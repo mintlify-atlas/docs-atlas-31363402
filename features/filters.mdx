@@ -1,0 +1,754 @@
+---
+title: Filters
+description: Apply advanced filters to analyze specific subsets of your analytics data
+---
+
+Filters allow you to narrow down your analytics data to focus on specific criteria. Unlike segments (which are saved), filters are applied on-demand for quick analysis and exploration.
+
+## Understanding Filters
+
+Filters help you answer specific questions about your data:
+
+<CardGroup cols={2}>
+  <Card title="Quick Analysis" icon="search">
+    Apply temporary filters to explore data:
+    - Test hypotheses
+    - Investigate anomalies
+    - Answer ad-hoc questions
+    - Drill into specific metrics
+  </Card>
+  
+  <Card title="Data Refinement" icon="filter">
+    Focus on what matters:
+    - Exclude bot traffic
+    - Isolate specific pages
+    - Focus on campaigns
+    - Remove outliers
+  </Card>
+</CardGroup>
+
+## Applying Filters
+
+Add filters to your dashboard or reports:
+
+<Steps>
+  <Step title="Open Filter Panel">
+    Click the **Filter** button in the dashboard controls.
+  </Step>
+  
+  <Step title="Add Filter Rule">
+    Click **Add Filter** to create a new filter criterion.
+  </Step>
+  
+  <Step title="Configure Filter">
+    Choose:
+    - **Field**: What to filter (URL, browser, country, etc.)
+    - **Operator**: How to match (equals, contains, etc.)
+    - **Value**: What value to match
+  </Step>
+  
+  <Step title="Apply Filters">
+    Your dashboard or report updates to show only matching data.
+  </Step>
+</Steps>
+
+<Info>
+  Filters are applied in real-time and affect all visible metrics and charts.
+</Info>
+
+## Filter Fields
+
+All available filter criteria:
+
+### Page Filters
+
+<Accordion title="URL Path">
+  Filter by page URLs:
+  
+  **Examples:**
+  - `path equals /home` - Exact page match
+  - `path contains /blog/` - All blog pages
+  - `path starts with /products/` - Product section
+  - `path ends with .pdf` - PDF downloads
+  
+  **Use cases:**
+  - Analyze specific page performance
+  - Exclude admin pages
+  - Focus on content sections
+</Accordion>
+
+<Accordion title="URL Query">
+  Filter by query string parameters:
+  
+  **Examples:**
+  - `query contains ref=email` - Email referrals
+  - `query contains ?id=` - Pages with ID parameter
+  
+  **Use cases:**
+  - Track specific page variants
+  - Analyze search results
+  - Filter dynamic content
+</Accordion>
+
+<Accordion title="Page Title">
+  Filter by HTML page title:
+  
+  **Examples:**
+  - `title contains "Product"` - Product pages
+  - `title equals "Home Page"` - Exact title
+  
+  **Use cases:**
+  - More readable than URL paths
+  - Filter dynamic URLs by title
+  - Content category analysis
+</Accordion>
+
+<Accordion title="Hostname">
+  Filter by domain/subdomain:
+  
+  **Examples:**
+  - `hostname equals blog.example.com` - Subdomain
+  - `hostname contains staging` - Staging sites
+  
+  **Use cases:**
+  - Multi-domain tracking
+  - Separate production from staging
+  - Subdomain analysis
+</Accordion>
+
+### Traffic Source Filters
+
+<Accordion title="Referrer Domain">
+  Filter by referring website:
+  
+  **Examples:**
+  - `referrer equals google.com` - Google traffic
+  - `referrer contains facebook` - Facebook referrals
+  - `referrer is empty` - Direct traffic
+  
+  **Use cases:**
+  - Analyze specific traffic sources
+  - Compare referrer performance
+  - Exclude internal referrals
+</Accordion>
+
+<Accordion title="Referrer Path">
+  Filter by specific referring page:
+  
+  **Examples:**
+  - `referrer_path contains /article/` - From articles
+  - `referrer_path starts with /search` - Search results
+  
+  **Use cases:**
+  - Deep referrer analysis
+  - Content performance on external sites
+  - Link source tracking
+</Accordion>
+
+<Accordion title="UTM Source">
+  Filter by campaign source:
+  
+  **Examples:**
+  - `utm_source equals google` - Google campaigns
+  - `utm_source equals newsletter` - Newsletter traffic
+  
+  **Use cases:**
+  - Campaign performance
+  - Source comparison
+  - Marketing attribution
+</Accordion>
+
+<Accordion title="UTM Medium">
+  Filter by marketing medium:
+  
+  **Examples:**
+  - `utm_medium equals cpc` - Paid ads
+  - `utm_medium equals email` - Email campaigns
+  - `utm_medium equals social` - Social media
+  
+  **Use cases:**
+  - Channel performance
+  - Medium comparison
+  - Budget allocation
+</Accordion>
+
+<Accordion title="UTM Campaign">
+  Filter by campaign name:
+  
+  **Examples:**
+  - `utm_campaign equals summer_sale` - Specific campaign
+  - `utm_campaign contains 2024` - All 2024 campaigns
+  
+  **Use cases:**
+  - Campaign-specific analysis
+  - A/B test comparison
+  - Seasonal performance
+</Accordion>
+
+<Accordion title="UTM Content & Term">
+  Filter by ad variation or keywords:
+  
+  **Examples:**
+  - `utm_content equals banner_a` - Ad variant
+  - `utm_term contains shoes` - Keyword groups
+  
+  **Use cases:**
+  - Ad variation testing
+  - Keyword analysis
+  - Creative performance
+</Accordion>
+
+### Technology Filters
+
+<Accordion title="Browser">
+  Filter by web browser:
+  
+  **Examples:**
+  - `browser equals Chrome` - Chrome users
+  - `browser not equals Safari` - Non-Safari users
+  
+  **Use cases:**
+  - Browser-specific issues
+  - Cross-browser comparison
+  - Feature support analysis
+  
+  **Common values:**
+  - Chrome, Firefox, Safari, Edge
+  - Mobile browsers (Chrome Mobile, Safari Mobile)
+</Accordion>
+
+<Accordion title="Operating System">
+  Filter by OS:
+  
+  **Examples:**
+  - `os equals Windows` - Windows users
+  - `os equals iOS` - iPhone/iPad users
+  
+  **Use cases:**
+  - Platform-specific behavior
+  - Mobile vs desktop analysis
+  - OS compatibility testing
+  
+  **Common values:**
+  - Windows, macOS, Linux
+  - iOS, Android, Chrome OS
+</Accordion>
+
+<Accordion title="Device Type">
+  Filter by device category:
+  
+  **Examples:**
+  - `device equals mobile` - Smartphones
+  - `device equals desktop` - Desktop computers
+  - `device equals tablet` - Tablets
+  
+  **Use cases:**
+  - Responsive design analysis
+  - Mobile optimization
+  - Device-specific features
+</Accordion>
+
+<Accordion title="Screen Resolution">
+  Filter by screen size:
+  
+  **Examples:**
+  - `screen equals 1920x1080` - Full HD
+  - `screen contains 1920` - All 1920px wide screens
+  
+  **Use cases:**
+  - Responsive breakpoint analysis
+  - Design optimization
+  - Screen size distribution
+</Accordion>
+
+### Geographic Filters
+
+<Accordion title="Country">
+  Filter by country:
+  
+  **Examples:**
+  - `country equals US` - United States
+  - `country equals GB` - United Kingdom
+  
+  **Use cases:**
+  - Geo-targeted campaigns
+  - Regional performance
+  - International expansion
+  
+  <Tip>
+    Use 2-letter ISO country codes (US, CA, GB, AU, etc.)
+  </Tip>
+</Accordion>
+
+<Accordion title="Region/State">
+  Filter by state or province:
+  
+  **Examples:**
+  - `region equals California` - California
+  - `region equals Ontario` - Ontario, Canada
+  
+  **Use cases:**
+  - Regional marketing
+  - State-specific analysis
+  - Local campaign tracking
+</Accordion>
+
+<Accordion title="City">
+  Filter by city:
+  
+  **Examples:**
+  - `city equals New York` - New York City
+  - `city contains San` - Cities starting with San
+  
+  **Use cases:**
+  - Hyper-local analysis
+  - City-specific campaigns
+  - Urban vs suburban trends
+</Accordion>
+
+### Behavioral Filters
+
+<Accordion title="Event Name">
+  Filter by custom events:
+  
+  **Examples:**
+  - `event equals click` - Click events
+  - `event contains purchase` - Purchase-related events
+  
+  **Use cases:**
+  - Event-based analysis
+  - User action tracking
+  - Conversion funnel filtering
+</Accordion>
+
+<Accordion title="Event Data/Properties">
+  Filter by event property values:
+  
+  **Examples:**
+  - `event_property.plan equals premium` - Premium users
+  - `event_property.value > 100` - High-value events
+  
+  **Use cases:**
+  - Advanced segmentation
+  - Property-based analysis
+  - Custom data filtering
+</Accordion>
+
+### Session Filters
+
+<Accordion title="Language">
+  Filter by browser language:
+  
+  **Examples:**
+  - `language equals en-US` - US English
+  - `language contains en` - All English variants
+  
+  **Use cases:**
+  - Localization analysis
+  - Language-specific content
+  - Translation priority
+</Accordion>
+
+<Accordion title="Distinct ID">
+  Filter by user identifier:
+  
+  **Examples:**
+  - `distinct_id equals user123` - Specific user
+  
+  **Use cases:**
+  - Individual user tracking
+  - User journey analysis
+  - Support issue investigation
+  
+  <Note>
+    Requires implementing distinct ID tracking in your code.
+  </Note>
+</Accordion>
+
+## Filter Operators
+
+How filters match values:
+
+<CardGroup cols={2}>
+  <Card title="Equals" icon="equal">
+    **Exact match**
+    
+    Examples:
+    - `country equals US`
+    - `browser equals Chrome`
+    
+    Use when: You know the exact value
+  </Card>
+  
+  <Card title="Not Equals" icon="not-equal">
+    **Exclude exact match**
+    
+    Examples:
+    - `path not equals /admin`
+    - `device not equals desktop`
+    
+    Use when: Excluding specific values
+  </Card>
+  
+  <Card title="Contains" icon="text">
+    **Partial match**
+    
+    Examples:
+    - `path contains /blog/`
+    - `referrer contains facebook`
+    
+    Use when: Flexible matching needed
+  </Card>
+  
+  <Card title="Does Not Contain" icon="x">
+    **Exclude partial match**
+    
+    Examples:
+    - `path does not contain /admin/`
+    - `title does not contain test`
+    
+    Use when: Excluding patterns
+  </Card>
+  
+  <Card title="Starts With" icon="chevron-right">
+    **Match beginning**
+    
+    Examples:
+    - `path starts with /products/`
+    - `utm_campaign starts with 2024`
+    
+    Use when: Matching prefixes
+  </Card>
+  
+  <Card title="Ends With" icon="chevron-left">
+    **Match ending**
+    
+    Examples:
+    - `path ends with .pdf`
+    - `path ends with /checkout`
+    
+    Use when: Matching suffixes
+  </Card>
+</CardGroup>
+
+### Empty/Not Empty
+
+<Accordion title="Checking for Empty Values">
+  Some fields support empty checks:
+  
+  **Is Empty:**
+  - `referrer is empty` - Direct traffic
+  - `utm_source is empty` - No campaign tracking
+  
+  **Is Not Empty:**
+  - `referrer is not empty` - Has referrer
+  - `event is not empty` - Has events
+</Accordion>
+
+## Combining Multiple Filters
+
+Filters use AND logic - all filters must match:
+
+### Example: Mobile Users from Paid Ads
+
+```text
+Filter 1: device equals mobile
+Filter 2: utm_medium equals cpc
+Filter 3: country equals US
+
+Result: Mobile users from US paid ads
+```
+
+<Info>
+  All filters must match for data to be included. There is no OR operator - use separate analyses or segments for OR logic.
+</Info>
+
+## Filter Strategies
+
+### Inclusion Filters
+
+Focus on specific data:
+
+- Include only specific pages
+- Include only certain traffic sources
+- Include only target locations
+
+**Example:**
+```text
+path starts with /products/
+country equals US
+device equals mobile
+```
+
+### Exclusion Filters
+
+Remove unwanted data:
+
+- Exclude admin pages
+- Exclude internal traffic
+- Exclude test data
+
+**Example:**
+```text
+path does not contain /admin/
+path does not contain /test/
+referrer does not contain mycompany.com
+```
+
+### Combination Strategy
+
+Combine inclusion and exclusion:
+
+**Example: Clean Product Page Analysis**
+```text
+INCLUDE:
+  path starts with /products/
+  
+EXCLUDE:
+  path does not contain /admin/
+  referrer does not contain internal.com
+```
+
+## Common Filter Patterns
+
+<CardGroup cols={2}>
+  <Card title="Campaign Analysis">
+    **Filters:**
+    - utm_campaign equals summer_sale
+    - utm_medium equals email
+    
+    **Purpose:** Email campaign performance
+  </Card>
+  
+  <Card title="Mobile Experience">
+    **Filters:**
+    - device equals mobile
+    - path contains /checkout/
+    
+    **Purpose:** Mobile checkout analysis
+  </Card>
+  
+  <Card title="International Traffic">
+    **Filters:**
+    - country not equals US
+    - language contains en
+    
+    **Purpose:** English speakers outside US
+  </Card>
+  
+  <Card title="Content Performance">
+    **Filters:**
+    - path starts with /blog/
+    - referrer contains google
+    
+    **Purpose:** Blog SEO performance
+  </Card>
+</CardGroup>
+
+## Saving Filters as Segments
+
+Convert useful filters into reusable segments:
+
+<Steps>
+  <Step title="Apply Filters">
+    Set up your filter criteria in the dashboard.
+  </Step>
+  
+  <Step title="Navigate to Segments">
+    Go to the Segments section.
+  </Step>
+  
+  <Step title="Create Segment">
+    Manually create a new segment with the same filter criteria.
+  </Step>
+  
+  <Step title="Use Segment">
+    Apply the segment instead of recreating filters each time.
+  </Step>
+</Steps>
+
+<Tip>
+  Convert filters to segments when you'll use the same criteria regularly.
+</Tip>
+
+## Filter Performance
+
+<Warning>
+  Applying many filters simultaneously can slow down data loading. Start with broad filters and add more as needed.
+</Warning>
+
+### Optimization Tips
+
+- Use specific operators (equals vs contains) when possible
+- Limit the number of simultaneous filters
+- Consider creating segments for complex filter combinations
+- Use shorter date ranges with multiple filters
+
+## Filters in Different Views
+
+### Dashboard Filters
+
+- Affect all dashboard panels
+- Persist while browsing tabs
+- Can be cleared all at once
+- Don't persist across sessions
+
+### Report Filters
+
+- Specific to each report
+- Can be saved with report configurations
+- Independent of dashboard filters
+- Apply to report results only
+
+### Real-time Filters
+
+- Apply to live data
+- Update as new data arrives
+- Useful for monitoring specific activity
+- Can combine with date filters
+
+## Troubleshooting Filters
+
+<Accordion title="No data after applying filters">
+  **Possible causes:**
+  - Filters too restrictive
+  - No matching data in date range
+  - Typo in filter value
+  - Wrong operator used
+  
+  **Solutions:**
+  - Remove filters one by one
+  - Check filter values against actual data
+  - Extend date range
+  - Try different operators
+</Accordion>
+
+<Accordion title="Unexpected results">
+  **Possible causes:**
+  - Case sensitivity issues
+  - Contains matching too broadly
+  - Multiple filters conflicting
+  
+  **Solutions:**
+  - Use more specific operators
+  - Check exact values in raw data
+  - Test filters individually
+  - Verify filter logic (all must match)
+</Accordion>
+
+<Accordion title="Filter not working">
+  **Possible causes:**
+  - Field not being tracked
+  - Data not yet available
+  - Filter syntax incorrect
+  
+  **Solutions:**
+  - Verify tracking implementation
+  - Check recent data availability
+  - Try different field/operator
+</Accordion>
+
+## Best Practices
+
+### Filter Usage
+
+- Start broad, then narrow down
+- Test filters on known data first
+- Document complex filter combinations
+- Clear filters when done to avoid confusion
+- Use consistent naming in UTM parameters for easier filtering
+
+### Filter Naming
+
+When creating segments from filters:
+- Use descriptive names
+- Include key criteria in name
+- Be consistent across team
+- Avoid generic names
+
+### Team Collaboration
+
+- Share useful filter combinations
+- Convert common filters to segments
+- Document filter strategies
+- Use consistent UTM naming conventions
+- Create naming guidelines for campaign parameters
+
+## Filters vs Segments
+
+| Feature | Filters | Segments |
+|---------|---------|----------|
+| **Saved** | No | Yes |
+| **Reusable** | No | Yes |
+| **Speed** | Instant | Instant |
+| **Sharing** | Manual | Automatic |
+| **Best For** | Quick analysis | Recurring analysis |
+| **Persistence** | Session only | Permanent |
+
+<Info>
+  Use **filters** for exploration and one-time analysis. Convert to **segments** for recurring use.
+</Info>
+
+## Advanced Filtering Techniques
+
+### Funnel Stage Analysis
+
+Filter by funnel stages:
+
+```text
+Top of Funnel:
+  path equals /landing
+  
+Middle of Funnel:
+  path contains /product/
+  
+Bottom of Funnel:
+  path equals /checkout
+```
+
+### Multi-Device Journey
+
+Track cross-device behavior:
+
+```text
+Mobile Entry:
+  device equals mobile
+  path equals /home
+  
+Desktop Conversion:
+  device equals desktop
+  event equals purchase
+```
+
+### Campaign Attribution
+
+Attribute conversions to campaigns:
+
+```text
+Campaign:
+  utm_campaign equals holiday_sale
+  
+Conversion:
+  event equals purchase
+  event_property.value > 50
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Segments" href="/features/segments">
+    Save your filters as reusable segments
+  </Card>
+  
+  <Card title="Reports" href="/features/reports">
+    Apply filters to custom reports
+  </Card>
+  
+  <Card title="Dashboards" href="/features/dashboards">
+    Use filters to analyze dashboard data
+  </Card>
+  
+  <Card title="UTM Tracking" href="/tracking/utm">
+    Set up campaign tracking for better filtering
+  </Card>
+</CardGroup>

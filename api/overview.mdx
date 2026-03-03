@@ -1,0 +1,90 @@
+---
+title: 'API Overview'
+description: 'Overview of the Umami Analytics API'
+---
+
+## Introduction
+
+The Umami API provides programmatic access to your web analytics data. You can use the API to:
+
+- Manage websites and tracking configurations
+- Create and manage teams
+- Access analytics data and reports
+- Send custom events
+- Retrieve real-time visitor data
+
+## Base URL
+
+All API requests should be made to:
+
+```
+https://your-umami-instance.com/api
+```
+
+## Authentication
+
+Most API endpoints require authentication using a Bearer token. See the [Authentication](/api/authentication) page for details on how to obtain and use access tokens.
+
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  https://your-umami-instance.com/api/websites
+```
+
+## Rate Limiting
+
+API requests may be rate-limited depending on your Umami instance configuration. Check response headers for rate limit information.
+
+## Response Format
+
+All API responses are returned in JSON format. Successful responses include the requested data, while error responses include an error message.
+
+### Success Response
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "My Website",
+  "domain": "example.com"
+}
+```
+
+### Error Response
+
+```json
+{
+  "message": "Website not found."
+}
+```
+
+## HTTP Status Codes
+
+| Status Code | Description |
+|------------|-------------|
+| 200 | Success |
+| 400 | Bad Request - Invalid parameters |
+| 401 | Unauthorized - Invalid or missing token |
+| 403 | Forbidden - Insufficient permissions |
+| 404 | Not Found - Resource does not exist |
+| 500 | Server Error - Internal server error |
+
+## Pagination
+
+Endpoints that return lists support pagination using query parameters:
+
+- `page` - Page number (starts at 1)
+- `pageSize` - Number of items per page
+
+```bash
+curl "https://your-umami-instance.com/api/websites?page=1&pageSize=20" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## API Resources
+
+- [Authentication](/api/authentication) - Obtain access tokens
+- [Websites](/api/websites/get-websites) - Manage website tracking
+- [Teams](/api/teams/get-teams) - Manage team collaboration
+- [Reports](/api/reports/get-reports) - Create and access analytics reports
+- [Events](/api/events/send-event) - Track custom events
+- [Realtime](/api/realtime/get-realtime) - Access live visitor data
+- [Users](/api/users/get-current-user) - Manage user accounts

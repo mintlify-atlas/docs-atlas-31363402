@@ -1,0 +1,164 @@
+---
+title: 'Create Website'
+description: 'Create a new website for tracking analytics'
+---
+
+## Create Website
+
+Create a new website to start tracking analytics data. Websites can be owned by a user or a team.
+
+### Endpoint
+
+```
+POST /api/websites
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Request Body
+
+<ParamField body="name" type="string" required>
+  Website name (max 100 characters)
+</ParamField>
+
+<ParamField body="domain" type="string" required>
+  Website domain (max 500 characters)
+</ParamField>
+
+<ParamField body="shareId" type="string">
+  Optional share ID for public analytics sharing (max 50 characters)
+</ParamField>
+
+<ParamField body="teamId" type="string">
+  Team UUID if creating a team website. Omit for personal website.
+</ParamField>
+
+<ParamField body="id" type="string">
+  Optional custom UUID for the website. Generated automatically if not provided.
+</ParamField>
+
+<Warning>
+  In CLOUD_MODE, free accounts are limited to 3 websites. Team websites require team creation permissions.
+</Warning>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Website UUID
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Website name
+</ResponseField>
+
+<ResponseField name="domain" type="string">
+  Website domain
+</ResponseField>
+
+<ResponseField name="shareId" type="string">
+  Public share ID (if provided)
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  Owner user UUID (null for team websites)
+</ResponseField>
+
+<ResponseField name="teamId" type="string">
+  Team UUID (null for personal websites)
+</ResponseField>
+
+<ResponseField name="createdBy" type="string">
+  UUID of user who created the website
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 timestamp of creation
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/websites \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My New Website",
+    "domain": "example.com",
+    "shareId": "public123"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://your-umami-instance.com/api/websites', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'My New Website',
+    domain: 'example.com',
+    shareId: 'public123',
+  }),
+});
+
+const website = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://your-umami-instance.com/api/websites',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'},
+    json={
+        'name': 'My New Website',
+        'domain': 'example.com',
+        'shareId': 'public123'
+    }
+)
+
+website = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "My New Website",
+  "domain": "example.com",
+  "shareId": "public123",
+  "userId": "660e8400-e29b-41d4-a716-446655440001",
+  "teamId": null,
+  "createdBy": "660e8400-e29b-41d4-a716-446655440001",
+  "createdAt": "2024-03-15T09:20:00.000Z"
+}
+```
+
+## Creating a Team Website
+
+To create a website owned by a team, include the `teamId` parameter:
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/websites \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Team Website",
+    "domain": "team.example.com",
+    "teamId": "880e8400-e29b-41d4-a716-446655440003"
+  }'
+```
+
+<Note>
+  You must have permission to create websites for the specified team. Team managers and owners can create team websites.
+</Note>

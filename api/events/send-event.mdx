@@ -1,0 +1,295 @@
+---
+title: 'Send Event'
+description: 'Track pageviews and custom events'
+---
+
+## Send Event
+
+Track pageviews, custom events, and user identification data. This is the primary endpoint for collecting analytics data.
+
+<Note>
+  This endpoint does not require authentication via Bearer token. It uses website IDs and optional tracking IDs for identification.
+</Note>
+
+### Endpoint
+
+```
+POST /api/send
+```
+
+### Request Body
+
+<ParamField body="type" type="string" required>
+  Event type. Must be one of:
+  - `event` - Track pageviews or custom events
+  - `identify` - Associate user data with a session
+</ParamField>
+
+<ParamField body="payload" type="object" required>
+  Event payload data
+</ParamField>
+
+### Payload for Event Type
+
+<ParamField body="payload.website" type="string">
+  Website UUID (required unless using link or pixel)
+</ParamField>
+
+<ParamField body="payload.link" type="string">
+  Link UUID (for link tracking)
+</ParamField>
+
+<ParamField body="payload.pixel" type="string">
+  Pixel UUID (for pixel tracking)
+</ParamField>
+
+<ParamField body="payload.hostname" type="string">
+  Hostname (max 100 characters)
+</ParamField>
+
+<ParamField body="payload.language" type="string">
+  Browser language (max 35 characters)
+</ParamField>
+
+<ParamField body="payload.referrer" type="string">
+  Referrer URL or path
+</ParamField>
+
+<ParamField body="payload.screen" type="string">
+  Screen resolution (max 11 characters, e.g., "1920x1080")
+</ParamField>
+
+<ParamField body="payload.title" type="string">
+  Page title
+</ParamField>
+
+<ParamField body="payload.url" type="string">
+  Page URL or path
+</ParamField>
+
+<ParamField body="payload.name" type="string">
+  Custom event name (max 50 characters)
+</ParamField>
+
+<ParamField body="payload.data" type="object">
+  Custom event data (key-value pairs)
+</ParamField>
+
+<ParamField body="payload.tag" type="string">
+  Event tag for categorization (max 50 characters)
+</ParamField>
+
+<ParamField body="payload.timestamp" type="number">
+  Unix timestamp in seconds (optional, defaults to current time)
+</ParamField>
+
+<ParamField body="payload.id" type="string">
+  Distinct user ID for tracking across sessions
+</ParamField>
+
+### Headers
+
+<ParamField header="x-umami-cache" type="string">
+  Cache token from previous request (improves performance)
+</ParamField>
+
+### Response
+
+<ResponseField name="cache" type="string">
+  Cache token to include in subsequent requests
+</ResponseField>
+
+<ResponseField name="sessionId" type="string">
+  Session UUID
+</ResponseField>
+
+<ResponseField name="visitId" type="string">
+  Visit UUID
+</ResponseField>
+
+### Example Requests
+
+<CodeGroup>
+
+```bash Pageview
+curl -X POST https://your-umami-instance.com/api/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "event",
+    "payload": {
+      "website": "550e8400-e29b-41d4-a716-446655440000",
+      "hostname": "example.com",
+      "language": "en-US",
+      "referrer": "https://google.com",
+      "screen": "1920x1080",
+      "title": "Home Page",
+      "url": "/"
+    }
+  }'
+```
+
+```bash Custom Event
+curl -X POST https://your-umami-instance.com/api/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "event",
+    "payload": {
+      "website": "550e8400-e29b-41d4-a716-446655440000",
+      "hostname": "example.com",
+      "url": "/checkout",
+      "name": "purchase",
+      "data": {
+        "amount": 99.99,
+        "currency": "USD",
+        "product": "Premium Plan"
+      }
+    }
+  }'
+```
+
+```bash User Identification
+curl -X POST https://your-umami-instance.com/api/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "identify",
+    "payload": {
+      "website": "550e8400-e29b-41d4-a716-446655440000",
+      "data": {
+        "userId": "user123",
+        "email": "user@example.com",
+        "plan": "premium"
+      },
+      "id": "user123"
+    }
+  }'
+```
+
+```javascript JavaScript
+// Pageview
+await fetch('https://your-umami-instance.com/api/send', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({
+    type: 'event',
+    payload: {
+      website: '550e8400-e29b-41d4-a716-446655440000',
+      hostname: window.location.hostname,
+      language: navigator.language,
+      referrer: document.referrer,
+      screen: `${screen.width}x${screen.height}`,
+      title: document.title,
+      url: window.location.pathname,
+    },
+  }),
+});
+
+// Custom event
+await fetch('https://your-umami-instance.com/api/send', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({
+    type: 'event',
+    payload: {
+      website: '550e8400-e29b-41d4-a716-446655440000',
+      url: window.location.pathname,
+      name: 'signup',
+      data: {
+        plan: 'premium',
+        method: 'google',
+      },
+    },
+  }),
+});
+```
+
+```python Python
+import requests
+
+# Pageview
+requests.post(
+    'https://your-umami-instance.com/api/send',
+    json={
+        'type': 'event',
+        'payload': {
+            'website': '550e8400-e29b-41d4-a716-446655440000',
+            'hostname': 'example.com',
+            'language': 'en-US',
+            'screen': '1920x1080',
+            'title': 'Home Page',
+            'url': '/'
+        }
+    }
+)
+
+# Custom event
+requests.post(
+    'https://your-umami-instance.com/api/send',
+    json={
+        'type': 'event',
+        'payload': {
+            'website': '550e8400-e29b-41d4-a716-446655440000',
+            'url': '/checkout',
+            'name': 'purchase',
+            'data': {
+                'amount': 99.99,
+                'currency': 'USD',
+                'product': 'Premium Plan'
+            }
+        }
+    }
+)
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "cache": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "sessionId": "ff0e8400-e29b-41d4-a716-446655440010",
+  "visitId": "gg0e8400-e29b-41d4-a716-446655440011"
+}
+```
+
+### UTM Parameters
+
+UTM parameters are automatically extracted from the URL:
+
+- `utm_source`
+- `utm_medium`
+- `utm_campaign`
+- `utm_content`
+- `utm_term`
+
+### Click IDs
+
+Click IDs are automatically captured from these parameters:
+
+- `gclid` (Google)
+- `fbclid` (Facebook)
+- `msclkid` (Microsoft)
+- `ttclid` (TikTok)
+- `li_fat_id` (LinkedIn)
+- `twclid` (Twitter)
+
+### Bot Detection
+
+<Note>
+  Bot traffic is automatically filtered unless `DISABLE_BOT_CHECK` is set in your environment.
+</Note>
+
+### Caching
+
+Include the `cache` token from the response in subsequent requests via the `x-umami-cache` header to improve performance:
+
+```bash
+curl -X POST https://your-umami-instance.com/api/send \
+  -H "Content-Type: application/json" \
+  -H "x-umami-cache: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -d '{...}'
+```
+
+<Warning>
+  You must provide exactly one of `website`, `link`, or `pixel` in the payload.
+</Warning>

@@ -1,0 +1,383 @@
+---
+title: 'Journey Report'
+description: 'Visualize the paths users take through your website'
+icon: 'route'
+---
+
+The Journey Report helps you understand the paths users take through your website by visualizing the sequences of pages and events they interact with. This is invaluable for optimizing navigation, content flow, and user experience.
+
+## What is a Journey Report?
+
+A Journey Report tracks the sequence of pages and events that users navigate through during a single visit. It shows:
+
+- Common paths users take through your site
+- How many users follow each path
+- Where users enter and exit
+- Popular page sequences
+
+## Key Concepts
+
+<CardGroup cols={2}>
+  <Card title="Step" icon="shoe-prints">
+    A page view or custom event in the user's journey
+  </Card>
+  <Card title="Path" icon="diagram-next">
+    A complete sequence of steps taken by users
+  </Card>
+  <Card title="Count" icon="hashtag">
+    Number of visits that followed this exact path
+  </Card>
+  <Card title="Sequential" icon="arrow-right">
+    Journeys track steps in chronological order
+  </Card>
+</CardGroup>
+
+## How Journey Tracking Works
+
+<Steps>
+  <Step title="Track User Sessions">
+    During each visit, Umami records every page view and custom event in chronological order.
+  </Step>
+  
+  <Step title="Define Journey Length">
+    Specify how many steps (1-7) you want to analyze in the journey.
+  </Step>
+  
+  <Step title="Aggregate Paths">
+    Group similar journeys together and count how many users followed each path.
+  </Step>
+  
+  <Step title="Remove Duplicates">
+    Sequential duplicate steps are combined (e.g., multiple views of the same page become one step).
+  </Step>
+</Steps>
+
+<Info>
+  Journey Reports are based on visits, not individual sessions. Each visit represents a continuous browsing session.
+</Info>
+
+## Configuring Journey Reports
+
+### Setting Journey Parameters
+
+<Tabs>
+  <Tab title="Step Count">
+    **Choose how many steps to track (1-7)**
+    
+    - **3 steps**: Quick overview of common paths
+    - **5 steps**: Balanced view of user journeys
+    - **7 steps**: Detailed journey analysis
+    
+    ```json
+    {
+      "steps": 5,
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+    
+    <Warning>
+      More steps provide more detail but may show fewer complete journeys, as not all users navigate through many pages.
+    </Warning>
+  </Tab>
+  
+  <Tab title="Start Step">
+    **Filter journeys that begin with a specific page or event**
+    
+    Use this to analyze paths from important entry points:
+    - Landing pages
+    - Campaign pages
+    - Product pages
+    
+    ```json
+    {
+      "steps": 5,
+      "startStep": "/landing/campaign-2024",
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+    
+    <Tip>
+      Analyzing journeys from specific landing pages helps you optimize conversion paths.
+    </Tip>
+  </Tab>
+  
+  <Tab title="End Step">
+    **Filter journeys that end with a specific page or event**
+    
+    Use this to understand how users reach important destinations:
+    - Thank you pages
+    - Checkout completion
+    - Contact form submissions
+    
+    ```json
+    {
+      "steps": 5,
+      "endStep": "/thank-you",
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+    
+    <Info>
+      End step filtering shows all paths that lead to conversions, helping you identify successful user journeys.
+    </Info>
+  </Tab>
+</Tabs>
+
+## Understanding Journey Results
+
+### Journey Visualization
+
+Journey reports display paths in sequence format:
+
+```
+Path 1 (1,234 visits):
+/home → /products → /product/abc → /cart → /checkout
+
+Path 2 (892 visits):
+/home → /about → /contact
+
+Path 3 (645 visits):
+/blog/post-1 → /blog/post-2 → /subscribe
+```
+
+Each path shows:
+- The sequence of steps (pages/events)
+- Number of visits that followed this exact path
+- Paths are sorted by count (most popular first)
+
+<Note>
+  The report shows up to 100 unique paths. Focus on the top paths as they represent the most common user behaviors.
+</Note>
+
+## Use Cases and Insights
+
+<Tabs>
+  <Tab title="Navigation Optimization">
+    ### Improve Site Navigation
+    
+    Analyze common paths to optimize your site structure and navigation.
+    
+    **Questions to answer:**
+    - What's the most common path from homepage to conversion?
+    - Are users finding what they need efficiently?
+    - Do users navigate as you expect?
+    
+    **Insights:**
+    - If users take circuitous routes, simplify navigation
+    - Popular paths should be easy and prominent
+    - Dead-end paths indicate potential UX issues
+    
+    ```json
+    {
+      "steps": 5,
+      "startStep": "/",
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Content Strategy">
+    ### Optimize Content Flow
+    
+    Understand how users navigate through your content.
+    
+    **For blogs and content sites:**
+    - Which articles lead to more page views?
+    - What content sequences keep users engaged?
+    - Where do users typically exit?
+    
+    **Actionable insights:**
+    - Add internal links to popular content sequences
+    - Place CTAs where users are most engaged
+    - Improve content that commonly precedes exits
+    
+    ```json
+    {
+      "steps": 4,
+      "startStep": "/blog/*",
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Conversion Analysis">
+    ### Analyze Conversion Paths
+    
+    Discover the paths that lead to conversions.
+    
+    **Track paths to:**
+    - Purchase completions
+    - Signup forms
+    - Contact submissions
+    - Newsletter subscriptions
+    
+    **How to use:**
+    1. Set the end step to your conversion page
+    2. Analyze the most common paths to conversion
+    3. Optimize these paths to improve conversion rates
+    4. Create similar paths for other entry points
+    
+    ```json
+    {
+      "steps": 6,
+      "endStep": "/thank-you",
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+    
+    <Tip>
+      Compare successful conversion paths with drop-off paths to identify what works and what doesn't.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Landing Page Testing">
+    ### Optimize Landing Pages
+    
+    Test different landing pages by analyzing the journeys they generate.
+    
+    **Compare:**
+    - Different campaign landing pages
+    - A/B test variations
+    - Organic vs paid traffic landing pages
+    
+    **Key metrics:**
+    - How many steps before exit?
+    - Which landing pages lead to conversions?
+    - Do users explore more from certain landing pages?
+    
+    ```json
+    {
+      "steps": 5,
+      "startStep": "/landing/spring-sale",
+      "startDate": "2024-03-01",
+      "endDate": "2024-03-31"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## API Usage
+
+```bash
+curl -X POST https://your-umami-instance.com/api/reports/journey \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "websiteId": "your-website-id",
+    "parameters": {
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": "2024-01-31T23:59:59Z",
+      "steps": 5,
+      "startStep": "/products",
+      "endStep": "/checkout/success"
+    },
+    "filters": {}
+  }'
+```
+
+### Response Format
+
+```json
+[
+  {
+    "items": ["/home", "/products", "/product/123", "/cart", "/checkout"],
+    "count": 1234
+  },
+  {
+    "items": ["/home", "/about", "/contact"],
+    "count": 892
+  }
+]
+```
+
+## Analyzing Journey Patterns
+
+### Common Patterns to Look For
+
+<Accordion title="Linear Paths">
+  Users follow a direct path from A to B to C.
+  
+  **Example**: `/pricing` → `/signup` → `/onboarding`
+  
+  **What it means**: Clear user intent and effective flow. Optimize these paths for conversion.
+</Accordion>
+
+<Accordion title="Exploration Paths">
+  Users visit many pages before converting or exiting.
+  
+  **Example**: `/home` → `/features` → `/pricing` → `/about` → `/features` → `/signup`
+  
+  **What it means**: Users need more information before converting. Consider:
+  - Adding more details to key pages
+  - Reducing information overload
+  - Adding comparison tools
+</Accordion>
+
+<Accordion title="Bounce Paths">
+  Single-step journeys (users view one page and leave).
+  
+  **Example**: `/blog/post-1` (only step)
+  
+  **What it means**: 
+  - Content doesn't match expectations
+  - No clear next steps
+  - Poor internal linking
+</Accordion>
+
+<Accordion title="Loop Paths">
+  Users return to the same pages multiple times (shown as single step due to duplicate removal).
+  
+  **Example**: `/product/A` appears once but was visited 3 times
+  
+  **What it means**: Users are comparing or reconsidering. Add features to help decision-making.
+</Accordion>
+
+## Optimization Strategies
+
+<CardGroup cols={2}>
+  <Card title="Reduce Path Length" icon="minimize">
+    If successful journeys are long, find ways to streamline the path to conversion
+  </Card>
+  <Card title="Improve Wayfinding" icon="signs-post">
+    Add navigation elements to help users follow successful paths
+  </Card>
+  <Card title="Add Exit Opportunities" icon="arrow-right-from-bracket">
+    Place CTAs at strategic points in popular journeys
+  </Card>
+  <Card title="Fix Dead Ends" icon="road-barrier">
+    Pages that frequently end journeys need better next steps
+  </Card>
+</CardGroup>
+
+<Warning>
+  Journey reports show up to 100 unique paths. Very diverse user behaviors may not all be captured.
+</Warning>
+
+## Best Practices
+
+1. **Start with 5 steps**: Balanced between detail and usability
+2. **Use filters**: Segment by traffic source, device, or country for deeper insights
+3. **Focus on top paths**: The top 10-20 paths represent most of your traffic
+4. **Compare time periods**: Look for changes in journey patterns over time
+5. **Combine with funnels**: Use Journey to understand behavior, Funnel to measure conversion
+
+<Tip>
+  Use Journey Reports to discover unexpected user behaviors and opportunities you didn't know existed.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Funnel Analysis" icon="filter" href="/reports/funnel">
+    Track specific conversion paths with Funnel Reports
+  </Card>
+  <Card title="Goal Tracking" icon="bullseye" href="/reports/goal">
+    Measure completions of specific journey endpoints
+  </Card>
+</CardGroup>

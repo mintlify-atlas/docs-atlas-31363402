@@ -1,0 +1,407 @@
+---
+title: Docker Deployment
+description: Deploy Umami using Docker and Docker Compose
+---
+
+## Overview
+
+Docker is the recommended deployment method for Umami. It provides a consistent, reproducible environment and simplifies the installation process by bundling all dependencies.
+
+## Docker Image
+
+Umami provides official Docker images hosted on GitHub Container Registry:
+
+```bash
+ghcr.io/umami-software/umami:latest
+```
+
+<Info>
+  The Docker image is based on Node.js 22 Alpine Linux for minimal size and security.
+</Info>
+
+## Docker Compose Deployment
+
+### Basic Setup
+
+The easiest way to deploy Umami is using Docker Compose, which automatically sets up both Umami and PostgreSQL.
+
+<Steps>
+  <Step title="Create docker-compose.yml">
+    Create a `docker-compose.yml` file with the following content:
+    
+    ```yaml docker-compose.yml
+    ---
+    services:
+      umami:
+        image: ghcr.io/umami-software/umami:latest
+        ports:
+          - "3000:3000"
+        environment:
+          DATABASE_URL: postgresql://umami:umami@db:5432/umami
+          APP_SECRET: replace-me-with-a-random-string
+        depends_on:
+          db:
+            condition: service_healthy
+        init: true
+        restart: always
+        healthcheck:
+          test: ["CMD-SHELL", "curl http://localhost:3000/api/heartbeat"]
+          interval: 5s
+          timeout: 5s
+          retries: 5
+      db:
+        image: postgres:15-alpine
+        environment:
+          POSTGRES_DB: umami
+          POSTGRES_USER: umami
+          POSTGRES_PASSWORD: umami
+        volumes:
+          - umami-db-data:/var/lib/postgresql/data
+        restart: always
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+          interval: 5s
+          timeout: 5s
+          retries: 5
+    volumes:
+      umami-db-data:
+    ```
+  </Step>
+  
+  <Step title="Generate APP_SECRET">
+    <Warning>
+      Before starting, generate a random APP_SECRET for securing sessions:
+    </Warning>
+    
+    ```bash
+    openssl rand -base64 32
+    ```
+    
+    Replace `replace-me-with-a-random-string` in the docker-compose.yml with the generated value.
+  </Step>
+  
+  <Step title="Start the services">
+    ```bash
+    docker compose up -d
+    ```
+    
+    This will:
+    - Pull the Umami and PostgreSQL images
+    - Create a persistent volume for database storage
+    - Start both containers in the background
+    - Run health checks to ensure services are ready
+  </Step>
+  
+  <Step title="Verify the deployment">
+    Check that both services are running:
+    
+    ```bash
+    docker compose ps
+    ```
+    
+    Access Umami at `http://localhost:3000`
+  </Step>
+</Steps>
+
+## Standalone Docker Deployment
+
+If you prefer to manage your own database, you can run Umami as a standalone container:
+
+```bash
+docker run -d \
+  --name umami \
+  -p 3000:3000 \
+  -e DATABASE_URL=postgresql://username:password@host:5432/umami \
+  -e APP_SECRET=your-secret-key \
+  --restart always \
+  ghcr.io/umami-software/umami:latest
+```
+
+<Note>
+  Replace the DATABASE_URL with your actual PostgreSQL connection string.
+</Note>
+
+## Understanding the Dockerfile
+
+The Umami Dockerfile uses a multi-stage build process for optimal image size:
+
+<Tabs>
+  <Tab title="Dependencies Stage">
+    ```dockerfile
+    FROM node:22-alpine AS deps
+    RUN apk add --no-cache libc6-compat
+    WORKDIR /app
+    COPY package.json pnpm-lock.yaml ./
+    RUN npm install -g pnpm
+    RUN pnpm install --frozen-lockfile
+    ```
+    
+    - Based on Node.js 22 Alpine
+    - Installs pnpm package manager
+    - Installs dependencies with locked versions
+  </Tab>
+  
+  <Tab title="Builder Stage">
+    ```dockerfile
+    FROM node:22-alpine AS builder
+    WORKDIR /app
+    COPY --from=deps /app/node_modules ./node_modules
+    COPY . .
+    
+    ARG BASE_PATH
+    ENV BASE_PATH=$BASE_PATH
+    ENV NEXT_TELEMETRY_DISABLED=1
+    ENV DATABASE_URL="postgresql://user:pass@localhost:5432/dummy"
+    
+    RUN npm run build-docker
+    ```
+    
+    - Copies dependencies from deps stage
+    - Builds the Next.js application
+    - Uses dummy DATABASE_URL for build time
+    - Disables Next.js telemetry
+  </Tab>
+  
+  <Tab title="Runner Stage">
+    ```dockerfile
+    FROM node:22-alpine AS runner
+    WORKDIR /app
+    
+    ENV NODE_ENV=production
+    ENV NEXT_TELEMETRY_DISABLED=1
+    
+    RUN addgroup --system --gid 1001 nodejs
+    RUN adduser --system --uid 1001 nextjs
+    
+    # Install runtime dependencies
+    RUN pnpm --allow-build='@prisma/engines' add \
+        npm-run-all dotenv chalk semver \
+        prisma@6.19.0 \
+        @prisma/adapter-pg@6.19.0
+    
+    COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+    COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+    
+    USER nextjs
+    EXPOSE 3000
+    CMD ["pnpm", "start-docker"]
+    ```
+    
+    - Creates non-root user for security
+    - Installs only production dependencies
+    - Copies built application
+    - Runs as unprivileged user
+  </Tab>
+</Tabs>
+
+## Custom Build Arguments
+
+The Dockerfile supports build arguments for customization:
+
+### BASE_PATH
+
+Serve Umami from a subdirectory:
+
+```bash
+docker build --build-arg BASE_PATH=/analytics -t umami:custom .
+```
+
+This allows you to access Umami at `http://yourdomain.com/analytics`
+
+### NODE_OPTIONS
+
+Customize Node.js runtime options:
+
+```bash
+docker build --build-arg NODE_OPTIONS="--max-old-space-size=4096" -t umami:custom .
+```
+
+## Environment Variables
+
+Key environment variables for Docker deployment:
+
+<Tabs>
+  <Tab title="Required">
+    | Variable | Description | Example |
+    |----------|-------------|----------|
+    | `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:5432/umami` |
+    | `APP_SECRET` | Secret key for securing sessions | Generated with `openssl rand -base64 32` |
+  </Tab>
+  
+  <Tab title="Optional">
+    | Variable | Description | Default |
+    |----------|-------------|----------|
+    | `PORT` | Application port | `3000` |
+    | `HOSTNAME` | Bind hostname | `0.0.0.0` |
+    | `BASE_PATH` | URL base path | None |
+    | `REDIS_URL` | Redis connection string | None |
+  </Tab>
+</Tabs>
+
+<Info>
+  See the [Environment Variables](/self-hosting/environment-variables) page for a complete list.
+</Info>
+
+## Health Checks
+
+The docker-compose.yml includes health checks for both services:
+
+### Umami Health Check
+
+```yaml
+healthcheck:
+  test: ["CMD-SHELL", "curl http://localhost:3000/api/heartbeat"]
+  interval: 5s
+  timeout: 5s
+  retries: 5
+```
+
+This endpoint returns 200 OK when Umami is ready to accept requests.
+
+### PostgreSQL Health Check
+
+```yaml
+healthcheck:
+  test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+  interval: 5s
+  timeout: 5s
+  retries: 5
+```
+
+Ensures PostgreSQL is ready before starting Umami.
+
+## Persistent Storage
+
+Database data is stored in a Docker volume:
+
+```yaml
+volumes:
+  - umami-db-data:/var/lib/postgresql/data
+```
+
+### Backing Up the Volume
+
+```bash
+# Create backup
+docker run --rm \
+  -v umami-db-data:/data \
+  -v $(pwd):/backup \
+  alpine tar czf /backup/umami-backup.tar.gz /data
+
+# Restore backup
+docker run --rm \
+  -v umami-db-data:/data \
+  -v $(pwd):/backup \
+  alpine tar xzf /backup/umami-backup.tar.gz -C /
+```
+
+## Managing Docker Containers
+
+<Tabs>
+  <Tab title="Common Commands">
+    ```bash
+    # Start services
+    docker compose up -d
+    
+    # Stop services
+    docker compose down
+    
+    # View logs
+    docker compose logs -f umami
+    
+    # Restart services
+    docker compose restart
+    
+    # Check status
+    docker compose ps
+    ```
+  </Tab>
+  
+  <Tab title="Troubleshooting">
+    ```bash
+    # View all logs
+    docker compose logs
+    
+    # Execute commands in container
+    docker compose exec umami sh
+    
+    # Check container resource usage
+    docker stats
+    
+    # Inspect container
+    docker compose exec umami env
+    ```
+  </Tab>
+  
+  <Tab title="Cleanup">
+    ```bash
+    # Stop and remove containers
+    docker compose down
+    
+    # Remove containers and volumes
+    docker compose down -v
+    
+    # Remove unused images
+    docker image prune -a
+    ```
+  </Tab>
+</Tabs>
+
+## Production Recommendations
+
+<CardGroup cols={2}>
+  <Card title="Use a Reverse Proxy" icon="shield">
+    Put Nginx or Traefik in front of Umami for SSL termination and load balancing.
+  </Card>
+  <Card title="External Database" icon="database">
+    Use a managed PostgreSQL service for better reliability and backups.
+  </Card>
+  <Card title="Resource Limits" icon="gauge">
+    Set memory and CPU limits in docker-compose.yml to prevent resource exhaustion.
+  </Card>
+  <Card title="Regular Backups" icon="clock">
+    Automate database backups with pg_dump or volume snapshots.
+  </Card>
+</CardGroup>
+
+### Example Production Configuration
+
+```yaml docker-compose.yml
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:latest
+    ports:
+      - "127.0.0.1:3000:3000"  # Only bind to localhost
+    environment:
+      DATABASE_URL: postgresql://umami:${DB_PASSWORD}@db:5432/umami
+      APP_SECRET: ${APP_SECRET}
+      FORCE_SSL: 1
+      REDIS_URL: redis://redis:6379
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    init: true
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="gear" href="/self-hosting/environment-variables">
+    Configure advanced options
+  </Card>
+  <Card title="Upgrading" icon="arrow-up" href="/self-hosting/upgrading">
+    Update to the latest version
+  </Card>
+  <Card title="PostgreSQL" icon="database" href="/self-hosting/postgresql">
+    Optimize database performance
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/self-hosting/troubleshooting">
+    Solve common issues
+  </Card>
+</CardGroup>

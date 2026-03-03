@@ -1,0 +1,665 @@
+---
+title: Upgrading Umami
+description: Keep your Umami installation up to date with the latest features and security fixes
+---
+
+## Overview
+
+Regular updates ensure you have the latest features, performance improvements, and security patches. Umami follows semantic versioning (MAJOR.MINOR.PATCH).
+
+<Info>
+  Current version information is available in `package.json` and displayed in the Umami interface.
+</Info>
+
+## Version Information
+
+Check your current version:
+
+<Tabs>
+  <Tab title="Web Interface">
+    Look in the bottom left corner of the Umami dashboard after logging in.
+  </Tab>
+  
+  <Tab title="package.json">
+    ```bash
+    cat package.json | grep version
+    ```
+    
+    Output:
+    ```json
+    "version": "3.0.3"
+    ```
+  </Tab>
+  
+  <Tab title="Docker">
+    ```bash
+    docker inspect ghcr.io/umami-software/umami:latest | grep version
+    ```
+  </Tab>
+</Tabs>
+
+## Release Types
+
+| Version Type | Example | Changes | Risk |
+|--------------|---------|---------|------|
+| **Major** | 3.0.0 | Breaking changes, major features | High |
+| **Minor** | 3.1.0 | New features, backward compatible | Low |
+| **Patch** | 3.0.1 | Bug fixes, security patches | Very Low |
+
+<Warning>
+  Always backup your database before upgrading, especially for major version updates.
+</Warning>
+
+## Upgrading Docker Installation
+
+### Using Docker Compose (Recommended)
+
+<Steps>
+  <Step title="Backup database">
+    Create a backup before upgrading:
+    
+    ```bash
+    # PostgreSQL backup
+    docker compose exec db pg_dump -U umami umami > backup-$(date +%Y%m%d).sql
+    
+    # Compressed backup
+    docker compose exec db pg_dump -U umami umami | gzip > backup-$(date +%Y%m%d).sql.gz
+    ```
+  </Step>
+  
+  <Step title="Pull latest image">
+    ```bash
+    docker compose pull umami
+    ```
+    
+    This downloads the latest image without stopping the current container.
+  </Step>
+  
+  <Step title="Recreate container">
+    ```bash
+    docker compose up -d --force-recreate umami
+    ```
+    
+    This:
+    - Stops the current container
+    - Creates a new container with the latest image
+    - Runs database migrations automatically
+    - Starts the new container
+  </Step>
+  
+  <Step title="Verify upgrade">
+    ```bash
+    # Check container is running
+    docker compose ps
+    
+    # View logs for errors
+    docker compose logs -f umami
+    
+    # Access Umami and verify version
+    ```
+  </Step>
+</Steps>
+
+### One-Line Update
+
+Combine steps for quick updates:
+
+```bash
+docker compose pull && docker compose up --force-recreate -d
+```
+
+### Specific Version
+
+Upgrade to a specific version:
+
+```yaml docker-compose.yml
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:v3.0.3  # Specific version
+    # or
+    image: ghcr.io/umami-software/umami:latest  # Latest version
+```
+
+Then:
+
+```bash
+docker compose up -d --force-recreate
+```
+
+### Rollback
+
+If something goes wrong, rollback to previous version:
+
+```bash
+# Change image tag in docker-compose.yml
+image: ghcr.io/umami-software/umami:v3.0.2
+
+# Recreate container
+docker compose up -d --force-recreate
+
+# Or restore database backup
+docker compose exec -T db psql -U umami umami < backup-20260303.sql
+```
+
+## Upgrading Source Installation
+
+### Standard Upgrade Process
+
+<Steps>
+  <Step title="Backup database">
+    ```bash
+    # PostgreSQL
+    pg_dump -U umami umami > backup-$(date +%Y%m%d).sql
+    
+    # Compressed
+    pg_dump -U umami -Fc umami > backup-$(date +%Y%m%d).dump
+    ```
+  </Step>
+  
+  <Step title="Stop application">
+    ```bash
+    # If using pm2
+    pm2 stop umami
+    
+    # If using systemd
+    sudo systemctl stop umami
+    
+    # Or just Ctrl+C if running in terminal
+    ```
+  </Step>
+  
+  <Step title="Pull latest code">
+    ```bash
+    cd /path/to/umami
+    git pull origin master
+    ```
+    
+    Or for a specific version:
+    
+    ```bash
+    git fetch --tags
+    git checkout v3.0.3
+    ```
+  </Step>
+  
+  <Step title="Install dependencies">
+    ```bash
+    pnpm install
+    ```
+    
+    This updates dependencies to versions specified in the new release.
+  </Step>
+  
+  <Step title="Run build">
+    ```bash
+    pnpm build
+    ```
+    
+    The build process:
+    - Generates Prisma client
+    - Runs database migrations
+    - Builds the Next.js application
+    - Updates tracker script
+  </Step>
+  
+  <Step title="Start application">
+    ```bash
+    pnpm start
+    
+    # Or with pm2
+    pm2 start umami
+    
+    # Or with systemd
+    sudo systemctl start umami
+    ```
+  </Step>
+</Steps>
+
+### Quick Update Command
+
+Combine all steps:
+
+```bash
+cd /path/to/umami && \
+  git pull && \
+  pnpm install && \
+  pnpm build && \
+  pnpm start
+```
+
+### Using a Script
+
+Create an update script:
+
+```bash update.sh
+#!/bin/bash
+set -e
+
+echo "Backing up database..."
+pg_dump -U umami umami > backup-$(date +%Y%m%d).sql
+
+echo "Stopping Umami..."
+pm2 stop umami
+
+echo "Updating code..."
+cd /path/to/umami
+git pull
+
+echo "Installing dependencies..."
+pnpm install
+
+echo "Building application..."
+pnpm build
+
+echo "Starting Umami..."
+pm2 start umami
+
+echo "Upgrade complete!"
+pm2 logs umami
+```
+
+Make it executable and run:
+
+```bash
+chmod +x update.sh
+./update.sh
+```
+
+## Kubernetes Upgrade
+
+### Update Deployment
+
+<Steps>
+  <Step title="Update image tag">
+    Edit your deployment manifest:
+    
+    ```yaml umami-deployment.yaml
+    spec:
+      containers:
+      - name: umami
+        image: ghcr.io/umami-software/umami:v3.0.3  # Update version
+    ```
+  </Step>
+  
+  <Step title="Apply changes">
+    ```bash
+    kubectl apply -f umami-deployment.yaml
+    ```
+    
+    Kubernetes will perform a rolling update.
+  </Step>
+  
+  <Step title="Monitor rollout">
+    ```bash
+    # Watch rollout status
+    kubectl rollout status deployment/umami -n umami
+    
+    # View pods
+    kubectl get pods -n umami -w
+    ```
+  </Step>
+</Steps>
+
+### Using kubectl set image
+
+Direct image update:
+
+```bash
+kubectl set image deployment/umami umami=ghcr.io/umami-software/umami:v3.0.3 -n umami
+```
+
+### Rollback Kubernetes Deployment
+
+```bash
+# View rollout history
+kubectl rollout history deployment/umami -n umami
+
+# Rollback to previous version
+kubectl rollout undo deployment/umami -n umami
+
+# Rollback to specific revision
+kubectl rollout undo deployment/umami --to-revision=2 -n umami
+```
+
+## Database Migrations
+
+Migrations run automatically during the upgrade process:
+
+### Automatic Migration
+
+<Tabs>
+  <Tab title="Docker">
+    Migrations run automatically on container start via the `start-docker` script:
+    
+    ```bash
+    npm-run-all check-db update-tracker start-server
+    ```
+    
+    The `check-db` script runs `prisma migrate deploy`.
+  </Tab>
+  
+  <Tab title="Source">
+    Migrations run during the build process:
+    
+    ```bash
+    pnpm build
+    # Includes: prisma migrate deploy
+    ```
+  </Tab>
+</Tabs>
+
+### Manual Migration
+
+Run migrations manually if needed:
+
+```bash
+# Check migration status
+pnpm prisma migrate status
+
+# Apply pending migrations
+pnpm prisma migrate deploy
+
+# Regenerate Prisma client
+pnpm prisma generate
+```
+
+### Skip Migration
+
+Skip automatic migration:
+
+```bash
+SKIP_DB_MIGRATION=1 pnpm start
+```
+
+<Warning>
+  Only skip migrations if you're managing schema manually. Running with outdated schema will cause errors.
+</Warning>
+
+## Version-Specific Upgrade Notes
+
+### Upgrading to v3.x
+
+<Accordion title="v3.0.0 - Major Release">
+  **Breaking Changes:**
+  - Requires Node.js 18.18+
+  - Requires PostgreSQL 12.14+
+  - New database schema with additional tables
+  - Updated API endpoints
+  
+  **New Features:**
+  - Team collaboration
+  - Revenue tracking
+  - URL shortener
+  - Tracking pixels
+  - Enhanced reporting
+  
+  **Migration Notes:**
+  - Allow extra time for migration (large databases may take 10+ minutes)
+  - Default admin password changed to `umami` (was `admin`)
+  - Review team permissions after upgrade
+</Accordion>
+
+### Upgrading from v2.x
+
+<Steps>
+  <Step title="Check Node.js version">
+    ```bash
+    node --version  # Must be 18.18+
+    ```
+    
+    Upgrade if needed:
+    ```bash
+    nvm install 18
+    nvm use 18
+    ```
+  </Step>
+  
+  <Step title="Check PostgreSQL version">
+    ```sql
+    SELECT version();
+    ```
+    
+    Must be 12.14+. Upgrade PostgreSQL if needed.
+  </Step>
+  
+  <Step title="Backup database">
+    Critical for major version upgrades:
+    
+    ```bash
+    pg_dump -U umami -Fc umami > backup-pre-v3-$(date +%Y%m%d).dump
+    ```
+  </Step>
+  
+  <Step title="Perform upgrade">
+    Follow standard upgrade process above.
+  </Step>
+</Steps>
+
+## Automated Updates
+
+### Renovate Bot
+
+Use Renovate for automatic dependency updates:
+
+```json renovate.json
+{
+  "extends": ["config:base"],
+  "packageRules": [
+    {
+      "matchPackageNames": ["ghcr.io/umami-software/umami"],
+      "schedule": ["before 6am on monday"],
+      "automerge": false
+    }
+  ]
+}
+```
+
+### Watchtower (Docker)
+
+Automatic Docker container updates:
+
+```yaml docker-compose.yml
+services:
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_SCHEDULE: "0 0 2 * * *"  # Daily at 2 AM
+      WATCHTOWER_CLEANUP: "true"
+    restart: always
+```
+
+<Warning>
+  Automatic updates can cause unexpected downtime. Use with caution in production.
+</Warning>
+
+## Monitoring Updates
+
+### GitHub Releases
+
+Watch for new releases:
+
+1. Visit [GitHub Releases](https://github.com/umami-software/umami/releases)
+2. Click "Watch" → "Custom" → "Releases"
+3. Get notified of new versions
+
+### RSS Feed
+
+Subscribe to release feed:
+
+```
+https://github.com/umami-software/umami/releases.atom
+```
+
+### Changelog
+
+Review changes before upgrading:
+
+- [GitHub Changelog](https://github.com/umami-software/umami/releases)
+- Release notes include:
+  - New features
+  - Bug fixes
+  - Breaking changes
+  - Migration notes
+
+## Upgrade Checklist
+
+<Accordion title="Pre-Upgrade Checklist">
+  - [ ] Review changelog for breaking changes
+  - [ ] Backup database
+  - [ ] Check disk space (build requires temporary space)
+  - [ ] Test upgrade in staging environment
+  - [ ] Schedule maintenance window
+  - [ ] Notify users of potential downtime
+  - [ ] Verify Node.js and PostgreSQL versions
+  - [ ] Have rollback plan ready
+</Accordion>
+
+<Accordion title="During Upgrade">
+  - [ ] Monitor upgrade logs
+  - [ ] Watch for migration errors
+  - [ ] Check database performance
+  - [ ] Verify application starts successfully
+</Accordion>
+
+<Accordion title="Post-Upgrade">
+  - [ ] Verify version number in UI
+  - [ ] Test core functionality (login, analytics, reports)
+  - [ ] Check for JavaScript errors in browser console
+  - [ ] Review application logs
+  - [ ] Monitor performance metrics
+  - [ ] Test data collection (tracker)
+  - [ ] Verify API endpoints
+  - [ ] Keep backup until stability confirmed
+</Accordion>
+
+## Troubleshooting Upgrades
+
+<AccordionGroup>
+  <Accordion title="Migration fails">
+    Check migration status:
+    
+    ```bash
+    pnpm prisma migrate status
+    ```
+    
+    View error details in logs:
+    
+    ```bash
+    docker compose logs umami
+    ```
+    
+    Common issues:
+    - Insufficient disk space
+    - Database connection timeout
+    - Constraint violations from existing data
+    
+    Rollback if needed:
+    
+    ```bash
+    # Restore from backup
+    pg_restore -U umami -d umami -c backup.dump
+    ```
+  </Accordion>
+  
+  <Accordion title="Application won't start">
+    Check logs for errors:
+    
+    ```bash
+    # Docker
+    docker compose logs umami
+    
+    # Source
+    pnpm start
+    ```
+    
+    Common issues:
+    - Missing environment variables
+    - Database connection failed
+    - Port already in use
+    - Node.js version mismatch
+    
+    Verify environment:
+    
+    ```bash
+    node --version
+    echo $DATABASE_URL
+    ```
+  </Accordion>
+  
+  <Accordion title="Tracker not working after upgrade">
+    Update tracker cache:
+    
+    ```bash
+    # The update-tracker script runs automatically
+    # Or run manually:
+    pnpm update-tracker
+    ```
+    
+    Clear browser cache and test:
+    
+    ```bash
+    # Check tracker loads
+    curl https://your-domain.com/script.js
+    ```
+  </Accordion>
+  
+  <Accordion title="Performance degraded after upgrade">
+    Run database maintenance:
+    
+    ```sql
+    VACUUM ANALYZE;
+    REINDEX DATABASE umami;
+    ```
+    
+    Check for missing indexes:
+    
+    ```bash
+    pnpm prisma migrate status
+    ```
+    
+    Monitor query performance:
+    
+    ```sql
+    SELECT query, calls, total_time, mean_time
+    FROM pg_stat_statements
+    ORDER BY mean_time DESC
+    LIMIT 10;
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Test First" icon="flask">
+    Always test upgrades in staging before production.
+  </Card>
+  <Card title="Backup Everything" icon="database">
+    Create backups before every upgrade, no exceptions.
+  </Card>
+  <Card title="Read Changelogs" icon="book">
+    Review release notes for breaking changes.
+  </Card>
+  <Card title="Monitor After Upgrade" icon="chart-line">
+    Watch logs and metrics for issues after upgrading.
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Migrations" icon="arrow-right" href="/self-hosting/migrations">
+    Learn about database migrations
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/self-hosting/troubleshooting">
+    Solve upgrade issues
+  </Card>
+  <Card title="Environment Variables" icon="gear" href="/self-hosting/environment-variables">
+    Configure your instance
+  </Card>
+  <Card title="Docker Deployment" icon="docker" href="/self-hosting/docker-deployment">
+    Docker upgrade details
+  </Card>
+</CardGroup>

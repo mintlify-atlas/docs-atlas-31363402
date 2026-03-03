@@ -1,0 +1,682 @@
+---
+title: ClickHouse Configuration
+description: Configure ClickHouse for high-performance analytics at scale
+---
+
+## Overview
+
+ClickHouse is an optional database backend for Umami, optimized for analytical workloads with billions of events. It provides exceptional query performance and compression for large-scale analytics.
+
+<Warning>
+  ClickHouse is recommended only for high-volume deployments (1M+ events per day). For most users, PostgreSQL is sufficient and easier to manage.
+</Warning>
+
+## When to Use ClickHouse
+
+<CardGroup cols={2}>
+  <Card title="High Volume" icon="chart-line">
+    Processing millions of events daily
+  </Card>
+  <Card title="Long Retention" icon="clock">
+    Storing years of historical data
+  </Card>
+  <Card title="Fast Aggregations" icon="bolt">
+    Complex analytical queries on large datasets
+  </Card>
+  <Card title="Storage Efficiency" icon="hard-drive">
+    Superior compression ratios (10:1 typical)
+  </Card>
+</CardGroup>
+
+## PostgreSQL vs ClickHouse
+
+| Feature | PostgreSQL | ClickHouse |
+|---------|-----------|------------|
+| **Best for** | Small to medium sites | High-volume analytics |
+| **Events/day** | < 1M | 1M+ |
+| **Query speed** | Good | Excellent |
+| **Compression** | Standard | Excellent (10:1) |
+| **Complexity** | Low | Medium |
+| **User management** | Native | Requires PostgreSQL |
+
+<Note>
+  Umami uses a **dual-database architecture** when using ClickHouse: PostgreSQL for user management and configuration, ClickHouse for analytics data.
+</Note>
+
+## Installation
+
+### Using Docker (Recommended)
+
+```yaml docker-compose.yml
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:latest
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:umami@postgres:5432/umami
+      CLICKHOUSE_URL: http://clickhouse:8123/umami
+      APP_SECRET: replace-me-with-a-random-string
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    restart: always
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    environment:
+      CLICKHOUSE_DB: umami
+      CLICKHOUSE_USER: umami
+      CLICKHOUSE_PASSWORD: umami
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    restart: always
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+  clickhouse-data:
+```
+
+<Steps>
+  <Step title="Save docker-compose.yml">
+    Save the configuration above to `docker-compose.yml`
+  </Step>
+  
+  <Step title="Generate APP_SECRET">
+    ```bash
+    openssl rand -base64 32
+    ```
+    
+    Replace `replace-me-with-a-random-string` with the generated value.
+  </Step>
+  
+  <Step title="Start services">
+    ```bash
+    docker compose up -d
+    ```
+  </Step>
+  
+  <Step title="Initialize ClickHouse schema">
+    The schema will be created automatically on first startup.
+  </Step>
+</Steps>
+
+### Standalone ClickHouse Server
+
+<Tabs>
+  <Tab title="Ubuntu/Debian">
+    ```bash
+    # Add repository
+    sudo apt-get install -y apt-transport-https ca-certificates dirmngr
+    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 8919F6BD2B48D754
+    echo "deb https://packages.clickhouse.com/deb stable main" | sudo tee /etc/apt/sources.list.d/clickhouse.list
+    
+    # Install ClickHouse
+    sudo apt-get update
+    sudo apt-get install -y clickhouse-server clickhouse-client
+    
+    # Start service
+    sudo systemctl start clickhouse-server
+    sudo systemctl enable clickhouse-server
+    ```
+  </Tab>
+  
+  <Tab title="macOS">
+    ```bash
+    # Using Homebrew
+    brew install clickhouse
+    
+    # Start service
+    brew services start clickhouse
+    ```
+  </Tab>
+  
+  <Tab title="Docker">
+    ```bash
+    docker run -d \
+      --name clickhouse \
+      -p 8123:8123 \
+      -p 9000:9000 \
+      -v clickhouse-data:/var/lib/clickhouse \
+      clickhouse/clickhouse-server:latest
+    ```
+  </Tab>
+</Tabs>
+
+## Database Schema
+
+ClickHouse schema is located in `/db/clickhouse/schema.sql`:
+
+### Core Tables
+
+<Accordion title="website_event Table">
+  Stores all page views and custom events:
+  
+  ```sql
+  CREATE TABLE umami.website_event
+  (
+      website_id UUID,
+      session_id UUID,
+      visit_id UUID,
+      event_id UUID,
+      -- Session attributes
+      hostname LowCardinality(String),
+      browser LowCardinality(String),
+      os LowCardinality(String),
+      device LowCardinality(String),
+      screen LowCardinality(String),
+      language LowCardinality(String),
+      country LowCardinality(String),
+      region LowCardinality(String),
+      city String,
+      -- Page view attributes
+      url_path String,
+      url_query String,
+      utm_source String,
+      utm_medium String,
+      utm_campaign String,
+      utm_content String,
+      utm_term String,
+      referrer_path String,
+      referrer_query String,
+      referrer_domain String,
+      page_title String,
+      -- Click IDs
+      gclid String,
+      fbclid String,
+      msclkid String,
+      ttclid String,
+      li_fat_id String,
+      twclid String,
+      -- Event attributes
+      event_type UInt32,
+      event_name String,
+      tag String,
+      distinct_id String,
+      created_at DateTime('UTC'),
+      job_id Nullable(UUID)
+  )
+  ENGINE = MergeTree
+      PARTITION BY toYYYYMM(created_at)
+      ORDER BY (toStartOfHour(created_at), website_id, session_id, visit_id, created_at)
+      PRIMARY KEY (toStartOfHour(created_at), website_id, session_id, visit_id)
+      SETTINGS index_granularity = 8192;
+  ```
+  
+  Key features:
+  - **Partitioned by month** for efficient data management
+  - **LowCardinality** columns for memory efficiency
+  - **Optimized sorting** for common query patterns
+</Accordion>
+
+<Accordion title="event_data Table">
+  Stores custom event properties:
+  
+  ```sql
+  CREATE TABLE umami.event_data
+  (
+      website_id UUID,
+      session_id UUID,
+      event_id UUID,
+      url_path String,
+      event_name String,
+      data_key String,
+      string_value Nullable(String),
+      number_value Nullable(Decimal(22, 4)),
+      date_value Nullable(DateTime('UTC')),
+      data_type UInt32,
+      created_at DateTime('UTC'),
+      job_id Nullable(UUID)
+  )
+  ENGINE = MergeTree
+      ORDER BY (website_id, event_id, data_key, created_at)
+      SETTINGS index_granularity = 8192;
+  ```
+</Accordion>
+
+<Accordion title="session_data Table">
+  Stores custom session properties:
+  
+  ```sql
+  CREATE TABLE umami.session_data
+  (
+      website_id UUID,
+      session_id UUID,
+      data_key String,
+      string_value Nullable(String),
+      number_value Nullable(Decimal(22, 4)),
+      date_value Nullable(DateTime('UTC')),
+      data_type UInt32,
+      distinct_id String,
+      created_at DateTime('UTC'),
+      job_id Nullable(UUID)
+  )
+  ENGINE = ReplacingMergeTree
+      ORDER BY (website_id, session_id, data_key)
+      SETTINGS index_granularity = 8192;
+  ```
+  
+  Uses **ReplacingMergeTree** to handle updates to session data.
+</Accordion>
+
+### Materialized Views
+
+ClickHouse uses materialized views for pre-aggregated statistics:
+
+```sql
+CREATE TABLE umami.website_event_stats_hourly
+(
+    website_id UUID,
+    session_id UUID,
+    visit_id UUID,
+    -- ... aggregated fields ...
+    views SimpleAggregateFunction(sum, UInt64),
+    min_time SimpleAggregateFunction(min, DateTime('UTC')),
+    max_time SimpleAggregateFunction(max, DateTime('UTC')),
+    created_at Datetime('UTC')
+)
+ENGINE = AggregatingMergeTree
+    PARTITION BY toYYYYMM(created_at)
+    ORDER BY (website_id, event_type, toStartOfHour(created_at), cityHash64(visit_id), visit_id)
+    SAMPLE BY cityHash64(visit_id);
+```
+
+This pre-aggregates data hourly for faster dashboard queries.
+
+## Configuration
+
+### Connection URL
+
+Set the `CLICKHOUSE_URL` environment variable:
+
+```bash
+# HTTP protocol (default)
+CLICKHOUSE_URL=http://localhost:8123/umami
+
+# With authentication
+CLICKHOUSE_URL=http://username:password@localhost:8123/umami
+
+# HTTPS
+CLICKHOUSE_URL=https://clickhouse.example.com:8443/umami
+```
+
+### ClickHouse Server Configuration
+
+Optimize ClickHouse settings in `/etc/clickhouse-server/config.xml`:
+
+```xml
+<clickhouse>
+    <!-- Memory settings -->
+    <max_memory_usage>10000000000</max_memory_usage>  <!-- 10GB -->
+    <max_bytes_before_external_group_by>5000000000</max_bytes_before_external_group_by>
+    
+    <!-- Compression -->
+    <compression>
+        <case>
+            <min_part_size>10485760</min_part_size>
+            <min_part_size_ratio>0.01</min_part_size_ratio>
+            <method>lz4</method>
+        </case>
+    </compression>
+    
+    <!-- Performance -->
+    <max_concurrent_queries>100</max_concurrent_queries>
+    <background_pool_size>16</background_pool_size>
+    <background_schedule_pool_size>16</background_schedule_pool_size>
+</clickhouse>
+```
+
+## Migrations
+
+ClickHouse migrations are located in `/db/clickhouse/migrations/`:
+
+- `01_edit_keys.sql` - Schema adjustments
+- `02_add_visit_id.sql` - Visit tracking
+- `03_session_data.sql` - Session data support
+- `04_add_tag.sql` - Event tags
+- `05_add_utm_clid.sql` - UTM parameters and click IDs
+- `06_update_subdivision.sql` - Geographic subdivisions
+- `07_add_distinct_id.sql` - User identification
+- `08_update_hostname_view.sql` - Hostname materialized view
+
+### Manual Schema Initialization
+
+If needed, manually initialize the schema:
+
+```bash
+# Using clickhouse-client
+clickhouse-client --query "CREATE DATABASE IF NOT EXISTS umami"
+clickhouse-client --multiquery < /path/to/db/clickhouse/schema.sql
+
+# Using Docker
+docker exec -i clickhouse clickhouse-client --multiquery < schema.sql
+```
+
+## Performance Optimization
+
+### Partition Management
+
+ClickHouse partitions data by month. Manage partitions:
+
+```sql
+-- List partitions
+SELECT
+    partition,
+    name,
+    rows,
+    formatReadableSize(bytes_on_disk) AS size
+FROM system.parts
+WHERE table = 'website_event' AND active
+ORDER BY partition DESC;
+
+-- Drop old partition (careful!)
+ALTER TABLE umami.website_event DROP PARTITION '202301';
+```
+
+### Data Compression
+
+Check compression ratios:
+
+```sql
+SELECT
+    table,
+    formatReadableSize(sum(data_compressed_bytes)) AS compressed,
+    formatReadableSize(sum(data_uncompressed_bytes)) AS uncompressed,
+    round(sum(data_uncompressed_bytes) / sum(data_compressed_bytes), 2) AS ratio
+FROM system.columns
+WHERE database = 'umami'
+GROUP BY table;
+```
+
+### Query Optimization
+
+```sql
+-- Analyze query performance
+EXPLAIN SELECT * FROM umami.website_event WHERE website_id = 'xxx';
+
+-- Check query log
+SELECT
+    query,
+    query_duration_ms,
+    read_rows,
+    formatReadableSize(read_bytes) AS read_size
+FROM system.query_log
+WHERE type = 'QueryFinish'
+ORDER BY query_duration_ms DESC
+LIMIT 10;
+```
+
+## Monitoring
+
+### System Metrics
+
+```sql
+-- Database size
+SELECT
+    database,
+    formatReadableSize(sum(bytes)) AS size
+FROM system.parts
+WHERE active
+GROUP BY database;
+
+-- Table statistics
+SELECT
+    table,
+    formatReadableSize(sum(bytes)) AS size,
+    sum(rows) AS rows,
+    max(modification_time) AS latest_modification
+FROM system.parts
+WHERE database = 'umami' AND active
+GROUP BY table;
+
+-- Active queries
+SELECT
+    query_id,
+    user,
+    elapsed,
+    formatReadableSize(memory_usage) AS memory,
+    query
+FROM system.processes;
+```
+
+### Performance Metrics
+
+```sql
+-- Merge statistics
+SELECT
+    table,
+    count() AS merges,
+    formatReadableSize(sum(bytes_read_uncompressed)) AS read,
+    formatReadableSize(sum(bytes_written_uncompressed)) AS written
+FROM system.merges
+GROUP BY table;
+
+-- Insert performance
+SELECT
+    table,
+    count() AS inserts,
+    sum(rows) AS rows,
+    formatReadableSize(sum(bytes)) AS size
+FROM system.query_log
+WHERE type = 'QueryFinish' AND query LIKE 'INSERT%'
+GROUP BY table;
+```
+
+## Backup and Restore
+
+### Using clickhouse-backup
+
+```bash
+# Install clickhouse-backup
+curl -sfL https://github.com/AlexAkulov/clickhouse-backup/releases/latest/download/clickhouse-backup-linux-amd64.tar.gz | tar xzv
+
+# Create backup
+clickhouse-backup create
+
+# List backups
+clickhouse-backup list
+
+# Restore backup
+clickhouse-backup restore <backup-name>
+```
+
+### Manual Backup
+
+```bash
+# Export table data
+clickhouse-client --query "SELECT * FROM umami.website_event FORMAT Native" > website_event.native
+
+# Import table data
+cat website_event.native | clickhouse-client --query "INSERT INTO umami.website_event FORMAT Native"
+```
+
+### Freeze/Unfreeze
+
+```sql
+-- Freeze table (create snapshot)
+ALTER TABLE umami.website_event FREEZE;
+
+-- Copy frozen data
+-- Data is in /var/lib/clickhouse/shadow/
+```
+
+## Data Retention
+
+### TTL (Time To Live)
+
+Automatic data expiration:
+
+```sql
+-- Add TTL to table (1 year retention)
+ALTER TABLE umami.website_event
+MODIFY TTL created_at + INTERVAL 1 YEAR;
+
+-- Different TTL for different columns
+ALTER TABLE umami.website_event
+MODIFY COLUMN ip_address String TTL created_at + INTERVAL 30 DAY;
+```
+
+### Manual Deletion
+
+```sql
+-- Delete old data (lightweight delete)
+ALTER TABLE umami.website_event
+DELETE WHERE created_at < now() - INTERVAL 1 YEAR;
+
+-- Optimize table to apply deletions
+OPTIMIZE TABLE umami.website_event FINAL;
+```
+
+<Warning>
+  DELETE operations in ClickHouse are asynchronous and may take time to complete.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Connection timeout">
+    Check ClickHouse is running:
+    
+    ```bash
+    # Check service status
+    sudo systemctl status clickhouse-server
+    
+    # Test connection
+    curl http://localhost:8123/
+    ```
+    
+    Verify network access:
+    
+    ```bash
+    telnet localhost 8123
+    ```
+  </Accordion>
+  
+  <Accordion title="Database not created">
+    Manually create the database:
+    
+    ```sql
+    CREATE DATABASE IF NOT EXISTS umami;
+    ```
+    
+    Run schema creation:
+    
+    ```bash
+    clickhouse-client --multiquery < db/clickhouse/schema.sql
+    ```
+  </Accordion>
+  
+  <Accordion title="Slow queries">
+    Check query execution plan:
+    
+    ```sql
+    EXPLAIN SELECT ... FROM umami.website_event WHERE ...;
+    ```
+    
+    Enable query profiling:
+    
+    ```sql
+    SET send_logs_level = 'trace';
+    SELECT ... FROM umami.website_event WHERE ...;
+    ```
+    
+    Optimize table:
+    
+    ```sql
+    OPTIMIZE TABLE umami.website_event FINAL;
+    ```
+  </Accordion>
+  
+  <Accordion title="Out of memory">
+    Reduce memory usage:
+    
+    ```sql
+    SET max_memory_usage = 10000000000;  -- 10GB
+    SET max_bytes_before_external_group_by = 5000000000;
+    ```
+    
+    Or adjust server config in `/etc/clickhouse-server/config.xml`.
+  </Accordion>
+</AccordionGroup>
+
+## Migration from PostgreSQL to ClickHouse
+
+Migrating existing data:
+
+<Steps>
+  <Step title="Install ClickHouse">
+    Set up ClickHouse alongside PostgreSQL.
+  </Step>
+  
+  <Step title="Configure Umami">
+    Add `CLICKHOUSE_URL` environment variable.
+  </Step>
+  
+  <Step title="Initialize schema">
+    Schema will be created automatically on first start.
+  </Step>
+  
+  <Step title="Data migration">
+    New events will be written to ClickHouse. Historical data remains in PostgreSQL.
+    
+    <Note>
+      Manual historical data migration is complex and typically not necessary. Most users start fresh with ClickHouse.
+    </Note>
+  </Step>
+</Steps>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Partition Strategy" icon="calendar">
+    Use monthly partitions for easier data management and deletion.
+  </Card>
+  <Card title="Compression" icon="compress">
+    Use LZ4 compression for balance between speed and size.
+  </Card>
+  <Card title="Materialized Views" icon="bolt">
+    Leverage pre-aggregated views for dashboard queries.
+  </Card>
+  <Card title="Regular Optimization" icon="wrench">
+    Run OPTIMIZE TABLE periodically to merge small parts.
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="PostgreSQL" icon="database" href="/self-hosting/postgresql">
+    Configure the PostgreSQL backend
+  </Card>
+  <Card title="Environment Variables" icon="gear" href="/self-hosting/environment-variables">
+    Configure Umami settings
+  </Card>
+  <Card title="Migrations" icon="arrow-right" href="/self-hosting/migrations">
+    Understand database migrations
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/self-hosting/troubleshooting">
+    Solve common issues
+  </Card>
+</CardGroup>

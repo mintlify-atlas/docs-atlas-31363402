@@ -1,0 +1,628 @@
+---
+title: User Identification
+description: Track users across sessions and associate events with specific user identities.
+---
+
+The `umami.identify()` function allows you to associate a unique identifier with a user, enabling you to track their journey across sessions and better understand user behavior.
+
+## Overview
+
+User identification is useful for:
+- Tracking authenticated users across sessions
+- Associating events with specific user accounts
+- Understanding individual user journeys
+- Analyzing behavior by user segments
+- Building user-specific analytics
+
+<Info>
+  Umami remains privacy-focused even with user identification. You control what data is sent, and all data remains anonymous unless you explicitly provide identifying information.
+</Info>
+
+## Basic Usage
+
+### Identify a User
+
+Call `identify()` with a unique user ID:
+
+```javascript
+umami.identify('user-12345');
+```
+
+After identification, all subsequent events will be associated with this user ID.
+
+### Identify with Additional Data
+
+Attach user properties along with the ID:
+
+```javascript
+umami.identify('user-12345', {
+  email: 'user@example.com',
+  plan: 'premium',
+  signup_date: '2024-01-15',
+  role: 'admin'
+});
+```
+
+## Function Signatures
+
+The `identify()` function accepts multiple parameter combinations:
+
+<Tabs>
+  <Tab title="User ID Only">
+    ```typescript
+    umami.identify(userId: string): Promise<string>
+    ```
+    
+    **Example:**
+    ```javascript
+    umami.identify('user-12345');
+    ```
+  </Tab>
+  
+  <Tab title="User ID + Data">
+    ```typescript
+    umami.identify(userId: string, userData: EventData): Promise<string>
+    ```
+    
+    **Example:**
+    ```javascript
+    umami.identify('user-12345', {
+      email: 'user@example.com',
+      plan: 'premium'
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Data Only">
+    ```typescript
+    umami.identify(userData: EventData): Promise<string>
+    ```
+    
+    Updates data for the currently identified user without changing the ID.
+    
+    **Example:**
+    ```javascript
+    // First, identify the user
+    umami.identify('user-12345');
+    
+    // Later, update their data
+    umami.identify({
+      plan: 'enterprise',
+      last_login: Date.now()
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## How It Works
+
+From the tracker source code (`index.js:201-214`):
+
+```javascript
+const identify = (id, data) => {
+  if (typeof id === 'string') {
+    identity = id;  // Store user ID
+  }
+
+  cache = '';  // Clear cache to ensure event is sent
+  return send(
+    {
+      ...getPayload(),  // Include default properties
+      data: typeof id === 'object' ? id : data,
+    },
+    'identify',  // Event type is 'identify' not 'event'
+  );
+};
+```
+
+Key behaviors:
+
+1. **Sets Internal Identity**: The user ID is stored in an internal `identity` variable
+2. **Clears Cache**: Ensures the identify event is sent immediately
+3. **Sends Identify Event**: Sends a special `identify` type event (not a regular event)
+4. **Persists for Session**: The identity is included in all subsequent events until page reload
+
+### Identity in Events
+
+Once identified, the user ID is automatically included in all tracked events:
+
+```javascript
+// From index.js:56-66
+const getPayload = () => ({
+  website,
+  screen,
+  language,
+  title: document.title,
+  hostname,
+  url: currentUrl,
+  referrer: currentRef,
+  tag,
+  id: identity ? identity : undefined,  // User ID included here
+});
+```
+
+## Common Use Cases
+
+### User Login
+
+Identify users when they log in:
+
+```javascript
+async function handleLogin(user) {
+  // Identify the user
+  await umami.identify(user.id, {
+    email: user.email,
+    username: user.username,
+    plan: user.subscription.plan,
+    signup_date: user.createdAt
+  });
+  
+  // Track the login event
+  umami.track('user-login', {
+    method: 'email',
+    timestamp: Date.now()
+  });
+}
+```
+
+### User Signup
+
+Identify new users during registration:
+
+```javascript
+async function handleSignup(userData) {
+  // Create the user account
+  const user = await createUser(userData);
+  
+  // Identify the new user
+  await umami.identify(user.id, {
+    email: user.email,
+    plan: user.plan,
+    referral_source: getReferralSource(),
+    signup_date: new Date().toISOString()
+  });
+  
+  // Track the signup event
+  umami.track('user-signup', {
+    plan: user.plan,
+    method: 'email'
+  });
+}
+```
+
+### Update User Properties
+
+Update user data as their information changes:
+
+```javascript
+// When user upgrades their plan
+async function handlePlanUpgrade(newPlan) {
+  // Update user properties
+  await umami.identify({
+    plan: newPlan,
+    upgrade_date: new Date().toISOString(),
+    previous_plan: currentUser.plan
+  });
+  
+  // Track the upgrade event
+  umami.track('plan-upgrade', {
+    from: currentUser.plan,
+    to: newPlan
+  });
+}
+```
+
+### User Logout
+
+Track when users log out:
+
+```javascript
+function handleLogout() {
+  // Track the logout event (identity still present)
+  umami.track('user-logout', {
+    session_duration: getSessionDuration(),
+    timestamp: Date.now()
+  });
+  
+  // Note: Identity persists until page reload
+  // Consider redirecting to clear the session
+  window.location.href = '/login';
+}
+```
+
+<Note>
+  The user identity persists in memory until the page reloads. There's no built-in way to "unidentify" a user within the same page session.
+</Note>
+
+## Framework Integration
+
+<Tabs>
+  <Tab title="React">
+    Use `useEffect` to identify users:
+    
+    ```jsx
+    import { useEffect } from 'react';
+    import { useAuth } from './auth';
+    
+    function App() {
+      const { user } = useAuth();
+      
+      useEffect(() => {
+        if (user && window.umami) {
+          umami.identify(user.id, {
+            email: user.email,
+            plan: user.plan,
+            role: user.role
+          });
+        }
+      }, [user]);
+      
+      return <div>App Content</div>;
+    }
+    ```
+    
+    With Auth Context:
+    ```jsx
+    import { createContext, useContext, useEffect } from 'react';
+    
+    const AuthContext = createContext();
+    
+    export function AuthProvider({ children }) {
+      const [user, setUser] = useState(null);
+      
+      useEffect(() => {
+        // When user state changes
+        if (user) {
+          window.umami?.identify(user.id, {
+            email: user.email,
+            plan: user.plan
+          });
+        }
+      }, [user]);
+      
+      return (
+        <AuthContext.Provider value={{ user, setUser }}>
+          {children}
+        </AuthContext.Provider>
+      );
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Vue">
+    Use watchers or lifecycle hooks:
+    
+    ```vue
+    <script setup>
+    import { watch, onMounted } from 'vue';
+    import { useAuth } from './composables/auth';
+    
+    const { user } = useAuth();
+    
+    // Watch for user changes
+    watch(user, (newUser) => {
+      if (newUser && window.umami) {
+        window.umami.identify(newUser.id, {
+          email: newUser.email,
+          plan: newUser.plan
+        });
+      }
+    }, { immediate: true });
+    </script>
+    ```
+    
+    With Vuex:
+    ```javascript
+    // store.js
+    export default new Vuex.Store({
+      actions: {
+        async login({ commit }, credentials) {
+          const user = await api.login(credentials);
+          commit('setUser', user);
+          
+          // Identify user in Umami
+          if (window.umami) {
+            window.umami.identify(user.id, {
+              email: user.email,
+              plan: user.plan
+            });
+          }
+        }
+      }
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Next.js">
+    Use in `_app.js` with authentication:
+    
+    ```jsx
+    // pages/_app.js
+    import { useEffect } from 'react';
+    import { SessionProvider, useSession } from 'next-auth/react';
+    
+    function MyApp({ Component, pageProps: { session, ...pageProps } }) {
+      return (
+        <SessionProvider session={session}>
+          <UmamiIdentify />
+          <Component {...pageProps} />
+        </SessionProvider>
+      );
+    }
+    
+    function UmamiIdentify() {
+      const { data: session } = useSession();
+      
+      useEffect(() => {
+        if (session?.user && window.umami) {
+          umami.identify(session.user.id, {
+            email: session.user.email,
+            name: session.user.name
+          });
+        }
+      }, [session]);
+      
+      return null;
+    }
+    
+    export default MyApp;
+    ```
+  </Tab>
+  
+  <Tab title="Angular">
+    Create an analytics service:
+    
+    ```typescript
+    import { Injectable } from '@angular/core';
+    import { AuthService } from './auth.service';
+    
+    declare global {
+      interface Window {
+        umami: any;
+      }
+    }
+    
+    @Injectable({ providedIn: 'root' })
+    export class AnalyticsService {
+      constructor(private auth: AuthService) {
+        // Identify user when auth state changes
+        this.auth.user$.subscribe(user => {
+          if (user && window.umami) {
+            window.umami.identify(user.id, {
+              email: user.email,
+              plan: user.plan
+            });
+          }
+        });
+      }
+      
+      identify(userId: string, data?: any) {
+        if (window.umami) {
+          window.umami.identify(userId, data);
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## User Segmentation
+
+Use identification to segment users and analyze behavior:
+
+```javascript
+// Segment by plan type
+umami.identify(user.id, {
+  plan: user.plan,              // 'free', 'premium', 'enterprise'
+  user_type: user.type,         // 'individual', 'business'
+  account_age: user.accountAge, // Days since signup
+  mau: user.monthlyActive       // Boolean
+});
+
+// Segment by usage patterns
+umami.identify(user.id, {
+  features_used: user.features.length,
+  last_active: user.lastActive,
+  power_user: user.isPowerUser,
+  beta_tester: user.isBetaTester
+});
+
+// Segment by organization
+umami.identify(user.id, {
+  organization_id: user.org.id,
+  organization_size: user.org.size,
+  industry: user.org.industry,
+  role: user.role
+});
+```
+
+## Privacy Considerations
+
+<Warning>
+  Be mindful of privacy when identifying users. Only send data you need and that users have consented to share.
+</Warning>
+
+### What to Track
+
+<Tabs>
+  <Tab title="Safe to Track">
+    ```javascript
+    umami.identify(user.id, {
+      plan: 'premium',
+      role: 'admin',
+      signup_date: '2024-01-15',
+      features_enabled: ['api', 'exports'],
+      organization_size: 'medium'
+    });
+    ```
+    
+    Safe, non-personally-identifiable data includes:
+    - User tier/plan
+    - Role or permission level
+    - Signup date
+    - Feature flags
+    - Organization info (non-specific)
+  </Tab>
+  
+  <Tab title="Use with Caution">
+    ```javascript
+    umami.identify(user.id, {
+      email: user.email,           // PII
+      name: user.name,             // PII
+      ip_address: user.ip,         // PII
+      phone: user.phone            // PII
+    });
+    ```
+    
+    Personally identifiable information (PII) should only be sent if:
+    - Users have explicitly consented
+    - Your privacy policy covers it
+    - You have a legitimate business need
+    - You comply with GDPR/CCPA requirements
+  </Tab>
+</Tabs>
+
+### Best Practices
+
+<Steps>
+  <Step title="Use anonymous IDs">
+    Use database IDs or UUIDs instead of emails or usernames:
+    
+    ```javascript
+    // Good
+    umami.identify('user-12345');
+    umami.identify('uuid-a1b2c3d4-e5f6-7890');
+    
+    // Avoid
+    umami.identify('john.doe@example.com');
+    umami.identify('johndoe');
+    ```
+  </Step>
+  
+  <Step title="Hash sensitive data">
+    If you must include sensitive data, hash it first:
+    
+    ```javascript
+    import { sha256 } from 'crypto';
+    
+    umami.identify(user.id, {
+      email_hash: sha256(user.email),
+      org_hash: sha256(user.organizationName)
+    });
+    ```
+  </Step>
+  
+  <Step title="Respect opt-outs">
+    Check user preferences before identifying:
+    
+    ```javascript
+    if (user.analyticsConsent) {
+      umami.identify(user.id, {
+        plan: user.plan
+      });
+    }
+    ```
+  </Step>
+  
+  <Step title="Document your tracking">
+    Maintain clear documentation of what you track and why:
+    
+    ```javascript
+    /**
+     * Identifies user in analytics
+     * Tracked data:
+     * - plan: Subscription tier for feature usage analysis
+     * - role: Permission level for access pattern analysis
+     * - signup_date: Account age for cohort analysis
+     */
+    umami.identify(user.id, {
+      plan: user.plan,
+      role: user.role,
+      signup_date: user.signupDate
+    });
+    ```
+  </Step>
+</Steps>
+
+## Complete Example
+
+Here's a complete implementation with authentication:
+
+```javascript
+// analytics.js
+export class Analytics {
+  static identify(user) {
+    if (!window.umami) return;
+    
+    // Only identify if user has consented
+    if (!user.analyticsConsent) return;
+    
+    umami.identify(user.id, {
+      // User attributes
+      plan: user.subscription.plan,
+      role: user.role,
+      
+      // Account metadata
+      signup_date: user.createdAt,
+      account_age_days: this.getAccountAge(user.createdAt),
+      
+      // Organization (if applicable)
+      has_organization: !!user.organizationId,
+      organization_size: user.organization?.size,
+      
+      // Feature flags
+      beta_features: user.betaFeatures,
+      
+      // Usage metrics
+      last_active: user.lastActive,
+      total_events: user.eventCount
+    });
+  }
+  
+  static track(event, data) {
+    if (!window.umami) return;
+    return umami.track(event, data);
+  }
+  
+  static getAccountAge(createdAt) {
+    const now = Date.now();
+    const created = new Date(createdAt).getTime();
+    return Math.floor((now - created) / (1000 * 60 * 60 * 24));
+  }
+}
+
+// auth.js
+import { Analytics } from './analytics';
+
+export async function login(credentials) {
+  const user = await api.login(credentials);
+  
+  // Identify user in analytics
+  Analytics.identify(user);
+  
+  // Track login event
+  Analytics.track('user-login', {
+    method: credentials.method
+  });
+  
+  return user;
+}
+
+export function logout() {
+  Analytics.track('user-logout');
+  
+  // Redirect to clear session and identity
+  window.location.href = '/login';
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Event Tracking" icon="chart-line" href="/tracking/events">
+    Learn how to track user events
+  </Card>
+  <Card title="Event Data" icon="database" href="/tracking/event-data">
+    Understand event data structure and limits
+  </Card>
+</CardGroup>

@@ -1,0 +1,271 @@
+---
+title: 'Get Realtime Data'
+description: 'Retrieve real-time visitor activity'
+---
+
+## Get Realtime Data
+
+Retrieve real-time visitor activity for a website, showing current active visitors and recent pageviews.
+
+<Note>
+  Realtime data shows activity from the last 5 minutes by default.
+</Note>
+
+### Endpoint
+
+```
+GET /api/realtime/{websiteId}
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="websiteId" type="string" required>
+  Website UUID
+</ParamField>
+
+### Response
+
+<ResponseField name="pageviews" type="array">
+  Array of recent pageviews
+  
+  <Expandable title="pageview object">
+    <ResponseField name="__id" type="string">
+      Unique identifier
+    </ResponseField>
+    
+    <ResponseField name="sessionId" type="string">
+      Session UUID
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+    
+    <ResponseField name="urlPath" type="string">
+      Page URL path
+    </ResponseField>
+    
+    <ResponseField name="urlQuery" type="string">
+      URL query string
+    </ResponseField>
+    
+    <ResponseField name="referrerDomain" type="string">
+      Referrer domain
+    </ResponseField>
+    
+    <ResponseField name="pageTitle" type="string">
+      Page title
+    </ResponseField>
+    
+    <ResponseField name="country" type="string">
+      Country code
+    </ResponseField>
+    
+    <ResponseField name="browser" type="string">
+      Browser name
+    </ResponseField>
+    
+    <ResponseField name="os" type="string">
+      Operating system
+    </ResponseField>
+    
+    <ResponseField name="device" type="string">
+      Device type
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="sessions" type="array">
+  Array of active sessions
+  
+  <Expandable title="session object">
+    <ResponseField name="__id" type="string">
+      Unique identifier
+    </ResponseField>
+    
+    <ResponseField name="sessionId" type="string">
+      Session UUID
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of first activity
+    </ResponseField>
+    
+    <ResponseField name="country" type="string">
+      Country code
+    </ResponseField>
+    
+    <ResponseField name="browser" type="string">
+      Browser name
+    </ResponseField>
+    
+    <ResponseField name="os" type="string">
+      Operating system
+    </ResponseField>
+    
+    <ResponseField name="device" type="string">
+      Device type
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="visitors" type="number">
+  Number of active visitors (unique sessions in the time window)
+</ResponseField>
+
+<ResponseField name="timestamp" type="number">
+  Current server timestamp in milliseconds
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl https://your-umami-instance.com/api/realtime/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const websiteId = '550e8400-e29b-41d4-a716-446655440000';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/realtime/${websiteId}`,
+  {
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+    },
+  }
+);
+
+const realtimeData = await response.json();
+console.log(`Active visitors: ${realtimeData.visitors}`);
+```
+
+```python Python
+import requests
+
+website_id = '550e8400-e29b-41d4-a716-446655440000'
+
+response = requests.get(
+    f'https://your-umami-instance.com/api/realtime/{website_id}',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+realtime_data = response.json()
+print(f"Active visitors: {realtime_data['visitors']}")
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "pageviews": [
+    {
+      "__id": "jj0e8400-e29b-41d4-a716-446655440014",
+      "sessionId": "ff0e8400-e29b-41d4-a716-446655440010",
+      "createdAt": "2024-03-15T14:35:42.000Z",
+      "urlPath": "/products",
+      "urlQuery": "category=electronics",
+      "referrerDomain": "google.com",
+      "pageTitle": "Products",
+      "country": "US",
+      "browser": "Chrome",
+      "os": "Windows",
+      "device": "desktop"
+    },
+    {
+      "__id": "kk0e8400-e29b-41d4-a716-446655440015",
+      "sessionId": "gg0e8400-e29b-41d4-a716-446655440011",
+      "createdAt": "2024-03-15T14:36:15.000Z",
+      "urlPath": "/",
+      "urlQuery": "",
+      "referrerDomain": "",
+      "pageTitle": "Home",
+      "country": "GB",
+      "browser": "Safari",
+      "os": "Mac OS",
+      "device": "desktop"
+    }
+  ],
+  "sessions": [
+    {
+      "__id": "ll0e8400-e29b-41d4-a716-446655440016",
+      "sessionId": "ff0e8400-e29b-41d4-a716-446655440010",
+      "createdAt": "2024-03-15T14:30:00.000Z",
+      "country": "US",
+      "browser": "Chrome",
+      "os": "Windows",
+      "device": "desktop"
+    },
+    {
+      "__id": "mm0e8400-e29b-41d4-a716-446655440017",
+      "sessionId": "gg0e8400-e29b-41d4-a716-446655440011",
+      "createdAt": "2024-03-15T14:33:20.000Z",
+      "country": "GB",
+      "browser": "Safari",
+      "os": "Mac OS",
+      "device": "desktop"
+    }
+  ],
+  "visitors": 2,
+  "timestamp": 1710513400000
+}
+```
+
+### Polling for Updates
+
+For live dashboards, poll this endpoint at regular intervals:
+
+```javascript
+// Poll every 5 seconds
+const websiteId = '550e8400-e29b-41d4-a716-446655440000';
+
+setInterval(async () => {
+  const response = await fetch(
+    `https://your-umami-instance.com/api/realtime/${websiteId}`,
+    {
+      headers: {
+        'Authorization': 'Bearer YOUR_TOKEN',
+      },
+    }
+  );
+  
+  const data = await response.json();
+  updateDashboard(data);
+}, 5000);
+```
+
+### Use Cases
+
+- Real-time visitor dashboards
+- Live event monitoring
+- Current traffic analysis
+- Active user tracking
+- Live campaign monitoring
+
+### Time Window
+
+The endpoint returns data from the last 5 minutes by default (defined by `REALTIME_RANGE` constant). This includes:
+
+- All pageviews in the last 5 minutes
+- All sessions with activity in the last 5 minutes
+- Current visitor count (unique sessions)
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  Unauthorized - You don't have permission to view this website's realtime data
+</ResponseField>
+
+<Note>
+  Realtime data is useful for monitoring live traffic and detecting traffic spikes or issues in real-time.
+</Note>

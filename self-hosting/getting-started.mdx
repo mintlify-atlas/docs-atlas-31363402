@@ -1,0 +1,276 @@
+---
+title: Getting Started with Self-Hosting
+description: Learn how to self-host Umami, a privacy-focused web analytics platform
+---
+
+## Introduction
+
+Umami is a simple, fast, privacy-focused alternative to Google Analytics that you can self-host on your own infrastructure. This guide will help you get started with self-hosting Umami.
+
+## Why Self-Host Umami?
+
+<CardGroup cols={2}>
+  <Card title="Privacy-First" icon="shield">
+    Full control over your analytics data with no third-party tracking
+  </Card>
+  <Card title="Open Source" icon="code">
+    MIT licensed with complete source code transparency
+  </Card>
+  <Card title="Lightweight" icon="feather">
+    Minimal resource requirements with efficient data storage
+  </Card>
+  <Card title="GDPR Compliant" icon="check">
+    No cookies, no personal data collection by default
+  </Card>
+</CardGroup>
+
+## Requirements
+
+Before you begin, ensure you have:
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    Version 18.18 or higher
+  </Card>
+  <Card title="Database" icon="database">
+    PostgreSQL v12.14+ or ClickHouse (optional)
+  </Card>
+  <Card title="Server" icon="server">
+    Linux, macOS, or Windows with 1GB+ RAM
+  </Card>
+  <Card title="Package Manager" icon="package">
+    pnpm (recommended) or npm
+  </Card>
+</CardGroup>
+
+<Note>
+  For production deployments, we recommend at least 2GB of RAM and 20GB of disk space.
+</Note>
+
+## Deployment Options
+
+Umami offers multiple deployment methods to suit your infrastructure:
+
+<Tabs>
+  <Tab title="Docker (Recommended)">
+    The easiest way to get started. Docker Compose automatically sets up Umami with PostgreSQL.
+    
+    ```bash
+    docker compose up -d
+    ```
+    
+    Perfect for quick deployments and production use.
+  </Tab>
+  
+  <Tab title="Source Installation">
+    Install from source for maximum customization and control.
+    
+    ```bash
+    git clone https://github.com/umami-software/umami.git
+    cd umami
+    pnpm install
+    pnpm build
+    pnpm start
+    ```
+    
+    Ideal for development and custom deployments.
+  </Tab>
+  
+  <Tab title="Kubernetes">
+    Deploy to Kubernetes for scalable, enterprise-grade infrastructure.
+    
+    Requires custom manifests for deployments, services, and ingress configuration.
+  </Tab>
+</Tabs>
+
+## Quick Start with Docker
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/umami-software/umami.git
+    cd umami
+    ```
+  </Step>
+  
+  <Step title="Start with Docker Compose">
+    ```bash
+    docker compose up -d
+    ```
+    
+    This command will:
+    - Pull the latest Umami image
+    - Start a PostgreSQL database
+    - Initialize the database schema
+    - Start Umami on port 3000
+  </Step>
+  
+  <Step title="Access Umami">
+    Open your browser and navigate to `http://localhost:3000`
+    
+    <Warning>
+      Default credentials:
+      - Username: `admin`
+      - Password: `umami`
+      
+      **Change these immediately after first login!**
+    </Warning>
+  </Step>
+</Steps>
+
+## Quick Start from Source
+
+<Steps>
+  <Step title="Clone and install dependencies">
+    ```bash
+    git clone https://github.com/umami-software/umami.git
+    cd umami
+    pnpm install
+    ```
+  </Step>
+  
+  <Step title="Configure environment variables">
+    Create a `.env` file in the root directory:
+    
+    ```bash
+    DATABASE_URL=postgresql://username:password@localhost:5432/umami
+    ```
+    
+    Replace with your actual PostgreSQL connection details.
+  </Step>
+  
+  <Step title="Build the application">
+    ```bash
+    pnpm build
+    ```
+    
+    <Info>
+      The build process will automatically create database tables and a default admin user.
+    </Info>
+  </Step>
+  
+  <Step title="Start the application">
+    ```bash
+    pnpm start
+    ```
+    
+    Umami will be available at `http://localhost:3000`
+  </Step>
+</Steps>
+
+## Database Options
+
+Umami supports two database backends:
+
+<Tabs>
+  <Tab title="PostgreSQL">
+    **Recommended for most users**
+    
+    - Mature, reliable, and well-documented
+    - Full SQL support with ACID compliance
+    - Minimum version: 12.14
+    - Ideal for small to medium-sized deployments
+    
+    ```bash
+    DATABASE_URL=postgresql://user:password@localhost:5432/umami
+    ```
+  </Tab>
+  
+  <Tab title="ClickHouse">
+    **For high-volume analytics**
+    
+    - Optimized for analytical queries
+    - Excellent performance with billions of events
+    - Columnar storage for efficient aggregations
+    - Best for large-scale deployments
+    
+    Requires additional configuration beyond DATABASE_URL.
+  </Tab>
+</Tabs>
+
+## Default Credentials
+
+<Warning>
+  After installation, Umami creates a default admin account:
+  
+  - **Username:** `admin`
+  - **Password:** `umami`
+  
+  **You must change these credentials immediately after your first login** for security reasons.
+</Warning>
+
+## Next Steps
+
+Now that you have Umami running, here's what to do next:
+
+<CardGroup cols={2}>
+  <Card title="Docker Deployment" icon="docker" href="/self-hosting/docker-deployment">
+    Learn advanced Docker configuration options
+  </Card>
+  <Card title="Environment Variables" icon="gear" href="/self-hosting/environment-variables">
+    Configure Umami with environment variables
+  </Card>
+  <Card title="PostgreSQL Setup" icon="database" href="/self-hosting/postgresql">
+    Optimize your PostgreSQL database
+  </Card>
+  <Card title="Upgrading" icon="arrow-up" href="/self-hosting/upgrading">
+    Keep your instance up to date
+  </Card>
+</CardGroup>
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="Port 3000 is already in use">
+    Change the port by setting the `PORT` environment variable:
+    
+    ```bash
+    PORT=3001 pnpm start
+    ```
+    
+    Or modify the docker-compose.yml ports section:
+    
+    ```yaml
+    ports:
+      - "3001:3000"
+    ```
+  </Accordion>
+  
+  <Accordion title="Database connection failed">
+    Verify your DATABASE_URL is correct:
+    
+    1. Check the hostname, port, username, and password
+    2. Ensure PostgreSQL is running
+    3. Verify the database exists
+    4. Check firewall rules allow connections
+    
+    Test the connection:
+    
+    ```bash
+    psql postgresql://username:password@localhost:5432/umami
+    ```
+  </Accordion>
+  
+  <Accordion title="Build fails with Node.js version error">
+    Umami requires Node.js 18.18 or higher. Check your version:
+    
+    ```bash
+    node --version
+    ```
+    
+    Upgrade Node.js if needed using nvm:
+    
+    ```bash
+    nvm install 18
+    nvm use 18
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Support
+
+Need help? Join the Umami community:
+
+- [GitHub Discussions](https://github.com/umami-software/umami/discussions)
+- [Discord Server](https://discord.com/invite/4dz4zcXYrQ)
+- [Documentation](https://umami.is/docs)

@@ -1,0 +1,297 @@
+---
+title: 'Create Report'
+description: 'Create a new analytics report'
+---
+
+## Create Report
+
+Create a new saved report for a website. Reports allow you to save and reuse specific analytics configurations.
+
+### Endpoint
+
+```
+POST /api/reports
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Request Body
+
+<ParamField body="websiteId" type="string" required>
+  Website UUID
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Report type. Must be one of:
+  - `attribution` - Attribution analysis
+  - `breakdown` - Multi-dimensional breakdown
+  - `funnel` - Conversion funnel analysis
+  - `goal` - Goal tracking
+  - `journey` - User journey paths
+  - `retention` - User retention cohorts
+  - `revenue` - Revenue tracking
+  - `utm` - UTM campaign analysis
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Report name (max 200 characters)
+</ParamField>
+
+<ParamField body="description" type="string">
+  Report description (max 500 characters)
+</ParamField>
+
+<ParamField body="parameters" type="object" required>
+  Report-specific parameters (varies by report type)
+</ParamField>
+
+### Report Parameters by Type
+
+<Expandable title="Goal Report">
+  ```json
+  {
+    "startDate": "2024-03-01T00:00:00.000Z",
+    "endDate": "2024-03-31T23:59:59.999Z",
+    "type": "event",
+    "value": "signup",
+    "operator": "count",  // optional: count, sum, average
+    "property": "amount"  // optional: required for sum/average
+  }
+  ```
+</Expandable>
+
+<Expandable title="Funnel Report">
+  ```json
+  {
+    "startDate": "2024-03-01T00:00:00.000Z",
+    "endDate": "2024-03-31T23:59:59.999Z",
+    "window": 30,  // days
+    "steps": [
+      {"type": "path", "value": "/landing"},
+      {"type": "event", "value": "signup"},
+      {"type": "event", "value": "purchase"}
+    ]  // min 2, max 8 steps
+  }
+  ```
+</Expandable>
+
+<Expandable title="Journey Report">
+  ```json
+  {
+    "startDate": "2024-03-01T00:00:00.000Z",
+    "endDate": "2024-03-31T23:59:59.999Z",
+    "steps": 5,  // 2-7
+    "startStep": "/landing",  // optional
+    "endStep": "/checkout"    // optional
+  }
+  ```
+</Expandable>
+
+<Expandable title="Retention Report">
+  ```json
+  {
+    "startDate": "2024-03-01T00:00:00.000Z",
+    "endDate": "2024-03-31T23:59:59.999Z",
+    "timezone": "America/New_York"  // optional
+  }
+  ```
+</Expandable>
+
+<Expandable title="Revenue Report">
+  ```json
+  {
+    "startDate": "2024-03-01T00:00:00.000Z",
+    "endDate": "2024-03-31T23:59:59.999Z",
+    "currency": "USD",
+    "timezone": "America/New_York"  // optional
+  }
+  ```
+</Expandable>
+
+<Expandable title="Attribution Report">
+  ```json
+  {
+    "startDate": "2024-03-01T00:00:00.000Z",
+    "endDate": "2024-03-31T23:59:59.999Z",
+    "model": "first-click",  // or "last-click"
+    "type": "event",  // or "path"
+    "step": "purchase",
+    "currency": "USD"  // optional
+  }
+  ```
+</Expandable>
+
+<Expandable title="Breakdown Report">
+  ```json
+  {
+    "startDate": "2024-03-01T00:00:00.000Z",
+    "endDate": "2024-03-31T23:59:59.999Z",
+    "fields": ["browser", "device", "country"]  // max 3
+  }
+  ```
+</Expandable>
+
+<Expandable title="UTM Report">
+  ```json
+  {
+    "startDate": "2024-03-01T00:00:00.000Z",
+    "endDate": "2024-03-31T23:59:59.999Z"
+  }
+  ```
+</Expandable>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Report UUID
+</ResponseField>
+
+<ResponseField name="websiteId" type="string">
+  Website UUID
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  User who created the report
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Report type
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Report name
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Report description
+</ResponseField>
+
+<ResponseField name="parameters" type="object">
+  Report parameters
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 timestamp of creation
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/reports \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "websiteId": "550e8400-e29b-41d4-a716-446655440000",
+    "type": "funnel",
+    "name": "Checkout Funnel",
+    "description": "Track users through checkout",
+    "parameters": {
+      "startDate": "2024-03-01T00:00:00.000Z",
+      "endDate": "2024-03-31T23:59:59.999Z",
+      "window": 30,
+      "steps": [
+        {"type": "path", "value": "/cart"},
+        {"type": "path", "value": "/checkout"},
+        {"type": "event", "value": "purchase"}
+      ]
+    }
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://your-umami-instance.com/api/reports', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    websiteId: '550e8400-e29b-41d4-a716-446655440000',
+    type: 'funnel',
+    name: 'Checkout Funnel',
+    description: 'Track users through checkout',
+    parameters: {
+      startDate: '2024-03-01T00:00:00.000Z',
+      endDate: '2024-03-31T23:59:59.999Z',
+      window: 30,
+      steps: [
+        {type: 'path', value: '/cart'},
+        {type: 'path', value: '/checkout'},
+        {type: 'event', value: 'purchase'},
+      ],
+    },
+  }),
+});
+
+const report = await response.json();
+```
+
+```python Python
+import requests
+from datetime import datetime
+
+response = requests.post(
+    'https://your-umami-instance.com/api/reports',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'},
+    json={
+        'websiteId': '550e8400-e29b-41d4-a716-446655440000',
+        'type': 'funnel',
+        'name': 'Checkout Funnel',
+        'description': 'Track users through checkout',
+        'parameters': {
+            'startDate': '2024-03-01T00:00:00.000Z',
+            'endDate': '2024-03-31T23:59:59.999Z',
+            'window': 30,
+            'steps': [
+                {'type': 'path', 'value': '/cart'},
+                {'type': 'path', 'value': '/checkout'},
+                {'type': 'event', 'value': 'purchase'}
+            ]
+        }
+    }
+)
+
+report = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "id": "dd0e8400-e29b-41d4-a716-446655440008",
+  "websiteId": "550e8400-e29b-41d4-a716-446655440000",
+  "userId": "660e8400-e29b-41d4-a716-446655440001",
+  "type": "funnel",
+  "name": "Checkout Funnel",
+  "description": "Track users through checkout",
+  "parameters": {
+    "startDate": "2024-03-01T00:00:00.000Z",
+    "endDate": "2024-03-31T23:59:59.999Z",
+    "window": 30,
+    "steps": [
+      {"type": "path", "value": "/cart"},
+      {"type": "path", "value": "/checkout"},
+      {"type": "event", "value": "purchase"}
+    ]
+  },
+  "createdAt": "2024-03-15T14:30:00.000Z"
+}
+```
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  Unauthorized - You don't have permission to create reports for this website
+</ResponseField>
+
+<Note>
+  You must have update permissions for the website to create reports.
+</Note>

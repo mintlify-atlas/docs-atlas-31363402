@@ -1,0 +1,152 @@
+---
+title: 'Update Team Member'
+description: "Update a team member's role"
+---
+
+## Update Team Member
+
+Update a team member's role.
+
+### Endpoint
+
+```
+POST /api/teams/{teamId}/users/{userId}
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="teamId" type="string" required>
+  Team UUID
+</ParamField>
+
+<ParamField path="userId" type="string" required>
+  User UUID
+</ParamField>
+
+### Request Body
+
+<ParamField body="role" type="string" required>
+  New role to assign. Must be one of:
+  - `team-member`
+  - `team-view-only`
+  - `team-manager`
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Team user relationship UUID
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  User UUID
+</ResponseField>
+
+<ResponseField name="teamId" type="string">
+  Team UUID
+</ResponseField>
+
+<ResponseField name="role" type="string">
+  Updated role
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 timestamp of update
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/teams/660e8400-e29b-41d4-a716-446655440001/users/bb0e8400-e29b-41d4-a716-446655440006 \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"role": "team-manager"}'
+```
+
+```javascript JavaScript
+const teamId = '660e8400-e29b-41d4-a716-446655440001';
+const userId = 'bb0e8400-e29b-41d4-a716-446655440006';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/teams/${teamId}/users/${userId}`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      role: 'team-manager',
+    }),
+  }
+);
+
+const member = await response.json();
+```
+
+```python Python
+import requests
+
+team_id = '660e8400-e29b-41d4-a716-446655440001'
+user_id = 'bb0e8400-e29b-41d4-a716-446655440006'
+
+response = requests.post(
+    f'https://your-umami-instance.com/api/teams/{team_id}/users/{user_id}',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'},
+    json={'role': 'team-manager'}
+)
+
+member = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "id": "cc0e8400-e29b-41d4-a716-446655440007",
+  "userId": "bb0e8400-e29b-41d4-a716-446655440006",
+  "teamId": "660e8400-e29b-41d4-a716-446655440001",
+  "role": "team-manager",
+  "updatedAt": "2024-03-15T16:45:00.000Z"
+}
+```
+
+### Role Permissions
+
+| Role | View Analytics | Edit Resources | Manage Members | Manage Settings |
+|------|---------------|----------------|----------------|------------------|
+| team-manager | Yes | Yes | Yes | Yes |
+| team-member | Yes | Yes | No | No |
+| team-view-only | Yes | No | No | No |
+
+### Error Responses
+
+<ResponseField name="400" type="error">
+  Bad Request - User does not exist on this team
+</ResponseField>
+
+<ResponseField name="401" type="error">
+  Unauthorized - You must be the owner/manager of this team
+</ResponseField>
+
+<ResponseField name="404" type="error">
+  Not Found - Team or user does not exist
+</ResponseField>
+
+### Permissions
+
+Only team owners and managers can update member roles.
+
+<Warning>
+  Be careful when changing a user's role to `team-view-only` as they will lose edit permissions for all team resources.
+</Warning>

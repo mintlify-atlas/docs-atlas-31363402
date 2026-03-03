@@ -1,0 +1,149 @@
+---
+title: 'Update Team'
+description: 'Update team details'
+---
+
+## Update Team
+
+Update the name or access code of an existing team.
+
+### Endpoint
+
+```
+POST /api/teams/{teamId}
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="teamId" type="string" required>
+  Team UUID
+</ParamField>
+
+### Request Body
+
+<ParamField body="name" type="string">
+  Updated team name (max 50 characters)
+</ParamField>
+
+<ParamField body="accessCode" type="string">
+  Updated access code for joining the team (max 50 characters)
+</ParamField>
+
+<Note>
+  All fields are optional. Only include fields you want to update.
+</Note>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Team UUID
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Updated team name
+</ResponseField>
+
+<ResponseField name="accessCode" type="string">
+  Updated access code
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 timestamp of update
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/teams/660e8400-e29b-41d4-a716-446655440001 \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Team Name"
+  }'
+```
+
+```javascript JavaScript
+const teamId = '660e8400-e29b-41d4-a716-446655440001';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/teams/${teamId}`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: 'Updated Team Name',
+    }),
+  }
+);
+
+const team = await response.json();
+```
+
+```python Python
+import requests
+
+team_id = '660e8400-e29b-41d4-a716-446655440001'
+
+response = requests.post(
+    f'https://your-umami-instance.com/api/teams/{team_id}',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'},
+    json={'name': 'Updated Team Name'}
+)
+
+team = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "id": "660e8400-e29b-41d4-a716-446655440001",
+  "name": "Updated Team Name",
+  "accessCode": "team_abc123def456789",
+  "updatedAt": "2024-03-15T16:45:00.000Z"
+}
+```
+
+## Regenerating Access Code
+
+You can regenerate the team's access code to invalidate the old one:
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/teams/660e8400-e29b-41d4-a716-446655440001 \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "accessCode": "team_newcode9876543"
+  }'
+```
+
+<Warning>
+  Changing the access code will invalidate any existing join links. Users with the old code will no longer be able to join the team.
+</Warning>
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  Unauthorized - You must be the owner/manager of this team
+</ResponseField>
+
+<ResponseField name="404" type="error">
+  Not Found - Team does not exist
+</ResponseField>
+
+### Permissions
+
+Only team owners and managers can update team settings.

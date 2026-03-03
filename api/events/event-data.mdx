@@ -1,0 +1,232 @@
+---
+title: 'Get Event Data'
+description: 'Retrieve custom event data and statistics'
+---
+
+## Get Event Data
+
+Retrieve a list of custom events and their occurrence statistics for a website.
+
+### Endpoint
+
+```
+GET /api/websites/{websiteId}/event-data/events
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="websiteId" type="string" required>
+  Website UUID
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="startAt" type="number" required>
+  Start timestamp in milliseconds
+</ParamField>
+
+<ParamField query="endAt" type="number" required>
+  End timestamp in milliseconds
+</ParamField>
+
+<ParamField query="event" type="string">
+  Filter by specific event name
+</ParamField>
+
+<ParamField query="path" type="string">
+  Filter by URL path
+</ParamField>
+
+<ParamField query="referrer" type="string">
+  Filter by referrer
+</ParamField>
+
+<ParamField query="title" type="string">
+  Filter by page title
+</ParamField>
+
+<ParamField query="query" type="string">
+  Filter by query string
+</ParamField>
+
+<ParamField query="os" type="string">
+  Filter by operating system
+</ParamField>
+
+<ParamField query="browser" type="string">
+  Filter by browser
+</ParamField>
+
+<ParamField query="device" type="string">
+  Filter by device type
+</ParamField>
+
+<ParamField query="country" type="string">
+  Filter by country code
+</ParamField>
+
+<ParamField query="region" type="string">
+  Filter by region
+</ParamField>
+
+<ParamField query="city" type="string">
+  Filter by city
+</ParamField>
+
+<ParamField query="tag" type="string">
+  Filter by event tag
+</ParamField>
+
+<ParamField query="hostname" type="string">
+  Filter by hostname
+</ParamField>
+
+<ParamField query="language" type="string">
+  Filter by language
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of event data objects
+  
+  <Expandable title="event data object">
+    <ResponseField name="eventName" type="string">
+      Custom event name
+    </ResponseField>
+    
+    <ResponseField name="count" type="number">
+      Number of times this event occurred
+    </ResponseField>
+    
+    <ResponseField name="properties" type="object">
+      Aggregated event properties and their values
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl "https://your-umami-instance.com/api/websites/550e8400-e29b-41d4-a716-446655440000/event-data/events?startAt=1709251200000&endAt=1711929599999" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const websiteId = '550e8400-e29b-41d4-a716-446655440000';
+const startAt = new Date('2024-03-01').getTime();
+const endAt = new Date('2024-03-31').getTime();
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/websites/${websiteId}/event-data/events?startAt=${startAt}&endAt=${endAt}`,
+  {
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+    },
+  }
+);
+
+const eventData = await response.json();
+```
+
+```python Python
+import requests
+from datetime import datetime
+
+website_id = '550e8400-e29b-41d4-a716-446655440000'
+start_at = int(datetime(2024, 3, 1).timestamp() * 1000)
+end_at = int(datetime(2024, 3, 31, 23, 59, 59).timestamp() * 1000)
+
+response = requests.get(
+    f'https://your-umami-instance.com/api/websites/{website_id}/event-data/events',
+    params={
+        'startAt': start_at,
+        'endAt': end_at
+    },
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+event_data = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "eventName": "purchase",
+      "count": 127,
+      "properties": {
+        "currency": {
+          "USD": 95,
+          "EUR": 32
+        },
+        "product": {
+          "Laptop": 45,
+          "Phone": 52,
+          "Tablet": 30
+        }
+      }
+    },
+    {
+      "eventName": "signup",
+      "count": 234,
+      "properties": {
+        "method": {
+          "google": 145,
+          "email": 89
+        },
+        "plan": {
+          "free": 189,
+          "premium": 45
+        }
+      }
+    },
+    {
+      "eventName": "newsletter-subscribe",
+      "count": 89,
+      "properties": {}
+    }
+  ]
+}
+```
+
+### Filtering by Event Name
+
+To get data for a specific event:
+
+```bash
+curl "https://your-umami-instance.com/api/websites/550e8400-e29b-41d4-a716-446655440000/event-data/events?startAt=1709251200000&endAt=1711929599999&event=purchase" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Use Cases
+
+This endpoint is useful for:
+
+- Analyzing custom event frequency
+- Understanding event property distributions
+- Building custom event dashboards
+- Tracking conversion metrics
+- Analyzing user behavior patterns
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  Unauthorized - You don't have permission to view this website's event data
+</ResponseField>
+
+<Note>
+  Event data includes aggregated statistics for custom events tracked via the [Send Event](/api/events/send-event) endpoint with a `name` parameter.
+</Note>

@@ -1,0 +1,278 @@
+---
+title: 'Retention Report'
+description: 'Measure user retention over time with cohort analysis'
+icon: 'arrows-rotate'
+---
+
+The Retention Report helps you understand how well you retain users over time. It uses cohort analysis to show what percentage of users return to your site after their first visit.
+
+## What is a Retention Report?
+
+Retention analysis tracks groups of users (cohorts) based on when they first visited your site, and measures how many return on subsequent days. This helps you:
+
+- Measure the stickiness of your product or content
+- Identify trends in user engagement
+- Evaluate the impact of product changes on retention
+- Understand your most loyal user segments
+
+## Key Concepts
+
+<CardGroup cols={2}>
+  <Card title="Cohort" icon="users">
+    A group of users who first visited on the same date
+  </Card>
+  <Card title="Cohort Date" icon="calendar">
+    The date of the user's first visit to your site
+  </Card>
+  <Card title="Day Number" icon="hashtag">
+    Number of days since the cohort date (Day 0, Day 1, Day 2, etc.)
+  </Card>
+  <Card title="Retention %" icon="percent">
+    Percentage of the cohort that returned on each day
+  </Card>
+</CardGroup>
+
+## How Retention Works
+
+<Steps>
+  <Step title="Cohort Creation">
+    Users are grouped into cohorts based on the date of their first visit to your website.
+  </Step>
+  
+  <Step title="Track Returns">
+    The system tracks when users from each cohort return to your site on subsequent days.
+  </Step>
+  
+  <Step title="Calculate Percentages">
+    For each cohort and day, calculate what percentage of the original cohort returned.
+  </Step>
+  
+  <Step title="Visualize Trends">
+    Display the data in a retention matrix showing retention rates over time.
+  </Step>
+</Steps>
+
+## Reading the Retention Report
+
+The Retention Report displays a matrix where:
+
+- **Rows** represent cohorts (grouped by first visit date)
+- **Columns** represent days since first visit (Day 0 through Day 31)
+- **Values** show the percentage of users who returned
+
+### Example Interpretation
+
+```
+Cohort Date | Day 0 | Day 1 | Day 7 | Day 14 | Day 30
+------------|-------|-------|-------|--------|--------
+2024-01-01  | 100%  | 25%   | 15%   | 10%    | 8%
+2024-01-02  | 100%  | 30%   | 18%   | 12%    | 9%
+2024-01-03  | 100%  | 28%   | 20%   | 15%    | 11%
+```
+
+**Insights from this example:**
+- Day 0 is always 100% (the cohort's first visit)
+- 25-30% of users return the next day (Day 1)
+- By Day 30, 8-11% of users are still active
+- The January 3rd cohort shows better retention, suggesting something improved
+
+## Use Cases and Insights
+
+<Tabs>
+  <Tab title="Product Stickiness">
+    ### Measure Product Engagement
+    
+    Track how engaging your product or content is by measuring how often users return.
+    
+    **Questions to answer:**
+    - What percentage of new users come back the next day?
+    - How does retention change over the first week? First month?
+    - Are we building a habit with our users?
+    
+    <Tip>
+      Healthy retention rates vary by industry. SaaS products often target 40-50% Day 1 retention and 20-30% Day 7 retention.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Feature Impact">
+    ### Evaluate Product Changes
+    
+    Use retention cohorts to measure the impact of product updates or new features.
+    
+    **How to analyze:**
+    1. Note the date of a product release
+    2. Compare retention rates before and after
+    3. Look for improvements in retention curves
+    
+    **Example:**
+    If you launched a new onboarding flow on Jan 15, compare cohorts from Jan 10-14 vs Jan 16-20 to see if retention improved.
+  </Tab>
+  
+  <Tab title="Content Strategy">
+    ### Optimize Content Strategy
+    
+    For content sites, retention shows how well you're building a loyal audience.
+    
+    **Key metrics:**
+    - **Day 1 retention**: Did your content compel them to return?
+    - **Day 7 retention**: Are you publishing frequently enough?
+    - **Day 30 retention**: Have you built a habit?
+    
+    <Info>
+      For blogs and content sites, focus on Day 7 and Day 14 retention. These indicate whether users are coming back for new content.
+    </Info>
+  </Tab>
+  
+  <Tab title="Segment Analysis">
+    ### Analyze Retention by Segment
+    
+    Use filters to compare retention across different user segments.
+    
+    **Useful segments:**
+    - **Traffic source**: Do organic users retain better than paid?
+    - **Geography**: Which countries have the stickiest users?
+    - **Device**: Mobile vs desktop retention
+    - **Landing page**: Which entry points lead to better retention?
+    
+    ```json
+    {
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31",
+      "filters": {
+        "country": "US",
+        "device": "mobile"
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## API Usage
+
+```bash
+curl -X POST https://your-umami-instance.com/api/reports/retention \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "websiteId": "your-website-id",
+    "parameters": {
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": "2024-01-31T23:59:59Z",
+      "timezone": "America/New_York"
+    },
+    "filters": {}
+  }'
+```
+
+### Response Format
+
+The API returns retention data with:
+
+```json
+[
+  {
+    "date": "2024-01-01",
+    "day": 0,
+    "visitors": 1000,
+    "returnVisitors": 1000,
+    "percentage": 100
+  },
+  {
+    "date": "2024-01-01",
+    "day": 1,
+    "visitors": 1000,
+    "returnVisitors": 250,
+    "percentage": 25
+  }
+]
+```
+
+## Analyzing Retention Curves
+
+### Typical Retention Patterns
+
+<Accordion title="Flat Retention (Good)">
+  After an initial drop, retention stabilizes at a consistent level.
+  
+  ```
+  Day 0: 100% → Day 1: 40% → Day 7: 25% → Day 30: 20%
+  ```
+  
+  **What it means**: You have a core group of engaged users. Focus on growing this segment.
+</Accordion>
+
+<Accordion title="Declining Retention (Concerning)">
+  Retention continuously declines with no plateau.
+  
+  ```
+  Day 0: 100% → Day 1: 30% → Day 7: 10% → Day 30: 2%
+  ```
+  
+  **What it means**: Users aren't finding long-term value. Focus on improving engagement and onboarding.
+</Accordion>
+
+<Accordion title="Improving Retention (Great)">
+  Each cohort retains better than previous cohorts.
+  
+  ```
+  Cohort A: Day 7: 15%
+  Cohort B: Day 7: 20%
+  Cohort C: Day 7: 25%
+  ```
+  
+  **What it means**: Your improvements are working! Keep iterating.
+</Accordion>
+
+<Accordion title="Smiling Curve (Excellent)">
+  After initial drop, retention actually increases.
+  
+  ```
+  Day 0: 100% → Day 1: 40% → Day 7: 35% → Day 30: 45%
+  ```
+  
+  **What it means**: You're building strong habits. Users who stick around become more engaged over time.
+</Accordion>
+
+## Optimization Strategies
+
+<CardGroup cols={2}>
+  <Card title="Improve Onboarding" icon="person-walking">
+    A strong first experience drives Day 1 and Day 7 retention. Guide new users to "aha" moments quickly.
+  </Card>
+  <Card title="Email Campaigns" icon="envelope">
+    Re-engage users with targeted emails on Days 1, 3, and 7 to bring them back.
+  </Card>
+  <Card title="Push Notifications" icon="bell">
+    For mobile apps, push notifications can significantly improve retention when used thoughtfully.
+  </Card>
+  <Card title="Content Cadence" icon="calendar-days">
+    Publish new content on a consistent schedule to build a habit of returning.
+  </Card>
+</CardGroup>
+
+<Warning>
+  The retention report shows data up to Day 31. For longer-term retention analysis, you may need to export data and analyze it separately.
+</Warning>
+
+## Best Practices
+
+1. **Set retention goals**: Define target retention rates for key days (1, 7, 30)
+2. **Monitor trends**: Look for upward or downward trends in cohort retention
+3. **Segment your analysis**: Different user types may have different retention patterns
+4. **Focus on early retention**: Improvements in Day 1-7 retention have the biggest impact
+5. **Test and iterate**: Run experiments to improve retention and measure the impact
+
+<Tip>
+  Compare your retention rates to industry benchmarks, but remember that "good" retention varies significantly by product type and business model.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="User Journeys" icon="route" href="/reports/journey">
+    Understand what retained users do differently with Journey Reports
+  </Card>
+  <Card title="Goal Tracking" icon="bullseye" href="/reports/goal">
+    Track specific actions that correlate with better retention
+  </Card>
+</CardGroup>

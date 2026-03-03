@@ -1,0 +1,404 @@
+---
+title: Event Data
+description: Learn how to attach custom data to events and understand data structure and limitations.
+---
+
+Umami allows you to attach custom data to events, providing deeper insights into user behavior. Event data can be added using HTML attributes or the JavaScript API.
+
+## Adding Data with HTML Attributes
+
+Attach custom data to events using `data-umami-event-*` attributes:
+
+```html
+<button
+  data-umami-event="purchase"
+  data-umami-event-product="Pro Plan"
+  data-umami-event-price="29.99"
+  data-umami-event-currency="USD"
+>
+  Buy Now
+</button>
+```
+
+The tracker automatically extracts all attributes matching the pattern `data-umami-event-*` and includes them in the event payload.
+
+### How It Works
+
+When you click the button above, the tracker:
+
+1. Finds the `data-umami-event` attribute (event name: `purchase`)
+2. Scans for all `data-umami-event-*` attributes
+3. Extracts the property name from each attribute (e.g., `data-umami-event-product` → `product`)
+4. Creates an event data object:
+
+```javascript
+{
+  name: 'purchase',
+  data: {
+    product: 'Pro Plan',
+    price: '29.99',
+    currency: 'USD'
+  }
+}
+```
+
+<Info>
+  The regex pattern used to match attributes is `/data-umami-event-([\w-_]+)/`. Property names can contain letters, numbers, hyphens, and underscores.
+</Info>
+
+## Adding Data with JavaScript
+
+Pass an object as the second parameter to `umami.track()`:
+
+```javascript
+umami.track('purchase', {
+  product: 'Pro Plan',
+  price: 29.99,
+  currency: 'USD',
+  quantity: 1
+});
+```
+
+## Data Structure
+
+Event data accepts any JSON-compatible structure:
+
+```typescript
+interface EventData {
+  [key: string]: number | string | EventData | number[] | string[] | EventData[];
+}
+```
+
+### Supported Data Types
+
+<Tabs>
+  <Tab title="Strings">
+    ```javascript
+    umami.track('event', {
+      name: 'John Doe',
+      email: 'john@example.com',
+      plan: 'premium'
+    });
+    ```
+    
+    <Note>
+      Strings have a maximum length of **500 characters** and will be truncated if longer.
+    </Note>
+  </Tab>
+  
+  <Tab title="Numbers">
+    ```javascript
+    umami.track('event', {
+      price: 29.99,
+      quantity: 3,
+      discount: 0.15
+    });
+    ```
+    
+    <Note>
+      Numbers have a maximum precision of **4 decimal places**.
+    </Note>
+  </Tab>
+  
+  <Tab title="Arrays">
+    ```javascript
+    umami.track('event', {
+      tags: ['tech', 'news', 'update'],
+      scores: [95, 87, 92],
+      items: [
+        { id: 1, name: 'Item 1' },
+        { id: 2, name: 'Item 2' }
+      ]
+    });
+    ```
+    
+    <Note>
+      String arrays are converted to strings with a maximum length of **500 characters**.
+    </Note>
+  </Tab>
+  
+  <Tab title="Objects">
+    ```javascript
+    umami.track('event', {
+      user: {
+        id: 123,
+        name: 'John Doe',
+        preferences: {
+          theme: 'dark',
+          notifications: true
+        }
+      }
+    });
+    ```
+    
+    <Note>
+      Objects have a maximum of **50 properties**. Arrays are counted as 1 property.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Data Limitations
+
+To maintain performance, Umami enforces these limits on event data:
+
+| Type | Limitation | Behavior |
+|------|------------|----------|
+| **Strings** | Max 500 characters | Truncated |
+| **Numbers** | Max 4 decimal places | Rounded |
+| **Objects** | Max 50 properties | Excess ignored |
+| **Arrays** | Converted to string | Max 500 characters |
+
+<Warning>
+  Data exceeding these limits will be automatically truncated or modified. Plan your event structure accordingly.
+</Warning>
+
+## Common Data Patterns
+
+### E-commerce Events
+
+<CodeGroup>
+```javascript Product View
+umami.track('product-view', {
+  product_id: 'SKU-12345',
+  product_name: 'Wireless Headphones',
+  category: 'Electronics',
+  price: 79.99,
+  currency: 'USD',
+  in_stock: true
+});
+```
+
+```javascript Add to Cart
+umami.track('add-to-cart', {
+  product_id: 'SKU-12345',
+  product_name: 'Wireless Headphones',
+  quantity: 2,
+  price: 79.99,
+  cart_total: 159.98
+});
+```
+
+```javascript Purchase
+umami.track('purchase', {
+  order_id: 'ORD-98765',
+  total: 159.98,
+  currency: 'USD',
+  items_count: 2,
+  payment_method: 'credit_card',
+  shipping_method: 'express'
+});
+```
+</CodeGroup>
+
+### User Interactions
+
+<CodeGroup>
+```javascript Form Submission
+umami.track('form-submit', {
+  form_name: 'contact',
+  form_type: 'support',
+  fields_filled: 5,
+  time_spent: 45
+});
+```
+
+```javascript Video Interaction
+umami.track('video-play', {
+  video_id: 'demo-2024',
+  video_title: 'Product Demo',
+  duration: 120,
+  quality: '1080p',
+  autoplay: false
+});
+```
+
+```javascript Search
+umami.track('search', {
+  query: 'analytics dashboard',
+  results_count: 24,
+  filters_applied: ['date', 'category'],
+  search_type: 'full-text'
+});
+```
+</CodeGroup>
+
+### Feature Usage
+
+<CodeGroup>
+```javascript Feature Activation
+umami.track('feature-enabled', {
+  feature_name: 'dark_mode',
+  user_type: 'premium',
+  enabled_from: 'settings',
+  first_time: true
+});
+```
+
+```javascript Export Action
+umami.track('data-export', {
+  export_type: 'csv',
+  data_range: '30_days',
+  records_count: 1500,
+  file_size: '2.4mb'
+});
+```
+
+```javascript Integration
+umami.track('integration-connected', {
+  integration_type: 'slack',
+  integration_version: 'v2',
+  auto_configured: true,
+  channels_connected: 3
+});
+```
+</CodeGroup>
+
+## HTML Attribute Examples
+
+<CodeGroup>
+```html E-commerce Button
+<button
+  data-umami-event="add-to-cart"
+  data-umami-event-product-id="SKU-12345"
+  data-umami-event-product-name="Wireless Headphones"
+  data-umami-event-price="79.99"
+  data-umami-event-quantity="1"
+>
+  Add to Cart
+</button>
+```
+
+```html Download Link
+<a
+  href="/downloads/whitepaper.pdf"
+  download
+  data-umami-event="download"
+  data-umami-event-file-name="whitepaper"
+  data-umami-event-file-type="pdf"
+  data-umami-event-file-size="2.4mb"
+>
+  Download Whitepaper
+</a>
+```
+
+```html Social Share
+<button
+  data-umami-event="social-share"
+  data-umami-event-platform="twitter"
+  data-umami-event-content-type="article"
+  data-umami-event-content-id="12345"
+>
+  Share on Twitter
+</button>
+```
+
+```html CTA Button
+<a
+  href="/signup"
+  data-umami-event="cta-click"
+  data-umami-event-location="hero"
+  data-umami-event-variant="primary"
+  data-umami-event-text="Get Started Free"
+>
+  Get Started Free
+</a>
+```
+</CodeGroup>
+
+## Best Practices
+
+<Steps>
+  <Step title="Use consistent naming">
+    Choose a naming convention and stick to it:
+    
+    ```javascript
+    // Good - snake_case
+    umami.track('event', {
+      user_id: 123,
+      product_name: 'Item',
+      cart_total: 99.99
+    });
+    
+    // Good - camelCase
+    umami.track('event', {
+      userId: 123,
+      productName: 'Item',
+      cartTotal: 99.99
+    });
+    ```
+  </Step>
+  
+  <Step title="Keep data relevant">
+    Only include data you'll actually use for analysis:
+    
+    ```javascript
+    // Good - focused data
+    umami.track('signup', {
+      plan: 'premium',
+      referral_source: 'google'
+    });
+    
+    // Avoid - unnecessary data
+    umami.track('signup', {
+      plan: 'premium',
+      browser_plugins: [...],
+      screen_resolution: '1920x1080',
+      timezone: 'UTC-5'
+      // Already tracked automatically
+    });
+    ```
+  </Step>
+  
+  <Step title="Mind the limits">
+    Stay within data constraints:
+    
+    ```javascript
+    // Good - concise strings
+    umami.track('event', {
+      description: 'User completed checkout'
+    });
+    
+    // Avoid - very long strings
+    umami.track('event', {
+      description: 'Very long description that exceeds 500 characters...'
+      // Will be truncated
+    });
+    ```
+  </Step>
+  
+  <Step title="Structure nested data carefully">
+    Remember the 50 property limit:
+    
+    ```javascript
+    // Good - within limits
+    umami.track('event', {
+      order: {
+        id: 123,
+        total: 99.99,
+        items: [...] // Counts as 1 property
+      }
+    });
+    
+    // Avoid - too many properties
+    umami.track('event', {
+      prop1: 1, prop2: 2, /* ... */ prop51: 51
+      // Properties beyond 50 will be ignored
+    });
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+  For complex data that exceeds limits, consider tracking multiple events or summarizing the data before sending.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Tracker Functions" icon="function" href="/tracking/tracker-functions">
+    Explore all available tracker functions
+  </Card>
+  <Card title="User Identification" icon="user" href="/tracking/identify">
+    Learn how to identify and track users
+  </Card>
+</CardGroup>

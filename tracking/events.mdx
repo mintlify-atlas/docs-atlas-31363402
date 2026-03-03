@@ -1,0 +1,261 @@
+---
+title: Event Tracking
+description: Track user interactions and custom events on your website using HTML attributes.
+---
+
+Umami allows you to track custom events without writing any JavaScript. Simply add data attributes to your HTML elements, and the tracker will automatically capture user interactions.
+
+## Basic Event Tracking
+
+To track an event, add the `data-umami-event` attribute to any HTML element:
+
+```html
+<button data-umami-event="signup-button">Sign Up</button>
+```
+
+When a user clicks this button, Umami will track an event named `signup-button`.
+
+<Info>
+  Event names will be truncated past 50 characters.
+</Info>
+
+## How It Works
+
+The tracker automatically:
+1. Listens for click events on all elements with the `data-umami-event` attribute
+2. Captures clicks on the element itself or its closest parent `<a>` or `<button>` element
+3. Sends the event name and any associated data to your Umami instance
+
+## Tracking Different Elements
+
+<Tabs>
+  <Tab title="Buttons">
+    Track button clicks:
+    
+    ```html
+    <button data-umami-event="subscribe-newsletter">Subscribe</button>
+    <button data-umami-event="download-app">Download</button>
+    <button data-umami-event="play-video">Play Video</button>
+    ```
+  </Tab>
+  
+  <Tab title="Links">
+    Track link clicks:
+    
+    ```html
+    <a href="/pricing" data-umami-event="view-pricing">View Pricing</a>
+    <a href="/docs" data-umami-event="open-docs">Documentation</a>
+    <a href="https://external.com" data-umami-event="external-link" target="_blank">
+      Visit Partner
+    </a>
+    ```
+    
+    <Note>
+      For internal links (non-`target="_blank"`), the tracker will wait for the event to be sent before navigating to prevent data loss.
+    </Note>
+  </Tab>
+  
+  <Tab title="Forms">
+    Track form submissions:
+    
+    ```html
+    <form onsubmit="return handleSubmit()">
+      <input type="email" name="email" />
+      <button type="submit" data-umami-event="submit-contact-form">
+        Submit
+      </button>
+    </form>
+    ```
+  </Tab>
+  
+  <Tab title="Custom Elements">
+    Track any clickable element:
+    
+    ```html
+    <div class="card" data-umami-event="click-card">
+      <h3>Feature Card</h3>
+      <p>Click anywhere on this card</p>
+    </div>
+    
+    <img src="banner.jpg" data-umami-event="click-banner" alt="Banner" />
+    ```
+  </Tab>
+</Tabs>
+
+## Navigation Handling
+
+The tracker intelligently handles navigation to ensure events are recorded:
+
+### Internal Links
+
+For internal links without `target="_blank"`, the tracker:
+1. Prevents default navigation
+2. Sends the event to Umami
+3. Completes navigation after the event is tracked
+
+```html
+<a href="/dashboard" data-umami-event="open-dashboard">Go to Dashboard</a>
+```
+
+### External Links
+
+For external links or links that open in new tabs, the tracker allows normal navigation:
+
+```html
+<a href="https://github.com" data-umami-event="visit-github" target="_blank">
+  View on GitHub
+</a>
+```
+
+### Special Cases
+
+The tracker also handles:
+- Command/Ctrl + Click (opens in new tab)
+- Shift + Click (opens in new window)
+- Middle mouse button clicks
+- Links with `target="_top"`
+
+## Event Naming Best Practices
+
+<Steps>
+  <Step title="Use descriptive names">
+    Choose names that clearly describe the action:
+    
+    ```html
+    <!-- Good -->
+    <button data-umami-event="subscribe-newsletter">Subscribe</button>
+    <button data-umami-event="download-whitepaper">Download</button>
+    
+    <!-- Avoid -->
+    <button data-umami-event="button1">Subscribe</button>
+    <button data-umami-event="click">Download</button>
+    ```
+  </Step>
+  
+  <Step title="Use kebab-case">
+    Separate words with hyphens for consistency:
+    
+    ```html
+    <button data-umami-event="view-pricing-page">View Pricing</button>
+    ```
+  </Step>
+  
+  <Step title="Keep names concise">
+    Remember that event names are truncated at 50 characters:
+    
+    ```html
+    <!-- Good (32 characters) -->
+    <button data-umami-event="subscribe-monthly-newsletter">Subscribe</button>
+    
+    <!-- Too long (will be truncated) -->
+    <button data-umami-event="subscribe-to-monthly-newsletter-for-product-updates">Subscribe</button>
+    ```
+  </Step>
+  
+  <Step title="Group related events">
+    Use prefixes to group related events:
+    
+    ```html
+    <button data-umami-event="cta-header-signup">Sign Up</button>
+    <button data-umami-event="cta-footer-signup">Sign Up</button>
+    <button data-umami-event="cta-modal-signup">Sign Up</button>
+    ```
+  </Step>
+</Steps>
+
+## Adding Event Data
+
+To attach additional data to your events, use the `data-umami-event-*` attributes:
+
+```html
+<button
+  data-umami-event="purchase"
+  data-umami-event-product="Pro Plan"
+  data-umami-event-price="29.99"
+>
+  Buy Now
+</button>
+```
+
+<Card title="Learn More" icon="database" href="/tracking/event-data">
+  Learn how to attach custom data to events →
+</Card>
+
+## Complete Examples
+
+<CodeGroup>
+```html E-commerce Button
+<button
+  data-umami-event="add-to-cart"
+  data-umami-event-product="Laptop"
+  data-umami-event-category="Electronics"
+  data-umami-event-price="999"
+>
+  Add to Cart
+</button>
+```
+
+```html Call-to-Action Link
+<a
+  href="/signup"
+  data-umami-event="cta-click"
+  data-umami-event-location="hero"
+  data-umami-event-variant="primary"
+>
+  Get Started Free
+</a>
+```
+
+```html Video Player
+<div class="video-player">
+  <button
+    data-umami-event="video-play"
+    data-umami-event-video="product-demo"
+    data-umami-event-duration="120"
+  >
+    Play Video
+  </button>
+</div>
+```
+
+```html Download Link
+<a
+  href="/files/whitepaper.pdf"
+  download
+  data-umami-event="download"
+  data-umami-event-file="whitepaper"
+  data-umami-event-type="pdf"
+>
+  Download PDF
+</a>
+```
+</CodeGroup>
+
+## When to Use HTML vs JavaScript
+
+<CardGroup cols={2}>
+  <Card title="Use HTML Attributes When" icon="code">
+    - Tracking simple click events
+    - Working with static HTML
+    - You want declarative tracking
+    - No dynamic data is needed
+  </Card>
+  
+  <Card title="Use JavaScript API When" icon="function">
+    - Tracking non-click events
+    - Data comes from application state
+    - Using frameworks like React
+    - Need programmatic control
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Custom Events" icon="code" href="/tracking/custom-events">
+    Track events programmatically using the JavaScript API
+  </Card>
+  <Card title="Event Data" icon="database" href="/tracking/event-data">
+    Learn how to attach custom data to your events
+  </Card>
+</CardGroup>

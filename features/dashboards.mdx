@@ -1,0 +1,395 @@
+---
+title: Dashboards
+description: View comprehensive analytics data and gain insights into your website's performance
+---
+
+The website dashboard is your central hub for analytics insights. It provides an at-a-glance view of your website's performance with key metrics, charts, and detailed breakdowns.
+
+## Dashboard Overview
+
+Each website has a dedicated dashboard showing analytics across multiple dimensions:
+
+<Steps>
+  <Step title="Select Website">
+    Choose a website from your websites list.
+  </Step>
+  
+  <Step title="View Dashboard">
+    The main dashboard loads with your selected date range.
+  </Step>
+  
+  <Step title="Explore Data">
+    Scroll through different sections to analyze various aspects of your traffic.
+  </Step>
+</Steps>
+
+## Key Metrics Overview
+
+The metrics bar at the top displays your most important statistics:
+
+<CardGroup cols={3}>
+  <Card title="Visitors" icon="users">
+    **Unique Visitors**: The number of distinct individuals who visited your website.
+    
+    Shows change compared to the previous period.
+  </Card>
+  
+  <Card title="Visits" icon="repeat">
+    **Total Visits**: The number of sessions on your website.
+    
+    A single visitor can have multiple visits.
+  </Card>
+  
+  <Card title="Page Views" icon="file-text">
+    **Views**: Total number of pages viewed.
+    
+    Includes multiple views of the same page.
+  </Card>
+</CardGroup>
+
+<CardGroup cols={2}>
+  <Card title="Bounce Rate" icon="trending-down">
+    **Percentage** of single-page visits.
+    
+    Lower is typically better, indicating engagement.
+  </Card>
+  
+  <Card title="Visit Duration" icon="clock">
+    **Average time** spent per visit.
+    
+    Measured in minutes and seconds.
+  </Card>
+</CardGroup>
+
+<Info>
+  All metrics show a trend indicator (up/down arrow) comparing to the previous period, helping you quickly identify changes.
+</Info>
+
+## Traffic Chart
+
+Visualize your traffic over time:
+
+### Chart Features
+
+- **Time-based visualization**: Line chart showing visitor trends
+- **Hover for details**: See exact numbers for any time period
+- **Automatic granularity**: Adjusts based on your date range
+- **Multiple metrics**: Toggle between visitors, views, and visits
+
+### Time Granularity
+
+The chart automatically adjusts its granularity:
+
+| Date Range | Granularity |
+|------------|-------------|
+| 1 day | Hourly |
+| 7 days | Daily |
+| 30 days | Daily |
+| 90+ days | Weekly |
+| 1 year+ | Monthly |
+
+## Date Range Selection
+
+Customize the time period for your analysis:
+
+<Accordion title="Quick Ranges">
+  - **Last 24 hours**: Real-time performance
+  - **Last 7 days**: Weekly trends
+  - **Last 30 days**: Monthly overview
+  - **Last 90 days**: Quarterly analysis
+  - **Last 12 months**: Yearly comparison
+  - **All time**: Complete history
+</Accordion>
+
+<Accordion title="Custom Range">
+  Select specific start and end dates for precise analysis:
+  - Click the date range selector
+  - Choose start date
+  - Choose end date
+  - Apply the range
+</Accordion>
+
+<Tip>
+  Use the comparison toggle to see how current performance compares to the previous period.
+</Tip>
+
+## Content Analytics
+
+Understand which pages and content perform best:
+
+### Top Pages
+
+See your most visited pages:
+- **URL Path**: The page's URL
+- **Page Title**: The page's title tag
+- **Views**: Total page views
+- **Visitors**: Unique visitors to the page
+- **Percentage**: Share of total traffic
+
+<Note>
+  Click any page to see detailed analytics for just that page, including entry/exit rates.
+</Note>
+
+### Entry Pages
+
+Pages where visitors start their journey:
+- Shows first page visited in a session
+- Indicates traffic landing pages
+- Useful for understanding acquisition
+
+### Exit Pages
+
+Pages where visitors leave your site:
+- Shows last page before leaving
+- High exit rates may indicate issues
+- Normal for confirmation/thank you pages
+
+## Traffic Sources
+
+Discover where your visitors come from:
+
+<CardGroup cols={2}>
+  <Card title="Referrers" icon="link">
+    **External sources** sending traffic:
+    - Social media platforms
+    - Other websites
+    - Link aggregators
+    - Partner sites
+  </Card>
+  
+  <Card title="Direct Traffic" icon="arrow-right">
+    **Visitors who arrive** without a referrer:
+    - Typed URL directly
+    - Bookmarks
+    - Email links (non-tracked)
+    - Mobile apps
+  </Card>
+</CardGroup>
+
+### UTM Parameters
+
+Track marketing campaigns with UTM parameters:
+- **Source**: Where traffic originates (e.g., google, newsletter)
+- **Medium**: Type of traffic (e.g., cpc, email, social)
+- **Campaign**: Specific campaign name
+- **Content**: Ad variation
+- **Term**: Keywords (for paid search)
+
+<Info>
+  Learn more about campaign tracking in the [UTM Reports](/reports/utm) section.
+</Info>
+
+## Visitor Information
+
+### Geographic Data
+
+<CardGroup cols={2}>
+  <Card title="Countries" icon="globe">
+    See where your visitors are located:
+    - Country name and flag
+    - Visitor count per country
+    - Interactive world map
+  </Card>
+  
+  <Card title="Regions & Cities" icon="map-pin">
+    More detailed location data:
+    - State/province information
+    - City-level tracking
+    - Regional distributions
+  </Card>
+</CardGroup>
+
+### Device Information
+
+<Accordion title="Browsers">
+  Which browsers your visitors use:
+  - Chrome, Firefox, Safari, Edge
+  - Browser versions
+  - Market share percentages
+</Accordion>
+
+<Accordion title="Operating Systems">
+  Operating systems breakdown:
+  - Windows, macOS, Linux
+  - iOS, Android, Chrome OS
+  - Version information
+</Accordion>
+
+<Accordion title="Device Types">
+  How visitors access your site:
+  - Desktop computers
+  - Mobile phones
+  - Tablets
+  - Other devices
+</Accordion>
+
+<Accordion title="Screen Sizes">
+  Screen resolution data:
+  - Common resolutions
+  - Mobile vs desktop screens
+  - Useful for responsive design
+</Accordion>
+
+## Language & Localization
+
+Understand your audience's language preferences:
+- Browser language settings
+- Language distribution
+- Regional language variants
+
+<Tip>
+  Use language data to prioritize translation efforts and localization strategies.
+</Tip>
+
+## Custom Events
+
+Track user interactions beyond page views:
+
+### Event Analytics
+
+- **Event Names**: Custom events you've defined
+- **Event Count**: How many times each event fired
+- **Unique Triggers**: Number of visitors triggering the event
+- **Event Properties**: Custom data attached to events
+
+<CardGroup cols={2}>
+  <Card title="Common Events" icon="zap">
+    Typical events to track:
+    - Button clicks
+    - Form submissions
+    - Video plays
+    - Downloads
+    - Scroll depth
+  </Card>
+  
+  <Card title="E-commerce Events" icon="shopping-cart">
+    Track business metrics:
+    - Add to cart
+    - Checkout started
+    - Purchase completed
+    - Product views
+  </Card>
+</CardGroup>
+
+## Dashboard Panels
+
+The dashboard is organized into collapsible panels:
+
+### Panel Features
+
+- **Expand/Collapse**: Toggle individual panels
+- **Sorting**: Click headers to sort data
+- **Filtering**: Apply filters to any panel
+- **Details**: Click rows for more information
+
+### Customization
+
+<Info>
+  Panel visibility and order are remembered between sessions for a personalized experience.
+</Info>
+
+## Filtering Dashboard Data
+
+Apply filters to analyze specific segments:
+
+<Steps>
+  <Step title="Click Filter Button">
+    Open the filter panel in the dashboard controls.
+  </Step>
+  
+  <Step title="Add Filter Criteria">
+    Choose from various filter options:
+    - URL path
+    - Referrer
+    - Browser
+    - OS
+    - Device
+    - Country
+    - Language
+    - Custom events
+  </Step>
+  
+  <Step title="Apply Filters">
+    All dashboard panels update to show filtered data.
+  </Step>
+</Steps>
+
+<Note>
+  Learn more about advanced filtering in the [Filters](/features/filters) documentation.
+</Note>
+
+## Comparison Mode
+
+Compare two time periods side by side:
+
+<Steps>
+  <Step title="Enable Comparison">
+    Toggle the comparison switch in the date picker.
+  </Step>
+  
+  <Step title="Select Periods">
+    Choose your current and comparison periods.
+  </Step>
+  
+  <Step title="Analyze Changes">
+    See percentage changes and trend indicators for all metrics.
+  </Step>
+</Steps>
+
+### Comparison Use Cases
+
+- **Year-over-year**: Compare same period last year
+- **Before/After**: Measure impact of changes
+- **Campaign Performance**: Compare campaign periods
+- **Seasonal Trends**: Identify seasonal patterns
+
+## Exporting Dashboard Data
+
+Export your analytics data for external analysis:
+
+<Accordion title="Export Options">
+  - **CSV Export**: Download data as spreadsheet
+  - **Date Range**: Export respects current filters
+  - **All Panels**: Each panel can be exported separately
+</Accordion>
+
+## Best Practices
+
+- Review your dashboard regularly to identify trends
+- Set up consistent date ranges for comparison
+- Use filters to analyze specific user segments
+- Pay attention to bounce rate on key landing pages
+- Monitor traffic sources to optimize marketing spend
+- Track custom events for business-critical actions
+- Compare performance over similar time periods
+
+## Dashboard Performance Tips
+
+<Warning>
+  Very large date ranges (1+ years) may take longer to load. Use appropriate date ranges for your analysis needs.
+</Warning>
+
+- Start with shorter date ranges for faster loading
+- Use filters to reduce data volume
+- Close unused panels to improve performance
+- Consider creating specific reports for deep analysis
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Create Reports" href="/features/reports">
+    Build custom reports for detailed analysis
+  </Card>
+  
+  <Card title="Set Up Filters" href="/features/filters">
+    Learn advanced filtering techniques
+  </Card>
+  
+  <Card title="Track Events" href="/tracking/events">
+    Implement custom event tracking
+  </Card>
+  
+  <Card title="Real-time View" href="/features/realtime">
+    Monitor live visitor activity
+  </Card>
+</CardGroup>

@@ -1,0 +1,174 @@
+---
+title: 'Add Team Member'
+description: 'Add a user to a team'
+---
+
+## Add Team Member
+
+Add an existing user to a team with a specific role.
+
+### Endpoint
+
+```
+POST /api/teams/{teamId}/users
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="teamId" type="string" required>
+  Team UUID
+</ParamField>
+
+### Request Body
+
+<ParamField body="userId" type="string" required>
+  UUID of the user to add to the team
+</ParamField>
+
+<ParamField body="role" type="string" required>
+  Role to assign to the user. Must be one of:
+  - `team-member` - Can view and edit team resources
+  - `team-view-only` - Read-only access to team resources
+  - `team-manager` - Full permissions to manage team
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Team user relationship UUID
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  User UUID
+</ResponseField>
+
+<ResponseField name="teamId" type="string">
+  Team UUID
+</ResponseField>
+
+<ResponseField name="role" type="string">
+  Assigned role
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 timestamp when user was added
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/teams/660e8400-e29b-41d4-a716-446655440001/users \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "bb0e8400-e29b-41d4-a716-446655440006",
+    "role": "team-member"
+  }'
+```
+
+```javascript JavaScript
+const teamId = '660e8400-e29b-41d4-a716-446655440001';
+const userId = 'bb0e8400-e29b-41d4-a716-446655440006';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/teams/${teamId}/users`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      userId: userId,
+      role: 'team-member',
+    }),
+  }
+);
+
+const member = await response.json();
+```
+
+```python Python
+import requests
+
+team_id = '660e8400-e29b-41d4-a716-446655440001'
+user_id = 'bb0e8400-e29b-41d4-a716-446655440006'
+
+response = requests.post(
+    f'https://your-umami-instance.com/api/teams/{team_id}/users',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'},
+    json={
+        'userId': user_id,
+        'role': 'team-member'
+    }
+)
+
+member = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "id": "cc0e8400-e29b-41d4-a716-446655440007",
+  "userId": "bb0e8400-e29b-41d4-a716-446655440006",
+  "teamId": "660e8400-e29b-41d4-a716-446655440001",
+  "role": "team-member",
+  "createdAt": "2024-03-15T14:30:00.000Z"
+}
+```
+
+### Team Roles
+
+<ResponseField name="team-manager">
+  Full permissions including:
+  - Manage team settings
+  - Add/remove team members
+  - Create/edit/delete team websites
+  - View all team analytics
+</ResponseField>
+
+<ResponseField name="team-member">
+  Standard permissions including:
+  - View team websites and analytics
+  - Edit team websites
+  - Cannot manage team members or settings
+</ResponseField>
+
+<ResponseField name="team-view-only">
+  Read-only permissions:
+  - View team websites and analytics
+  - Cannot edit anything
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="400" type="error">
+  Bad Request - User is already a member of the team
+</ResponseField>
+
+<ResponseField name="401" type="error">
+  Unauthorized - You must be the owner/manager of this team
+</ResponseField>
+
+<ResponseField name="404" type="error">
+  Not Found - Team or user does not exist
+</ResponseField>
+
+### Permissions
+
+Only team owners and managers can add new members to the team.
+
+<Note>
+  The user must already exist in the Umami system. You cannot create new user accounts through this endpoint.
+</Note>

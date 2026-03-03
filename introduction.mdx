@@ -1,0 +1,142 @@
+---
+title: Introduction
+description: Umami is a simple, fast, privacy-focused alternative to Google Analytics
+---
+
+# Welcome to Umami
+
+Umami is a simple, fast, privacy-focused alternative to Google Analytics. Track your website analytics without compromising your visitors' privacy.
+
+<CardGroup cols={2}>
+  <Card
+    title="Quickstart"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get up and running with Umami in minutes
+  </Card>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation/docker"
+  >
+    Deploy Umami with Docker, Railway, Vercel, or from source
+  </Card>
+  <Card
+    title="Tracking Script"
+    icon="code"
+    href="/quickstart#install-tracking-script"
+  >
+    Add the tracking script to your website
+  </Card>
+  <Card
+    title="Features"
+    icon="star"
+    href="/features"
+  >
+    Explore all Umami features and capabilities
+  </Card>
+</CardGroup>
+
+## What is Umami?
+
+Umami is a self-hosted web analytics solution that provides you with valuable insights about your website traffic while respecting user privacy. Built with modern technologies like Next.js and PostgreSQL, Umami offers a clean, intuitive interface for tracking and analyzing your website metrics.
+
+### Key Features
+
+<CardGroup cols={2}>
+  <Card title="Privacy-Focused" icon="shield">
+    No cookies, GDPR compliant, and respects user privacy by default
+  </Card>
+  <Card title="Lightweight" icon="feather">
+    Minimal tracking script (< 2KB) that won't slow down your website
+  </Card>
+  <Card title="Self-Hosted" icon="server">
+    Own your data completely - no third parties involved
+  </Card>
+  <Card title="Open Source" icon="code-branch">
+    MIT licensed and community-driven development
+  </Card>
+</CardGroup>
+
+## Why Choose Umami?
+
+### vs. Google Analytics
+
+<Accordion title="Privacy First">
+  Umami doesn't use cookies and doesn't collect personal information. All data is anonymized, making it GDPR compliant out of the box. Google Analytics, on the other hand, tracks users across websites and requires cookie consent banners.
+</Accordion>
+
+<Accordion title="Simplicity">
+  Umami provides a clean, focused interface showing the metrics that matter. No overwhelming dashboards with hundreds of options. Just the essential data you need to understand your website traffic.
+</Accordion>
+
+<Accordion title="Data Ownership">
+  With Umami, you own 100% of your data. It's stored in your own database and never leaves your infrastructure. Google Analytics stores data on Google's servers and can use it for their own purposes.
+</Accordion>
+
+<Accordion title="Performance">
+  The Umami tracking script is less than 2KB, compared to Google Analytics which is over 45KB. This means faster page loads and better user experience.
+</Accordion>
+
+### Core Advantages
+
+<Info>
+  **No Cookie Banners Required**: Umami doesn't use cookies, so you can skip the annoying cookie consent banners that hurt user experience and conversion rates.
+</Info>
+
+<Note>
+  **Real-Time Analytics**: See your website traffic as it happens with real-time updates and live visitor tracking.
+</Note>
+
+<Tip>
+  **Simple Setup**: Get started in minutes with Docker Compose, or deploy to platforms like Railway and Vercel with one click.
+</Tip>
+
+## What You Can Track
+
+Umami provides comprehensive analytics including:
+
+- **Pageviews**: Track every page visit with automatic path detection
+- **Unique Visitors**: Count distinct visitors without invasive tracking
+- **Referrers**: See where your traffic is coming from
+- **Browsers & Devices**: Understand what technology your visitors use
+- **Countries & Regions**: Geographic distribution of your audience
+- **Custom Events**: Track button clicks, form submissions, and custom interactions
+- **Real-time Data**: Monitor your traffic as it happens
+- **Multi-Website Support**: Manage multiple websites from one dashboard
+
+## Technology Stack
+
+Umami is built with modern, reliable technologies:
+
+- **Frontend**: Next.js 15, React 19
+- **Backend**: Node.js 18+
+- **Database**: PostgreSQL 12.14+ (primary), ClickHouse (optional for high-volume)
+- **Deployment**: Docker, Vercel, Railway, or manual deployment
+
+## Getting Started
+
+<Steps>
+  <Step title="Choose Your Installation Method">
+    Select from Docker (recommended), Railway, Vercel, or source installation based on your needs.
+  </Step>
+  <Step title="Set Up Your Database">
+    Configure a PostgreSQL database connection for storing your analytics data.
+  </Step>
+  <Step title="Deploy Umami">
+    Follow the installation guide for your chosen platform to deploy Umami.
+  </Step>
+  <Step title="Add Your Website">
+    Log in with the default credentials (username: `admin`, password: `umami`) and add your first website.
+  </Step>
+  <Step title="Install Tracking Script">
+    Add the tracking script to your website and start collecting data.
+  </Step>
+</Steps>
+
+<Warning>
+  **Security First**: Make sure to change the default admin password immediately after your first login.
+</Warning>
+
+Ready to get started? Head over to the [Quickstart Guide](/quickstart) to deploy Umami in minutes.

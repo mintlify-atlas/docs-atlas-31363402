@@ -1,0 +1,302 @@
+---
+title: Teams
+description: Collaborate with team members and manage access to websites with role-based permissions
+---
+
+Teams enable multiple users to collaborate on website analytics. Create teams to share access to websites, links, and pixels with team members while controlling permissions through role-based access.
+
+## Creating a Team
+
+Set up a team to collaborate with others:
+
+<Steps>
+  <Step title="Navigate to Teams">
+    Click on **Teams** in the main navigation.
+  </Step>
+  
+  <Step title="Add Team">
+    Click the **Add Team** button.
+  </Step>
+  
+  <Step title="Enter Team Name">
+    Provide a descriptive name for your team (e.g., "Marketing Team", "Development").
+  </Step>
+  
+  <Step title="Configure Team">
+    After creation, you can add members, assign websites, and configure settings.
+  </Step>
+</Steps>
+
+## Team Roles
+
+Umami uses role-based access control to manage team member permissions:
+
+<CardGroup cols={3}>
+  <Card title="Manager" icon="crown">
+    Full control over the team:
+    - Add/remove members
+    - Assign/modify roles
+    - Manage team websites
+    - Access all analytics
+    - Configure team settings
+  </Card>
+  
+  <Card title="Member" icon="user">
+    Standard team access:
+    - View all team websites
+    - Create and edit reports
+    - Manage segments and filters
+    - Cannot manage team members
+  </Card>
+  
+  <Card title="View Only" icon="eye">
+    Read-only access:
+    - View website analytics
+    - View existing reports
+    - Cannot create or edit content
+    - Cannot access settings
+  </Card>
+</CardGroup>
+
+## Managing Team Members
+
+### Adding Members
+
+Invite users to join your team:
+
+<Steps>
+  <Step title="Open Team Settings">
+    Navigate to your team page and click on the **Members** tab.
+  </Step>
+  
+  <Step title="Generate Access Code">
+    Create a unique access code that members can use to join.
+  </Step>
+  
+  <Step title="Share Access Code">
+    Provide the access code to team members through your preferred communication channel.
+  </Step>
+  
+  <Step title="Members Join">
+    Team members use the **Join Team** button and enter the access code.
+  </Step>
+</Steps>
+
+<Note>
+  Access codes can be regenerated at any time to revoke old invitations.
+</Note>
+
+### Changing Member Roles
+
+Update permissions for existing team members:
+
+<Steps>
+  <Step title="Locate Member">
+    Find the team member in the members list.
+  </Step>
+  
+  <Step title="Edit Role">
+    Click the edit icon next to their name.
+  </Step>
+  
+  <Step title="Select New Role">
+    Choose from Manager, Member, or View Only.
+  </Step>
+  
+  <Step title="Save Changes">
+    Confirm the role change.
+  </Step>
+</Steps>
+
+### Removing Members
+
+Remove users from the team:
+
+<Warning>
+  Removed members will immediately lose access to all team websites and resources.
+</Warning>
+
+<Steps>
+  <Step title="Open Members List">
+    Navigate to the team's member management page.
+  </Step>
+  
+  <Step title="Remove Member">
+    Click the remove button next to the member's name.
+  </Step>
+  
+  <Step title="Confirm Removal">
+    Confirm the action to remove them from the team.
+  </Step>
+</Steps>
+
+## Team Websites
+
+Manage websites owned by the team:
+
+### Adding Websites to Teams
+
+**Option 1: Create New Website**
+- When creating a website, select the team from the dropdown
+- The website will be owned by the team
+
+**Option 2: Transfer Existing Website**
+- Go to website settings
+- Use the transfer function to move it to a team
+- Confirm the transfer
+
+### Website Access
+
+Team member access to websites depends on their role:
+- **Managers**: Full control including deletion and transfer
+- **Members**: Can view analytics and create reports
+- **View Only**: Can only view existing analytics and reports
+
+### Removing Websites from Teams
+
+<Steps>
+  <Step title="Open Team Websites">
+    Navigate to the team's website management page.
+  </Step>
+  
+  <Step title="Remove Website">
+    Click the remove button next to the website.
+  </Step>
+  
+  <Step title="Choose Action">
+    Decide whether to:
+    - Transfer to another owner
+    - Delete the website entirely
+  </Step>
+</Steps>
+
+## Team Settings
+
+Configure your team's preferences:
+
+### Basic Settings
+
+- **Team Name**: Update the display name
+- **Logo**: Upload a custom team logo
+- **Access Code**: Generate or regenerate the join code
+
+### Access Management
+
+<Accordion title="Access Code">
+  A unique code that allows users to join your team. Regenerate this code to invalidate previous invitations.
+</Accordion>
+
+<Accordion title="Team Deletion">
+  Permanently delete the team. All team websites will need to be reassigned or will be deleted.
+  
+  <Warning>
+    This action cannot be undone. Ensure all important data is backed up.
+  </Warning>
+</Accordion>
+
+## Joining a Team
+
+As a user, join an existing team:
+
+<Steps>
+  <Step title="Get Access Code">
+    Obtain the team access code from a team manager.
+  </Step>
+  
+  <Step title="Navigate to Teams">
+    Go to the Teams page.
+  </Step>
+  
+  <Step title="Click Join Team">
+    Click the **Join Team** button.
+  </Step>
+  
+  <Step title="Enter Code">
+    Input the access code and submit.
+  </Step>
+  
+  <Step title="Access Team Resources">
+    You'll immediately gain access to team websites based on your assigned role.
+  </Step>
+</Steps>
+
+## Leaving a Team
+
+Remove yourself from a team:
+
+<Steps>
+  <Step title="Open Team Page">
+    Navigate to the team you want to leave.
+  </Step>
+  
+  <Step title="Leave Team">
+    Click the **Leave Team** button.
+  </Step>
+  
+  <Step title="Confirm Action">
+    Confirm that you want to leave the team.
+  </Step>
+</Steps>
+
+<Info>
+  After leaving, you'll lose access to all team resources. You can rejoin if you have the access code.
+</Info>
+
+## Best Practices
+
+- Use descriptive team names that reflect their purpose
+- Assign the minimum necessary permissions to team members
+- Regularly review team membership and remove inactive users
+- Regenerate access codes periodically for security
+- Create separate teams for different departments or projects
+- Document your team structure and role assignments
+
+## Team vs Personal Websites
+
+<CardGroup cols={2}>
+  <Card title="Team Websites">
+    **Best for:**
+    - Shared company properties
+    - Client projects
+    - Collaborative analytics
+    - Multiple stakeholders
+    
+    **Features:**
+    - Role-based access
+    - Multiple managers
+    - Centralized management
+  </Card>
+  
+  <Card title="Personal Websites">
+    **Best for:**
+    - Individual projects
+    - Personal blogs
+    - Testing and development
+    - Full ownership control
+    
+    **Features:**
+    - Single owner
+    - Complete control
+    - Can transfer later
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Add Team Websites" href="/features/websites">
+    Create or transfer websites to your team
+  </Card>
+  
+  <Card title="Manage Members" icon="users">
+    Invite collaborators and assign roles
+  </Card>
+  
+  <Card title="Team Links" href="/features/links">
+    Create tracked links for your team
+  </Card>
+  
+  <Card title="Team Pixels" href="/features/pixels">
+    Set up tracking pixels for campaigns
+  </Card>
+</CardGroup>

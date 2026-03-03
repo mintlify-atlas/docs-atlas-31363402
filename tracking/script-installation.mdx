@@ -1,0 +1,218 @@
+---
+title: Script Installation
+description: Learn how to install the Umami tracking script on your website.
+---
+
+The Umami tracking script is a lightweight JavaScript snippet that needs to be added to your website. Once installed, it will automatically start tracking page views and events.
+
+## Basic Installation
+
+Add the following script tag to your website's HTML, typically in the `<head>` section or before the closing `</body>` tag:
+
+```html
+<script
+  defer
+  src="https://cloud.umami.is/script.js"
+  data-website-id="your-website-id"
+></script>
+```
+
+<Info>
+  Replace `your-website-id` with the unique ID provided when you created your website in Umami.
+</Info>
+
+### Required Attributes
+
+| Attribute | Description |
+|-----------|-------------|
+| `data-website-id` | Your unique website identifier (UUID format) |
+
+<Warning>
+  The script will not function without a valid `data-website-id`. Make sure to get this ID from your Umami dashboard.
+</Warning>
+
+## Self-Hosted Installation
+
+If you're running a self-hosted Umami instance, you need to specify your server URL:
+
+```html
+<script
+  defer
+  src="https://your-umami-instance.com/script.js"
+  data-website-id="your-website-id"
+  data-host-url="https://your-umami-instance.com"
+></script>
+```
+
+<Tip>
+  The `data-host-url` attribute tells the tracker where to send analytics data. This is only needed for self-hosted instances.
+</Tip>
+
+## Installation by Platform
+
+<Tabs>
+  <Tab title="HTML / Static Sites">
+    Add the script to your HTML template:
+    
+    ```html
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>My Website</title>
+        <script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="b59e9c65-ae32-47f1-8400-119fcf4861c4"
+        ></script>
+      </head>
+      <body>
+        <!-- Your content -->
+      </body>
+    </html>
+    ```
+  </Tab>
+  
+  <Tab title="React">
+    Add the script to your `public/index.html` or use a library like `react-helmet`:
+    
+    ```jsx
+    import { Helmet } from 'react-helmet';
+    
+    function App() {
+      return (
+        <>
+          <Helmet>
+            <script
+              defer
+              src="https://cloud.umami.is/script.js"
+              data-website-id="b59e9c65-ae32-47f1-8400-119fcf4861c4"
+            />
+          </Helmet>
+          {/* Your app content */}
+        </>
+      );
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Next.js">
+    Add the script to your `_app.js` or `_app.tsx` using `next/script`:
+    
+    ```jsx
+    import Script from 'next/script';
+    
+    function MyApp({ Component, pageProps }) {
+      return (
+        <>
+          <Script
+            src="https://cloud.umami.is/script.js"
+            data-website-id="b59e9c65-ae32-47f1-8400-119fcf4861c4"
+            strategy="afterInteractive"
+          />
+          <Component {...pageProps} />
+        </>
+      );
+    }
+    
+    export default MyApp;
+    ```
+  </Tab>
+  
+  <Tab title="Vue">
+    Add the script to your `public/index.html`:
+    
+    ```html
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>My Vue App</title>
+        <script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="b59e9c65-ae32-47f1-8400-119fcf4861c4"
+        ></script>
+      </head>
+      <body>
+        <div id="app"></div>
+      </body>
+    </html>
+    ```
+  </Tab>
+  
+  <Tab title="WordPress">
+    Add the script to your theme's `header.php` file before the closing `</head>` tag, or use a plugin like "Insert Headers and Footers":
+    
+    ```html
+    <script
+      defer
+      src="https://cloud.umami.is/script.js"
+      data-website-id="b59e9c65-ae32-47f1-8400-119fcf4861c4"
+    ></script>
+    <?php wp_head(); ?>
+    ```
+  </Tab>
+</Tabs>
+
+## Script Loading Best Practices
+
+<Steps>
+  <Step title="Use the defer attribute">
+    Always include the `defer` attribute to ensure the script doesn't block page rendering:
+    
+    ```html
+    <script defer src="https://cloud.umami.is/script.js" ...></script>
+    ```
+  </Step>
+  
+  <Step title="Place in the head section">
+    For best results, add the script tag in the `<head>` section of your HTML. This ensures tracking starts as early as possible.
+  </Step>
+  
+  <Step title="Verify installation">
+    After installation, check your browser's Network tab to confirm the script loads successfully and sends data to your Umami instance.
+  </Step>
+</Steps>
+
+## Verifying Installation
+
+After adding the script, verify it's working correctly:
+
+<Accordion title="Check Browser Console">
+  Open your browser's developer tools (F12) and check the Console tab for any errors related to Umami.
+</Accordion>
+
+<Accordion title="Monitor Network Requests">
+  In the Network tab, look for POST requests to your Umami endpoint. You should see requests being sent when you navigate your site.
+</Accordion>
+
+<Accordion title="View Real-time Data">
+  Log into your Umami dashboard and check the real-time view. You should see your visit appear within a few seconds.
+</Accordion>
+
+## Common Installation Issues
+
+<Warning>
+  **Script not loading**: Make sure the `src` URL is correct and accessible. Check for any Content Security Policy (CSP) restrictions that might block the script.
+</Warning>
+
+<Warning>
+  **No data appearing**: Verify that `data-website-id` matches the ID in your Umami dashboard. Check browser console for JavaScript errors.
+</Warning>
+
+<Warning>
+  **Self-hosted issues**: If using a self-hosted instance, ensure `data-host-url` points to your server and CORS is properly configured.
+</Warning>
+
+## Advanced Configuration
+
+Once the basic script is installed, you can customize its behavior with additional configuration options:
+
+<CardGroup cols={2}>
+  <Card title="Tracker Configuration" icon="sliders" href="/tracking/tracker-config">
+    Learn about all available configuration options
+  </Card>
+  <Card title="Event Tracking" icon="cursor-click" href="/tracking/events">
+    Start tracking custom events and user interactions
+  </Card>
+</CardGroup>

@@ -1,0 +1,140 @@
+---
+title: Tracking Overview
+description: Learn how Umami's privacy-focused tracking system works and what data is collected.
+---
+
+Umami is a simple, fast, privacy-focused alternative to Google Analytics. The tracking script is lightweight and automatically collects essential analytics data while respecting user privacy.
+
+## How It Works
+
+The Umami tracker is a lightweight JavaScript snippet that runs in your visitors' browsers. It automatically tracks page views and can be configured to track custom events.
+
+<CardGroup cols={2}>
+  <Card title="Automatic Tracking" icon="wand-magic-sparkles">
+    Page views are tracked automatically when the script loads and on navigation changes in single-page applications.
+  </Card>
+  <Card title="Event Tracking" icon="cursor-click">
+    Track user interactions like button clicks, form submissions, and custom events using HTML attributes or JavaScript.
+  </Card>
+  <Card title="User Identification" icon="user">
+    Identify users and track their journey across sessions with the identify function.
+  </Card>
+  <Card title="Privacy First" icon="shield-check">
+    Respects Do Not Track settings, no cookies required, and all data is anonymized.
+  </Card>
+</CardGroup>
+
+## What Data Is Collected
+
+Umami automatically collects the following information on each page view:
+
+| Property | Description | Example |
+|----------|-------------|--------|
+| `hostname` | The website's hostname | `analytics.umami.is` |
+| `language` | Browser language | `en-US`, `fr-FR` |
+| `referrer` | Page referrer URL | `https://google.com` |
+| `screen` | Screen dimensions | `1920x1080` |
+| `title` | Page title | `Getting Started - Umami` |
+| `url` | Current page URL | `/docs/getting-started` |
+| `website` | Your website ID | `b59e9c65-ae32-47f1-8400-119fcf4861c4` |
+
+<Info>
+  All data is extracted from the browser's standard APIs (`window.location`, `window.navigator`, `window.screen`) and does not include any personally identifiable information.
+</Info>
+
+## Privacy Features
+
+Umami is built with privacy as a core principle:
+
+<Accordion title="No Cookies">
+  Umami doesn't use cookies, so there's no need for annoying cookie banners or consent forms.
+</Accordion>
+
+<Accordion title="Anonymous Data">
+  All data collected is anonymized. No personal information like IP addresses is stored.
+</Accordion>
+
+<Accordion title="Do Not Track Support">
+  The tracker respects the Do Not Track (DNT) browser setting when configured with the `data-do-not-track` attribute.
+</Accordion>
+
+<Accordion title="GDPR Compliant">
+  Umami is designed to be GDPR compliant out of the box, with no personal data collection.
+</Accordion>
+
+## Core Features
+
+### Automatic Page View Tracking
+
+Once installed, the tracker automatically:
+- Records page views on initial load
+- Tracks navigation in single-page applications (SPAs)
+- Monitors URL changes via History API
+
+### Custom Event Tracking
+
+Track user interactions in two ways:
+
+<Tabs>
+  <Tab title="HTML Attributes">
+    Add tracking to any element without writing JavaScript:
+    
+    ```html
+    <button data-umami-event="signup-button">Sign Up</button>
+    ```
+  </Tab>
+  <Tab title="JavaScript API">
+    Use the `umami.track()` function for programmatic tracking:
+    
+    ```javascript
+    umami.track('signup-button');
+    ```
+  </Tab>
+</Tabs>
+
+### User Identification
+
+Track users across sessions and associate events with specific users:
+
+```javascript
+umami.identify({ userId: '123', plan: 'premium' });
+```
+
+## Getting Started
+
+<Steps>
+  <Step title="Install the tracking script">
+    Add the Umami script tag to your website's HTML.
+    
+    [Learn more about script installation →](/tracking/script-installation)
+  </Step>
+  
+  <Step title="Configure tracking options">
+    Customize the tracker behavior with data attributes.
+    
+    [View all configuration options →](/tracking/tracker-config)
+  </Step>
+  
+  <Step title="Track custom events">
+    Add event tracking to capture user interactions.
+    
+    [Learn about event tracking →](/tracking/events)
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Script Installation" icon="code" href="/tracking/script-installation">
+    Learn how to install the tracking script on your website
+  </Card>
+  <Card title="Tracker Configuration" icon="sliders" href="/tracking/tracker-config">
+    Customize tracker behavior with configuration options
+  </Card>
+  <Card title="Event Tracking" icon="chart-line" href="/tracking/events">
+    Track custom events and user interactions
+  </Card>
+  <Card title="Tracker Functions" icon="function" href="/tracking/tracker-functions">
+    Use the JavaScript API for advanced tracking
+  </Card>
+</CardGroup>

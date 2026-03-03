@@ -1,0 +1,664 @@
+---
+title: Pixels
+description: Create tracking pixels to measure impressions and conversions in emails, ads, and external content
+---
+
+Pixels are tiny, invisible tracking images that help you measure when content is viewed. Use pixels to track email opens, ad impressions, and content views across platforms where you can't install JavaScript tracking code.
+
+## What are Tracking Pixels?
+
+A tracking pixel is a 1x1 transparent image that loads when content is viewed:
+
+<CardGroup cols={2}>
+  <Card title="Impression Tracking" icon="eye">
+    Track when content is viewed:
+    - Email opens
+    - Ad impressions
+    - Newsletter views
+    - External content
+  </Card>
+  
+  <Card title="Simple Implementation" icon="code">
+    Easy to add anywhere:
+    - No JavaScript required
+    - Works in emails
+    - Compatible with most platforms
+    - Invisible to users
+  </Card>
+</CardGroup>
+
+## How Pixels Work
+
+<Steps>
+  <Step title="Create Pixel">
+    Generate a unique tracking pixel in Umami.
+  </Step>
+  
+  <Step title="Embed Image">
+    Add the pixel image to your content (email, page, etc.).
+  </Step>
+  
+  <Step title="Content Viewed">
+    When someone views the content, the pixel image loads.
+  </Step>
+  
+  <Step title="Track Impression">
+    Umami records the view with associated data (time, location, device).
+  </Step>
+</Steps>
+
+<Note>
+  Pixels are 1x1 transparent images, completely invisible to users but loaded by their browser/email client.
+</Note>
+
+## Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Email Marketing" icon="mail">
+    Track email engagement:
+    - Newsletter open rates
+    - Campaign reach
+    - Email client analytics
+    - Geographic distribution
+  </Card>
+  
+  <Card title="Display Advertising" icon="monitor">
+    Measure ad impressions:
+    - Banner ad views
+    - Sponsored content
+    - Native advertising
+    - Partnership tracking
+  </Card>
+  
+  <Card title="External Content" icon="external-link">
+    Track off-site content:
+    - Guest blog posts
+    - Partner websites
+    - Syndicated content
+    - Third-party platforms
+  </Card>
+  
+  <Card title="Print to Digital" icon="printer">
+    Bridge offline and online:
+    - QR codes with pixels
+    - Digital versions of print ads
+    - Hybrid campaigns
+    - Cross-channel tracking
+  </Card>
+</CardGroup>
+
+## Creating Pixels
+
+Generate a new tracking pixel:
+
+<Steps>
+  <Step title="Navigate to Pixels">
+    Click **Pixels** in the main navigation.
+  </Step>
+  
+  <Step title="Add Pixel">
+    Click the **Add Pixel** button.
+  </Step>
+  
+  <Step title="Name Your Pixel">
+    Enter a descriptive name:
+    - Purpose of the pixel
+    - Campaign or content identifier
+    - Easy to recognize later
+    
+    **Examples:**
+    - "Newsletter - Weekly Digest"
+    - "Banner Ad - Homepage"
+    - "Email Campaign - Product Launch"
+  </Step>
+  
+  <Step title="Generate Pixel">
+    Click **Save** to create your tracking pixel.
+    
+    <Note>
+      A unique pixel URL is automatically generated with a random slug.
+    </Note>
+  </Step>
+  
+  <Step title="Copy Pixel Code">
+    Copy the generated pixel URL to use in your content.
+  </Step>
+</Steps>
+
+## Pixel URL Format
+
+Your tracking pixel URL:
+
+```
+https://[your-domain]/pixels/[unique-slug]
+```
+
+Example:
+```
+https://analytics.umami.is/pixels/abc123xyz
+```
+
+<Info>
+  The slug is a 9-character alphanumeric code that uniquely identifies your pixel.
+</Info>
+
+## Implementing Pixels
+
+### Email Newsletter
+
+Add pixel to HTML emails:
+
+```html
+<img src="https://analytics.umami.is/pixels/abc123xyz" 
+     width="1" 
+     height="1" 
+     alt="" 
+     style="display:block; border:0;" />
+```
+
+<Tip>
+  Place the pixel image at the bottom of your email for best tracking results.
+</Tip>
+
+### HTML Page
+
+Embed in any HTML content:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Page</title>
+</head>
+<body>
+  <!-- Your content here -->
+  
+  <!-- Tracking pixel at the bottom -->
+  <img src="https://analytics.umami.is/pixels/abc123xyz" 
+       width="1" 
+       height="1" 
+       alt="" 
+       style="display:none;" />
+</body>
+</html>
+```
+
+### Markdown Content
+
+Add to Markdown documents:
+
+```markdown
+# My Blog Post
+
+Your content here...
+
+![](https://analytics.umami.is/pixels/abc123xyz)
+```
+
+### Email Signature
+
+Track email views:
+
+```html
+<p>
+  John Doe<br>
+  <a href="https://example.com">example.com</a>
+  <img src="https://analytics.umami.is/pixels/abc123xyz" width="1" height="1" alt="">
+</p>
+```
+
+### Rich Text Editors
+
+For WYSIWYG editors:
+
+<Steps>
+  <Step title="Switch to HTML Mode">
+    Toggle to HTML/source code view.
+  </Step>
+  
+  <Step title="Paste Pixel Code">
+    Add the image tag at the bottom of your content.
+  </Step>
+  
+  <Step title="Return to Visual Mode">
+    Switch back to visual editing (pixel will be invisible).
+  </Step>
+</Steps>
+
+## Pixel Analytics
+
+Track impressions and analyze pixel performance:
+
+<Steps>
+  <Step title="Open Pixel Details">
+    Click on any pixel from your pixels list.
+  </Step>
+  
+  <Step title="View Analytics">
+    See comprehensive impression analytics.
+  </Step>
+  
+  <Step title="Analyze Trends">
+    Explore data by time, location, and device.
+  </Step>
+</Steps>
+
+### Impression Metrics
+
+<CardGroup cols={3}>
+  <Card title="Total Views" icon="eye">
+    Total number of times the pixel was loaded.
+  </Card>
+  
+  <Card title="Unique Viewers" icon="users">
+    Estimated unique viewers (based on sessions).
+  </Card>
+  
+  <Card title="View Rate" icon="trending-up">
+    Impressions over time showing engagement trends.
+  </Card>
+</CardGroup>
+
+### Analytics Dashboard
+
+Each pixel has detailed analytics:
+
+**Views Chart**
+- Impression volume over time
+- Hourly, daily, or monthly views
+- Peak viewing times
+- Trend visualization
+
+**Geographic Data**
+- Countries viewing your content
+- Regional distribution
+- City-level tracking (where available)
+- Interactive map visualization
+
+**Device Information**
+- Desktop vs mobile views
+- Email clients (for email pixels)
+- Operating systems
+- Browser types
+
+**Time Analysis**
+- Best viewing times
+- Day of week patterns
+- Opening behavior
+- Engagement timing
+
+<Info>
+  Pixel analytics use the same analytics engine as website tracking, providing consistent, detailed insights.
+</Info>
+
+## Managing Pixels
+
+### Editing Pixels
+
+Update pixel details:
+
+<Steps>
+  <Step title="Find Pixel">
+    Locate the pixel in your pixels list.
+  </Step>
+  
+  <Step title="Click Edit">
+    Click the edit icon next to the pixel name.
+  </Step>
+  
+  <Step title="Update Name">
+    Modify the pixel name for better organization.
+    
+    <Note>
+      The pixel URL and slug cannot be changed after creation.
+    </Note>
+  </Step>
+  
+  <Step title="Save Changes">
+    Click **Save** to update.
+  </Step>
+</Steps>
+
+### What Can Be Changed
+
+- **Name**: Update the internal reference name
+
+### What Cannot Be Changed
+
+- **Slug**: The pixel URL code is permanent
+- **Creation Date**: Historical timestamp
+- **View History**: Analytics data is preserved
+
+### Deleting Pixels
+
+Remove pixels you no longer need:
+
+<Warning>
+  Deleting a pixel is permanent. The pixel will stop tracking immediately, and all view data will be lost.
+</Warning>
+
+<Steps>
+  <Step title="Select Pixel">
+    Find the pixel you want to delete.
+  </Step>
+  
+  <Step title="Click Delete">
+    Click the delete icon.
+  </Step>
+  
+  <Step title="Confirm Deletion">
+    Confirm that you want to permanently delete the pixel.
+  </Step>
+</Steps>
+
+**Before deleting, consider:**
+- Is the pixel still active in any content?
+- Do you need the historical view data?
+- Export analytics data if needed
+- Remove pixel from all content first
+
+## Team Pixels
+
+Pixels can be created under teams for shared access:
+
+### Creating Team Pixels
+
+<Steps>
+  <Step title="Select Team Context">
+    When creating a pixel, select the team from the dropdown (if available).
+  </Step>
+  
+  <Step title="Create Pixel">
+    Follow the normal pixel creation process.
+  </Step>
+  
+  <Step title="Team Access">
+    All team members can view and manage the pixel based on their role.
+  </Step>
+</Steps>
+
+### Team Permissions
+
+<CardGroup cols={3}>
+  <Card title="Manager">
+    Full access:
+    - Create pixels
+    - Edit pixels
+    - Delete pixels
+    - View analytics
+  </Card>
+  
+  <Card title="Member">
+    Standard access:
+    - Create pixels
+    - Edit own pixels
+    - View all analytics
+    - Cannot delete team pixels
+  </Card>
+  
+  <Card title="View Only">
+    Read-only access:
+    - View pixels
+    - View analytics
+    - Cannot create/edit
+    - Cannot delete
+  </Card>
+</CardGroup>
+
+## Email Tracking Considerations
+
+### Email Client Compatibility
+
+Pixel tracking works in most email clients:
+
+**Full Support:**
+- Gmail (web)
+- Outlook (web)
+- Apple Mail
+- iOS Mail
+- Most webmail services
+
+**Limited Support:**
+- Outlook (desktop) - may cache images
+- Privacy-focused email clients
+- Clients with image blocking enabled
+
+<Note>
+  Some email clients cache images or block tracking pixels. Your actual open rates may be higher than reported.
+</Note>
+
+### Privacy Features
+
+Modern email clients have privacy protections:
+
+**Apple Mail Privacy Protection (iOS 15+):**
+- Preloads images on server
+- Masks IP addresses
+- May inflate open rates
+- Location data less accurate
+
+**Gmail Image Proxy:**
+- Caches images on Google servers
+- May delay tracking
+- Obscures some data
+
+<Info>
+  Despite privacy features, pixel tracking still provides valuable aggregate engagement insights.
+</Info>
+
+## Best Practices
+
+### Naming Conventions
+
+Use clear, descriptive names:
+
+**Good Names:**
+- "Newsletter - Weekly Tech News - 2024"
+- "Email Campaign - Product Launch - March"
+- "Banner Ad - Homepage - Q1"
+- "Partner Content - Blog XYZ"
+
+**Poor Names:**
+- "Pixel 1"
+- "Test"
+- "New"
+- "Email"
+
+### Implementation Tips
+
+- Place pixels at the bottom of content
+- Use appropriate image attributes (width="1" height="1")
+- Include alt="" for accessibility
+- Test pixel loading before deployment
+- Don't use multiple pixels in the same content
+
+### Privacy and Ethics
+
+<Warning>
+  Always comply with privacy regulations (GDPR, CAN-SPAM, etc.) when using tracking pixels in emails.
+</Warning>
+
+**Best practices:**
+- Include privacy policy link in emails
+- Provide opt-out mechanisms
+- Don't use pixels to collect sensitive information
+- Be transparent about tracking
+- Respect "Do Not Track" preferences
+- Comply with email marketing regulations
+
+### Organization
+
+- Use consistent naming conventions
+- Create pixels under appropriate teams
+- Archive or delete old campaign pixels
+- Document pixel usage
+- Keep a record of where pixels are deployed
+
+## Pixels vs Other Tracking Methods
+
+| Method | Pixels | JavaScript | Links |
+|--------|--------|------------|-------|
+| **Works in Email** | Yes | No | Yes (for clicks) |
+| **Tracks Views** | Yes | Yes | No (clicks only) |
+| **Requires Images** | Yes | No | No |
+| **Detail Level** | Basic | Comprehensive | Click-focused |
+| **Best For** | Impressions | Full analytics | Click tracking |
+
+<Info>
+  Use **pixels** for impression tracking in emails and restricted environments. Use **JavaScript tracking** for comprehensive website analytics. Use **links** for click tracking.
+</Info>
+
+## Troubleshooting
+
+<Accordion title="Pixel not tracking">
+  **Possible causes:**
+  - Images blocked by email client
+  - Pixel code not properly embedded
+  - Typo in pixel URL
+  - Content not yet viewed
+  
+  **Solutions:**
+  - Test pixel in different email clients
+  - Verify HTML code is correct
+  - Check pixel URL in browser
+  - Ensure content has been delivered/viewed
+  - Look for browser console errors
+</Accordion>
+
+<Accordion title="Duplicate tracking">
+  **Possible causes:**
+  - Multiple pixels in same content
+  - Email client preloading images
+  - User opening email multiple times
+  
+  **Solutions:**
+  - Use only one pixel per content piece
+  - Understand client-specific behavior
+  - This is normal user behavior
+  - Consider unique vs total views
+</Accordion>
+
+<Accordion title="Inflated numbers">
+  **Possible causes:**
+  - Apple Mail Privacy Protection
+  - Email client preloading
+  - Spam filters scanning content
+  - Automated email scanners
+  
+  **Solutions:**
+  - Expect some inflation with Apple Mail users
+  - Focus on trends rather than absolute numbers
+  - Compare to historical data
+  - Use multiple metrics (not just opens)
+</Accordion>
+
+<Accordion title="No geographic data">
+  **Possible causes:**
+  - Privacy features masking location
+  - Image proxies obscuring origin
+  - VPN or proxy usage
+  
+  **Solutions:**
+  - Accept that some data will be masked
+  - Look at aggregate patterns
+  - Combine with other tracking methods
+  - Focus on available data points
+</Accordion>
+
+## Advanced Use Cases
+
+### Campaign Comparison
+
+Track multiple variations:
+
+```text
+Campaign A:
+  Pixel: newsletter-a-subject-test
+  
+Campaign B:
+  Pixel: newsletter-b-subject-test
+  
+Compare:
+  View rates, engagement timing, geographic response
+```
+
+### Multi-Channel Tracking
+
+Combine tracking methods:
+
+```text
+Email Campaign:
+  Pixel: Tracks email opens
+  Link: Tracks click-through
+  Website: Tracks on-site behavior
+  
+Complete Attribution:
+  Email opened → Link clicked → Website conversion
+```
+
+### Content Performance
+
+Measure content reach:
+
+```text
+Guest Post:
+  Pixel: guest-post-site-xyz-march
+  
+Metrics:
+  How many readers?
+  Geographic reach
+  Reading times (if pixel in different sections)
+```
+
+## Privacy and Compliance
+
+Pixel tracking respects privacy:
+
+- **Anonymized data**: IP addresses are anonymized
+- **No cookies**: Pixel tracking doesn't use cookies
+- **No PII**: No personally identifiable information
+- **GDPR compliant**: When used appropriately
+- **Transparent**: Include in privacy policies
+
+<Note>
+  Always ensure your use of tracking pixels complies with applicable privacy laws and regulations in your jurisdiction.
+</Note>
+
+## Limitations
+
+### What Pixels Can Track
+
+- View/impression count
+- Approximate location (country/region)
+- Device type
+- Time of view
+- Email client (in emails)
+
+### What Pixels Cannot Track
+
+- Individual user identity
+- Email addresses
+- Exact reading time
+- Clicks (use links for this)
+- On-page behavior (use JavaScript for this)
+- Cross-device activity
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Links" href="/features/links">
+    Create tracking links for click measurement
+  </Card>
+  
+  <Card title="Website Tracking" href="/tracking/script">
+    Install full JavaScript tracking
+  </Card>
+  
+  <Card title="Teams" href="/features/teams">
+    Create shared pixels for your team
+  </Card>
+  
+  <Card title="Reports" href="/features/reports">
+    Analyze campaign performance with reports
+  </Card>
+</CardGroup>

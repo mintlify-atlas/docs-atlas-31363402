@@ -1,0 +1,457 @@
+---
+title: Share URLs
+description: Create public links to share your website analytics with anyone
+---
+
+Share URLs allow you to create public links to your analytics dashboard. This enables you to share website statistics with stakeholders, clients, or team members without giving them a full account.
+
+## What are Share URLs?
+
+A share URL is a publicly accessible link to a read-only version of your website analytics:
+
+<CardGroup cols={2}>
+  <Card title="Public Access" icon="globe">
+    Anyone with the link can view the analytics:
+    - No login required
+    - No account needed
+    - Share with anyone
+    - Works on any device
+  </Card>
+  
+  <Card title="Read-Only" icon="eye">
+    Viewers can see data but cannot:
+    - Modify settings
+    - Access other websites
+    - Create reports
+    - Change filters
+    - View sensitive information
+  </Card>
+</CardGroup>
+
+## Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Client Reporting" icon="briefcase">
+    Share analytics with clients:
+    - Transparent reporting
+    - Real-time access
+    - No separate reports needed
+    - Professional presentation
+  </Card>
+  
+  <Card title="Stakeholder Updates" icon="users">
+    Keep stakeholders informed:
+    - Executive dashboards
+    - Board presentations
+    - Investor updates
+    - Partner transparency
+  </Card>
+  
+  <Card title="Public Transparency" icon="lock-open">
+    Share metrics publicly:
+    - Open analytics
+    - Community engagement
+    - Public projects
+    - Transparency initiatives
+  </Card>
+  
+  <Card title="Team Collaboration" icon="user-plus">
+    Share with team members:
+    - External contractors
+    - Temporary access
+    - Cross-team visibility
+    - Quick sharing
+  </Card>
+</CardGroup>
+
+## Creating a Share URL
+
+Generate a public link for your website:
+
+<Steps>
+  <Step title="Navigate to Website Settings">
+    Select your website and go to **Settings**.
+  </Step>
+  
+  <Step title="Find Share URL Section">
+    Scroll to the Share URL settings panel.
+  </Step>
+  
+  <Step title="Enable Share URL">
+    Toggle the **Enable Share URL** switch.
+  </Step>
+  
+  <Step title="Copy the Link">
+    A unique URL is generated. Click the copy button to copy the link.
+    
+    <Note>
+      The URL format is: `https://your-domain.com/share/[unique-id]`
+    </Note>
+  </Step>
+  
+  <Step title="Share the Link">
+    Distribute the URL through your preferred channel:
+    - Email
+    - Slack/Teams
+    - Documentation
+    - Website embed
+  </Step>
+</Steps>
+
+## Share URL Features
+
+### What's Included
+
+Shared dashboards show:
+
+- **Key Metrics**: Visitors, views, bounce rate, visit duration
+- **Traffic Chart**: Visual representation over time
+- **Top Pages**: Most visited pages
+- **Referrers**: Traffic sources
+- **Geographic Data**: Visitor locations
+- **Device Information**: Browsers, OS, devices
+- **Custom Events**: Event tracking data (if applicable)
+
+### What's Excluded
+
+Shared dashboards do not show:
+
+- Individual user data
+- Real-time activity log
+- Detailed session information
+- Admin controls
+- Settings or configuration
+- Other websites in your account
+
+<Info>
+  Share URLs provide transparency while maintaining privacy and security.
+</Info>
+
+## Managing Share URLs
+
+### Regenerating the Link
+
+Create a new share URL to revoke the old one:
+
+<Steps>
+  <Step title="Open Settings">
+    Go to your website settings.
+  </Step>
+  
+  <Step title="Click Regenerate">
+    Click the **Regenerate** button next to the share URL.
+  </Step>
+  
+  <Step title="Confirm Action">
+    Confirm that you want to generate a new URL.
+    
+    <Warning>
+      The old URL will immediately stop working. Anyone using the old link will lose access.
+    </Warning>
+  </Step>
+  
+  <Step title="Share New Link">
+    Copy and distribute the new URL to intended recipients.
+  </Step>
+</Steps>
+
+### Disabling Share URL
+
+Revoke public access:
+
+<Steps>
+  <Step title="Open Settings">
+    Navigate to website settings.
+  </Step>
+  
+  <Step title="Disable Sharing">
+    Toggle off the **Enable Share URL** switch.
+  </Step>
+  
+  <Step title="Confirm">
+    The share URL is immediately deactivated.
+  </Step>
+</Steps>
+
+<Note>
+  When disabled, anyone trying to access the share URL will see an error message.
+</Note>
+
+## Viewing Shared Dashboards
+
+What viewers see when they access a share URL:
+
+### Dashboard Layout
+
+- Clean, read-only interface
+- Website name displayed
+- All analytics panels visible
+- Interactive charts and data
+- Date range selector (viewers can change)
+- Export capabilities (CSV download)
+
+### Viewer Capabilities
+
+Viewers can:
+- Change date ranges
+- Sort data tables
+- View different metrics
+- Export data to CSV
+- View charts and visualizations
+
+Viewers cannot:
+- Modify website settings
+- Create or edit reports
+- Access real-time view
+- See other websites
+- Change filters permanently
+
+## Embedding Shared Dashboards
+
+Embed analytics in other websites or documentation:
+
+### Using iFrame
+
+```html
+<iframe 
+  src="https://your-domain.com/share/[unique-id]" 
+  width="100%" 
+  height="800px"
+  frameborder="0"
+  style="border: 1px solid #ccc;"
+>
+</iframe>
+```
+
+<Accordion title="Responsive Embed">
+  Make the iframe responsive:
+  
+  ```html
+  <div style="position: relative; padding-bottom: 75%; height: 0; overflow: hidden;">
+    <iframe 
+      src="https://your-domain.com/share/[unique-id]"
+      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 1px solid #ccc;"
+      frameborder="0"
+    >
+    </iframe>
+  </div>
+  ```
+</Accordion>
+
+### In Documentation
+
+Add to README or docs:
+
+```markdown
+## Analytics
+
+View our website analytics: [Analytics Dashboard](https://your-domain.com/share/[unique-id])
+```
+
+### In Internal Tools
+
+Integrate with:
+- Notion pages
+- Confluence documentation
+- SharePoint sites
+- Custom dashboards
+- Wiki pages
+
+## Security Considerations
+
+### Access Control
+
+<Warning>
+  Share URLs are publicly accessible. Anyone with the link can view the analytics. Do not share the link publicly if you want to keep your data private.
+</Warning>
+
+**Best practices:**
+- Only share with intended recipients
+- Regenerate URLs if compromised
+- Disable sharing when no longer needed
+- Use team accounts for internal access instead
+- Monitor for unauthorized sharing
+
+### Data Privacy
+
+Share URLs are privacy-compliant:
+- No personal user data exposed
+- Aggregated statistics only
+- No IP addresses or identifiers
+- GDPR compliant
+- No visitor tracking on shared page
+
+### Rate Limiting
+
+<Info>
+  Shared dashboards may have rate limiting to prevent abuse. Normal viewing is not affected.
+</Info>
+
+## Share URL vs Team Access
+
+Choose the right sharing method:
+
+| Feature | Share URL | Team Access |
+|---------|-----------|-------------|
+| **Account Required** | No | Yes |
+| **Authentication** | None | Login required |
+| **Permissions** | Read-only | Role-based |
+| **Multiple Websites** | One only | All team sites |
+| **Report Creation** | No | Yes (Members+) |
+| **Settings Access** | No | Yes (Managers) |
+| **Best For** | External sharing | Internal collaboration |
+
+<Tip>
+  Use **Share URLs** for external stakeholders. Use **Team Access** for internal team members who need full features.
+</Tip>
+
+## Common Scenarios
+
+### Client Reporting
+
+```text
+Scenario: Agency sharing client website analytics
+
+Setup:
+1. Enable share URL for client website
+2. Send link to client contact
+3. Include in monthly report email
+4. Embed in client portal
+
+Benefits:
+- Real-time access for clients
+- No manual report generation
+- Transparent relationship
+- Reduced support requests
+```
+
+### Public Project
+
+```text
+Scenario: Open source project showing public interest
+
+Setup:
+1. Enable share URL
+2. Add link to README
+3. Announce on project website
+4. Share on social media
+
+Benefits:
+- Demonstrate project popularity
+- Community engagement
+- Transparent metrics
+- Build credibility
+```
+
+### Executive Dashboard
+
+```text
+Scenario: Providing executive team with high-level metrics
+
+Setup:
+1. Create share URL
+2. Add to executive dashboard tool
+3. Include in weekly email
+4. Embed in intranet
+
+Benefits:
+- Easy executive access
+- No training required
+- Always up-to-date
+- Professional presentation
+```
+
+## Troubleshooting
+
+<Accordion title="Share URL not working">
+  **Possible causes:**
+  - Share URL disabled in settings
+  - URL regenerated (old link invalid)
+  - Incorrect URL format
+  - Website deleted
+  
+  **Solutions:**
+  - Check if sharing is enabled
+  - Verify you're using the latest URL
+  - Copy the full URL including unique ID
+  - Confirm website still exists
+</Accordion>
+
+<Accordion title="Data not updating">
+  **Possible causes:**
+  - Browser cache
+  - Tracking code issue on main site
+  - Date range selected showing old data
+  
+  **Solutions:**
+  - Refresh the page (hard refresh: Ctrl+F5)
+  - Check main dashboard for updates
+  - Verify date range includes recent dates
+  - Clear browser cache
+</Accordion>
+
+<Accordion title="Can't disable share URL">
+  **Possible causes:**
+  - Insufficient permissions
+  - Network error
+  
+  **Solutions:**
+  - Ensure you're the website owner or manager
+  - Check browser console for errors
+  - Try again after refreshing
+  - Contact support if persists
+</Accordion>
+
+## Best Practices
+
+### When to Use Share URLs
+
+- External stakeholders without accounts
+- Temporary access needs
+- Public transparency
+- Client reporting
+- Quick sharing without setup
+
+### When to Use Team Access Instead
+
+- Internal team members
+- Users needing full features
+- Multiple website access
+- Report creation needs
+- Settings management required
+
+### Managing Multiple Share URLs
+
+- Keep a record of where URLs are shared
+- Regenerate URLs periodically for security
+- Disable unused share URLs
+- Use descriptive documentation
+- Monitor for unauthorized use
+
+### Communication
+
+- Explain what the link provides
+- Set expectations about update frequency
+- Provide context for the metrics
+- Include contact for questions
+- Note any limitations or caveats
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Teams" href="/features/teams">
+    Set up team access for internal collaboration
+  </Card>
+  
+  <Card title="Dashboards" href="/features/dashboards">
+    Learn what's included in shared dashboards
+  </Card>
+  
+  <Card title="Website Settings" href="/features/websites#website-settings">
+    Configure other website settings
+  </Card>
+  
+  <Card title="Reports" href="/features/reports">
+    Create detailed reports for deeper analysis
+  </Card>
+</CardGroup>

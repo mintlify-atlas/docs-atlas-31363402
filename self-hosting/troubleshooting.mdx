@@ -1,0 +1,815 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for self-hosted Umami installations
+---
+
+## Overview
+
+This guide covers common issues you may encounter when self-hosting Umami and how to resolve them.
+
+<Tip>
+  Before troubleshooting, check the [GitHub Discussions](https://github.com/umami-software/umami/discussions) and [Issues](https://github.com/umami-software/umami/issues) for similar problems.
+</Tip>
+
+## Installation Issues
+
+### Database Connection Errors
+
+<AccordionGroup>
+  <Accordion title="Error: DATABASE_URL is not defined">
+    **Cause:** Missing DATABASE_URL environment variable.
+    
+    **Solution:**
+    
+    ```bash
+    # Create .env file
+    echo 'DATABASE_URL=postgresql://umami:password@localhost:5432/umami' > .env
+    
+    # Or export environment variable
+    export DATABASE_URL=postgresql://umami:password@localhost:5432/umami
+    ```
+    
+    For Docker:
+    
+    ```yaml docker-compose.yml
+    environment:
+      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+    ```
+  </Accordion>
+  
+  <Accordion title="Error: Connection refused (ECONNREFUSED)">
+    **Cause:** Cannot connect to PostgreSQL server.
+    
+    **Diagnosis:**
+    
+    ```bash
+    # Check if PostgreSQL is running
+    sudo systemctl status postgresql
+    
+    # Test connection
+    psql -U umami -h localhost -d umami
+    
+    # Check port is listening
+    netstat -an | grep 5432
+    ```
+    
+    **Solutions:**
+    
+    1. Start PostgreSQL:
+    ```bash
+    sudo systemctl start postgresql
+    ```
+    
+    2. Check pg_hba.conf allows connections:
+    ```bash
+    sudo nano /etc/postgresql/15/main/pg_hba.conf
+    ```
+    Add:
+    ```
+    host    all    all    127.0.0.1/32    md5
+    ```
+    
+    3. Check postgresql.conf:
+    ```bash
+    sudo nano /etc/postgresql/15/main/postgresql.conf
+    ```
+    Ensure:
+    ```
+    listen_addresses = 'localhost'
+    ```
+    
+    4. Restart PostgreSQL:
+    ```bash
+    sudo systemctl restart postgresql
+    ```
+  </Accordion>
+  
+  <Accordion title="Error: password authentication failed">
+    **Cause:** Incorrect database credentials.
+    
+    **Solution:**
+    
+    ```bash
+    # Reset PostgreSQL password
+    sudo -u postgres psql
+    ALTER USER umami WITH PASSWORD 'new-password';
+    \q
+    
+    # Update DATABASE_URL
+    DATABASE_URL=postgresql://umami:new-password@localhost:5432/umami
+    ```
+  </Accordion>
+  
+  <Accordion title="Error: database does not exist">
+    **Cause:** Database not created.
+    
+    **Solution:**
+    
+    ```bash
+    # Create database
+    sudo -u postgres psql
+    CREATE DATABASE umami;
+    CREATE USER umami WITH PASSWORD 'password';
+    GRANT ALL PRIVILEGES ON DATABASE umami TO umami;
+    \q
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Build Failures
+
+<AccordionGroup>
+  <Accordion title="Error: Node.js version too old">
+    **Cause:** Umami requires Node.js 18.18 or higher.
+    
+    **Check version:**
+    
+    ```bash
+    node --version
+    ```
+    
+    **Solution:**
+    
+    ```bash
+    # Using nvm
+    nvm install 18
+    nvm use 18
+    
+    # Or update system Node.js
+    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    ```
+  </Accordion>
+  
+  <Accordion title="Error: Prisma Client could not locate...">
+    **Cause:** Prisma Client not generated.
+    
+    **Solution:**
+    
+    ```bash
+    # Generate Prisma Client
+    pnpm prisma generate
+    
+    # Or rebuild from scratch
+    rm -rf node_modules .next generated
+    pnpm install
+    pnpm build
+    ```
+  </Accordion>
+  
+  <Accordion title="Error: ENOSPC - no space left on device">
+    **Cause:** Insufficient disk space or inotify watches.
+    
+    **Check disk space:**
+    
+    ```bash
+    df -h
+    ```
+    
+    **Increase inotify watches:**
+    
+    ```bash
+    # Temporary
+    sudo sysctl fs.inotify.max_user_watches=524288
+    
+    # Permanent
+    echo 'fs.inotify.max_user_watches=524288' | sudo tee -a /etc/sysctl.conf
+    sudo sysctl -p
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Runtime Issues
+
+### Application Won't Start
+
+<AccordionGroup>
+  <Accordion title="Error: Port already in use">
+    **Cause:** Another process is using port 3000.
+    
+    **Find process:**
+    
+    ```bash
+    # Linux/Mac
+    lsof -i :3000
+    
+    # Or
+    netstat -tulpn | grep 3000
+    ```
+    
+    **Solutions:**
+    
+    1. Kill the process:
+    ```bash
+    kill -9 <PID>
+    ```
+    
+    2. Use a different port:
+    ```bash
+    PORT=3001 pnpm start
+    ```
+    
+    3. For Docker:
+    ```yaml
+    ports:
+      - "3001:3000"
+    ```
+  </Accordion>
+  
+  <Accordion title="Container keeps restarting">
+    **Check logs:**
+    
+    ```bash
+    docker compose logs umami
+    ```
+    
+    **Common issues:**
+    
+    - Database connection failed → Check DATABASE_URL
+    - Migration error → Check migration logs
+    - Out of memory → Increase container memory limit
+    
+    **Increase memory:**
+    
+    ```yaml docker-compose.yml
+    services:
+      umami:
+        deploy:
+          resources:
+            limits:
+              memory: 1G
+    ```
+  </Accordion>
+  
+  <Accordion title="502 Bad Gateway with reverse proxy">
+    **Cause:** Proxy can't connect to Umami.
+    
+    **Nginx configuration:**
+    
+    ```nginx
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    ```
+    
+    **Test backend:**
+    
+    ```bash
+    curl http://localhost:3000/api/heartbeat
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Login Issues
+
+<AccordionGroup>
+  <Accordion title="Cannot login with admin/umami">
+    **Default credentials changed in v3.0:**
+    
+    - Username: `admin`
+    - Password: `umami`
+    
+    **Reset password:**
+    
+    ```bash
+    # Using change-password script
+    pnpm change-password
+    
+    # Or directly in database
+    psql -U umami umami
+    ```
+    
+    ```sql
+    -- Hash for password 'newpassword'
+    UPDATE "user" 
+    SET password = '$2a$10$...' 
+    WHERE username = 'admin';
+    ```
+  </Accordion>
+  
+  <Accordion title="Session expires immediately">
+    **Cause:** APP_SECRET not set or changing.
+    
+    **Solution:**
+    
+    ```bash
+    # Generate stable APP_SECRET
+    openssl rand -base64 32
+    
+    # Add to .env
+    APP_SECRET=generated-secret-here
+    
+    # Restart application
+    ```
+    
+    **For multi-instance deployments:**
+    
+    ```bash
+    # Use Redis for session storage
+    REDIS_URL=redis://localhost:6379
+    ```
+  </Accordion>
+  
+  <Accordion title="Infinite redirect loop">
+    **Cause:** Reverse proxy SSL configuration.
+    
+    **Nginx solution:**
+    
+    ```nginx
+    proxy_set_header X-Forwarded-Proto $scheme;
+    ```
+    
+    **Umami configuration:**
+    
+    ```bash
+    FORCE_SSL=1
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Tracking Issues
+
+### Data Not Being Collected
+
+<AccordionGroup>
+  <Accordion title="Tracker script not loading">
+    **Check script loads:**
+    
+    ```bash
+    curl https://your-domain.com/script.js
+    ```
+    
+    **Browser console errors:**
+    
+    1. Open browser DevTools (F12)
+    2. Check Console tab for errors
+    3. Check Network tab for failed requests
+    
+    **Common issues:**
+    
+    - Ad blocker blocking tracker
+    - CORS error → Check ALLOWED_FRAME_URLS
+    - Wrong website URL in tracking code
+    
+    **Test without ad blocker:**
+    
+    Open in incognito/private mode
+  </Accordion>
+  
+  <Accordion title="Events not appearing in dashboard">
+    **Verify tracking code:**
+    
+    ```html
+    <script defer src="https://analytics.yourdomain.com/script.js" 
+            data-website-id="your-website-id"></script>
+    ```
+    
+    **Check website ID:**
+    
+    1. Login to Umami
+    2. Go to Settings → Websites
+    3. Copy the correct website ID
+    
+    **Test data collection:**
+    
+    ```bash
+    # Send test event
+    curl -X POST https://your-domain.com/api/send \
+      -H "Content-Type: application/json" \
+      -d '{
+        "type": "event",
+        "payload": {
+          "website": "your-website-id",
+          "url": "/test",
+          "hostname": "test.com"
+        }
+      }'
+    ```
+    
+    **Check database:**
+    
+    ```sql
+    SELECT COUNT(*) FROM website_event 
+    WHERE website_id = 'your-website-id';
+    ```
+  </Accordion>
+  
+  <Accordion title="Real-time data not updating">
+    **Cause:** Cache or database connection issues.
+    
+    **Clear cache:**
+    
+    ```bash
+    # Restart application
+    docker compose restart umami
+    # or
+    pm2 restart umami
+    ```
+    
+    **Check database connection:**
+    
+    ```bash
+    # Docker
+    docker compose exec umami node -e "require('prisma').default.\$connect().then(() => console.log('Connected'))"
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### CORS Errors
+
+<AccordionGroup>
+  <Accordion title="CORS policy error in browser console">
+    **Error:**
+    ```
+    Access to fetch at 'https://analytics.example.com/api/send' from origin 'https://website.com' has been blocked by CORS policy
+    ```
+    
+    **Cause:** Umami's CORS headers are permissive by default, but reverse proxy may override.
+    
+    **Nginx solution:**
+    
+    ```nginx
+    location /api/send {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        
+        # Don't override Umami's CORS headers
+        proxy_hide_header Access-Control-Allow-Origin;
+    }
+    ```
+    
+    **Verify CORS headers:**
+    
+    ```bash
+    curl -H "Origin: https://website.com" \
+         -H "Access-Control-Request-Method: POST" \
+         -X OPTIONS \
+         https://analytics.example.com/api/send
+    ```
+    
+    Should return:
+    ```
+    Access-Control-Allow-Origin: *
+    Access-Control-Allow-Methods: GET, DELETE, POST, PUT
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Performance Issues
+
+### Slow Dashboard
+
+<AccordionGroup>
+  <Accordion title="Dashboard takes long to load">
+    **Check database performance:**
+    
+    ```sql
+    -- Find slow queries
+    SELECT query, calls, total_time, mean_time
+    FROM pg_stat_statements
+    ORDER BY mean_time DESC
+    LIMIT 10;
+    ```
+    
+    **Optimize database:**
+    
+    ```sql
+    VACUUM ANALYZE;
+    REINDEX DATABASE umami;
+    ```
+    
+    **Check indexes:**
+    
+    ```bash
+    pnpm prisma migrate status
+    ```
+    
+    **For high volume, use ClickHouse:**
+    
+    ```bash
+    CLICKHOUSE_URL=http://localhost:8123/umami
+    ```
+  </Accordion>
+  
+  <Accordion title="High memory usage">
+    **Check current usage:**
+    
+    ```bash
+    # Docker
+    docker stats umami
+    
+    # System
+    ps aux | grep node
+    ```
+    
+    **Increase Node.js memory:**
+    
+    ```bash
+    NODE_OPTIONS="--max-old-space-size=4096" pnpm start
+    ```
+    
+    **For Docker:**
+    
+    ```yaml docker-compose.yml
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=4096"
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+    ```
+  </Accordion>
+  
+  <Accordion title="High CPU usage">
+    **Check for long-running queries:**
+    
+    ```sql
+    SELECT pid, age(clock_timestamp(), query_start), query
+    FROM pg_stat_activity
+    WHERE state != 'idle'
+    ORDER BY query_start;
+    ```
+    
+    **Optimize queries:**
+    
+    ```sql
+    EXPLAIN ANALYZE SELECT ...;
+    ```
+    
+    **Add indexes if needed:**
+    
+    ```sql
+    CREATE INDEX idx_custom ON table_name(column_name);
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Migration Issues
+
+### Migration Failures
+
+<AccordionGroup>
+  <Accordion title="Migration hangs or times out">
+    **Increase timeout:**
+    
+    ```bash
+    DATABASE_URL="postgresql://...?connect_timeout=300&statement_timeout=300000"
+    ```
+    
+    **Run manually with psql:**
+    
+    ```bash
+    psql -U umami umami < prisma/migrations/XX_migration/migration.sql
+    ```
+    
+    **Check for locks:**
+    
+    ```sql
+    SELECT * FROM pg_locks WHERE NOT granted;
+    ```
+  </Accordion>
+  
+  <Accordion title="Migration error: relation already exists">
+    **Mark migration as applied:**
+    
+    ```bash
+    pnpm prisma migrate resolve --applied migration_name
+    ```
+    
+    **Or reset migration state:**
+    
+    ```sql
+    -- Carefully review before running!
+    DELETE FROM _prisma_migrations WHERE migration_name = 'problematic_migration';
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Docker Issues
+
+### Container Problems
+
+<AccordionGroup>
+  <Accordion title="Cannot remove container">
+    **Force remove:**
+    
+    ```bash
+    docker rm -f umami
+    docker compose rm -f umami
+    ```
+    
+    **Remove with volumes:**
+    
+    ```bash
+    docker compose down -v
+    ```
+  </Accordion>
+  
+  <Accordion title="Image pull fails">
+    **Check network:**
+    
+    ```bash
+    docker pull ghcr.io/umami-software/umami:latest
+    ```
+    
+    **Use specific version:**
+    
+    ```yaml
+    image: ghcr.io/umami-software/umami:v3.0.3
+    ```
+    
+    **Authenticate to GHCR:**
+    
+    ```bash
+    echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+    ```
+  </Accordion>
+  
+  <Accordion title="Volume permission issues">
+    **Fix ownership:**
+    
+    ```bash
+    # Find volume location
+    docker volume inspect umami_postgres-data
+    
+    # Fix permissions
+    sudo chown -R 999:999 /var/lib/docker/volumes/umami_postgres-data/_data
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Network Issues
+
+### Reverse Proxy Problems
+
+<AccordionGroup>
+  <Accordion title="Assets not loading (404)">
+    **Nginx configuration:**
+    
+    ```nginx
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Important for Next.js
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_cache_bypass $http_upgrade;
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="WebSocket connection failed">
+    **Enable WebSocket proxy:**
+    
+    ```nginx
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Diagnostic Commands
+
+### System Information
+
+```bash
+# Node.js version
+node --version
+
+# npm/pnpm version
+pnpm --version
+
+# PostgreSQL version
+psql --version
+
+# Database connection test
+psql "$DATABASE_URL" -c "SELECT version();"
+
+# Umami version
+cat package.json | grep version
+
+# Environment variables
+env | grep -E "DATABASE_URL|PORT|NODE_ENV"
+```
+
+### Docker Diagnostics
+
+```bash
+# Container status
+docker compose ps
+
+# Container logs
+docker compose logs -f umami
+
+# Execute command in container
+docker compose exec umami sh
+
+# Check environment variables
+docker compose exec umami env
+
+# Container resource usage
+docker stats umami
+```
+
+### Database Diagnostics
+
+```sql
+-- Table sizes
+SELECT
+  tablename,
+  pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size
+FROM pg_tables
+WHERE schemaname = 'public'
+ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
+
+-- Row counts
+SELECT
+  'website_event' as table,
+  COUNT(*) as rows
+FROM website_event
+UNION ALL
+SELECT 'session', COUNT(*) FROM session;
+
+-- Migration status
+SELECT * FROM _prisma_migrations ORDER BY finished_at DESC;
+
+-- Active connections
+SELECT count(*) FROM pg_stat_activity WHERE datname = 'umami';
+```
+
+## Getting Help
+
+<CardGroup cols={2}>
+  <Card title="GitHub Discussions" icon="github" href="https://github.com/umami-software/umami/discussions">
+    Ask questions and get community support
+  </Card>
+  <Card title="Discord" icon="discord" href="https://discord.com/invite/4dz4zcXYrQ">
+    Chat with the community in real-time
+  </Card>
+  <Card title="GitHub Issues" icon="bug" href="https://github.com/umami-software/umami/issues">
+    Report bugs and request features
+  </Card>
+  <Card title="Documentation" icon="book" href="https://umami.is/docs">
+    Official documentation and guides
+  </Card>
+</CardGroup>
+
+### Creating a Bug Report
+
+When reporting issues, include:
+
+1. **Environment:**
+   - Umami version
+   - Node.js version
+   - PostgreSQL version
+   - Deployment method (Docker/source)
+   - Operating system
+
+2. **Steps to reproduce:**
+   - What you did
+   - What you expected
+   - What actually happened
+
+3. **Logs:**
+   ```bash
+   # Application logs
+   docker compose logs umami > logs.txt
+   
+   # Or for source installation
+   pnpm start 2>&1 | tee logs.txt
+   ```
+
+4. **Database status:**
+   ```bash
+   pnpm prisma migrate status > migration-status.txt
+   ```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="gear" href="/self-hosting/environment-variables">
+    Review configuration options
+  </Card>
+  <Card title="PostgreSQL" icon="database" href="/self-hosting/postgresql">
+    Optimize database performance
+  </Card>
+  <Card title="Docker Deployment" icon="docker" href="/self-hosting/docker-deployment">
+    Docker-specific issues
+  </Card>
+  <Card title="Migrations" icon="arrow-right" href="/self-hosting/migrations">
+    Database migration troubleshooting
+  </Card>
+</CardGroup>

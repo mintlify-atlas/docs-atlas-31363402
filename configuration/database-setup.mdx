@@ -1,0 +1,633 @@
+---
+title: Database Setup
+description: Configure and optimize PostgreSQL for Umami
+---
+
+# Database Setup
+
+Umami requires PostgreSQL 12.14 or higher for storing analytics data. This guide covers database setup, optimization, and maintenance.
+
+## Supported Databases
+
+<CardGroup cols={2}>
+  <Card title="PostgreSQL" icon="database">
+    **Recommended**. Version 12.14+ required. Full feature support and best performance.
+  </Card>
+  <Card title="MySQL" icon="database">
+    **Deprecated**. Limited support in v2+. Not recommended for new installations.
+  </Card>
+</CardGroup>
+
+<Info>
+  Umami v2+ focuses on PostgreSQL. All new features and optimizations target PostgreSQL.
+</Info>
+
+## PostgreSQL Installation
+
+### Linux (Ubuntu/Debian)
+
+<Steps>
+  <Step title="Install PostgreSQL">
+    ```bash
+    sudo apt update
+    sudo apt install postgresql postgresql-contrib
+    ```
+  </Step>
+
+  <Step title="Start PostgreSQL">
+    ```bash
+    sudo systemctl start postgresql
+    sudo systemctl enable postgresql
+    ```
+  </Step>
+
+  <Step title="Verify Installation">
+    ```bash
+    sudo systemctl status postgresql
+    psql --version
+    ```
+  </Step>
+</Steps>
+
+### macOS
+
+<Tabs>
+  <Tab title="Homebrew">
+    ```bash
+    # Install PostgreSQL 15
+    brew install postgresql@15
+
+    # Start service
+    brew services start postgresql@15
+
+    # Verify
+    psql postgres
+    ```
+  </Tab>
+
+  <Tab title="Postgres.app">
+    1. Download from [postgresapp.com](https://postgresapp.com/)
+    2. Move to Applications folder
+    3. Open Postgres.app
+    4. Click "Initialize" to create a server
+  </Tab>
+</Tabs>
+
+### Windows
+
+1. Download installer from [postgresql.org](https://www.postgresql.org/download/windows/)
+2. Run the installer
+3. Choose installation directory
+4. Set superuser password
+5. Select port (default: 5432)
+6. Complete installation
+
+### Docker
+
+Run PostgreSQL in a container:
+
+```bash
+docker run -d \
+  --name postgres \
+  -e POSTGRES_DB=umami \
+  -e POSTGRES_USER=umami \
+  -e POSTGRES_PASSWORD=umami \
+  -v postgres-data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:15-alpine
+```
+
+## Database Creation
+
+### Create Umami Database
+
+<Steps>
+  <Step title="Connect to PostgreSQL">
+    <Tabs>
+      <Tab title="Linux">
+        ```bash
+        sudo -u postgres psql
+        ```
+      </Tab>
+
+      <Tab title="macOS/Windows">
+        ```bash
+        psql postgres
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Create Database and User">
+    ```sql
+    -- Create database
+    CREATE DATABASE umami;
+
+    -- Create user with password
+    CREATE USER umami WITH PASSWORD 'your-secure-password';
+
+    -- Grant all privileges
+    GRANT ALL PRIVILEGES ON DATABASE umami TO umami;
+
+    -- Exit
+    \q
+    ```
+
+    <Warning>
+      Replace `your-secure-password` with a strong password. Never use default passwords in production.
+    </Warning>
+  </Step>
+
+  <Step title="Test Connection">
+    ```bash
+    psql -U umami -d umami -h localhost
+    ```
+
+    Enter the password when prompted.
+  </Step>
+</Steps>
+
+### Connection URL Format
+
+Umami uses a PostgreSQL connection string:
+
+```bash
+DATABASE_URL=postgresql://username:password@hostname:port/database
+```
+
+**Components:**
+- `username`: Database user (e.g., `umami`)
+- `password`: User password
+- `hostname`: Server address (e.g., `localhost`, `db`, or IP)
+- `port`: PostgreSQL port (default: `5432`)
+- `database`: Database name (e.g., `umami`)
+
+**Examples:**
+
+<CodeGroup>
+  ```bash Local
+  DATABASE_URL=postgresql://umami:mypassword@localhost:5432/umami
+  ```
+
+  ```bash Docker Network
+  DATABASE_URL=postgresql://umami:umami@db:5432/umami
+  ```
+
+  ```bash Remote Server
+  DATABASE_URL=postgresql://umami:pass123@192.168.1.100:5432/umami
+  ```
+
+  ```bash SSL Connection
+  DATABASE_URL=postgresql://user:pass@host:5432/db?sslmode=require
+  ```
+</CodeGroup>
+
+## Schema Initialization
+
+Umami automatically creates database tables on first build.
+
+### Automatic Migration (Recommended)
+
+When you run the build command, Umami:
+1. Connects to the database
+2. Runs Prisma migrations
+3. Creates all required tables
+4. Sets up indexes
+5. Creates default admin user
+
+```bash
+# For source installation
+pnpm run build
+
+# For Docker
+docker compose up -d
+```
+
+<Info>
+  The build process creates tables from the Prisma schema located at `prisma/schema.prisma`.
+</Info>
+
+### Manual Migration
+
+If automatic migration fails:
+
+```bash
+# Generate Prisma client
+pnpm run build-db-client
+
+# Run migrations
+pnpm prisma migrate deploy
+
+# Or reset database (WARNING: deletes all data)
+pnpm prisma migrate reset
+```
+
+### Verify Tables
+
+Check that tables were created:
+
+```sql
+-- Connect to database
+psql -U umami -d umami
+
+-- List tables
+\dt
+
+-- Should show:
+-- user
+-- website
+-- session
+-- website_event
+-- event_data
+-- session_data
+-- team
+-- team_user
+-- report
+-- And more...
+```
+
+## Database Schema
+
+Umami's database schema includes:
+
+<Accordion title="Core Tables">
+  **user**: User accounts and authentication
+  - `user_id` (UUID, primary key)
+  - `username` (unique)
+  - `password` (hashed with bcrypt)
+  - `role` (admin, user, view-only)
+  - `created_at`, `updated_at`
+
+  **website**: Tracked websites
+  - `website_id` (UUID, primary key)
+  - `name`, `domain`
+  - `share_id` (for public dashboards)
+  - `user_id`, `team_id`
+  - Timestamps
+
+  **session**: Visitor sessions
+  - `session_id` (UUID, primary key)
+  - `website_id`
+  - Browser, OS, device info
+  - Location data (country, region, city)
+  - Language, screen resolution
+
+  **website_event**: Pageviews and events
+  - `event_id` (UUID, primary key)
+  - `website_id`, `session_id`
+  - `url`, `referrer`
+  - `event_type`, `event_name`
+  - Timestamp
+</Accordion>
+
+<Accordion title="Additional Tables">
+  - **event_data**: Custom event properties
+  - **session_data**: Custom session data
+  - **team**: Team/organization management
+  - **team_user**: Team membership
+  - **report**: Custom reports
+  - **revenue**: Revenue tracking (optional)
+</Accordion>
+
+## Performance Optimization
+
+### Indexes
+
+Umami automatically creates indexes for common queries:
+
+```sql
+-- Check existing indexes
+\di
+
+-- Key indexes:
+-- session(website_id, created_at)
+-- session(website_id, created_at, browser)
+-- session(website_id, created_at, country)
+-- website_event(website_id, created_at)
+-- And many more...
+```
+
+<Info>
+  The Prisma schema defines all indexes. They're created automatically during migration.
+</Info>
+
+### Vacuum and Analyze
+
+Regularly maintain your database:
+
+```sql
+-- Analyze tables for query optimization
+ANALYZE;
+
+-- Vacuum to reclaim space
+VACUUM;
+
+-- Full vacuum (requires more time)
+VACUUM FULL;
+
+-- Auto-vacuum (recommended)
+ALTER TABLE session SET (autovacuum_enabled = true);
+```
+
+### Connection Pooling
+
+For high-traffic sites, use connection pooling:
+
+<Tabs>
+  <Tab title="PgBouncer">
+    Install PgBouncer:
+    ```bash
+    sudo apt install pgbouncer
+    ```
+
+    Configure `/etc/pgbouncer/pgbouncer.ini`:
+    ```ini
+    [databases]
+    umami = host=localhost port=5432 dbname=umami
+
+    [pgbouncer]
+    listen_addr = *
+    listen_port = 6432
+    auth_type = md5
+    auth_file = /etc/pgbouncer/userlist.txt
+    pool_mode = transaction
+    max_client_conn = 100
+    default_pool_size = 20
+    ```
+
+    Update DATABASE_URL:
+    ```bash
+    DATABASE_URL=postgresql://umami:password@localhost:6432/umami
+    ```
+  </Tab>
+
+  <Tab title="Prisma Connection Pool">
+    Prisma includes built-in connection pooling:
+
+    ```bash
+    # Configure in DATABASE_URL
+    DATABASE_URL=postgresql://user:pass@host:5432/db?connection_limit=10
+    ```
+
+    Default connection pool size: 10
+  </Tab>
+
+  <Tab title="Cloud Providers">
+    **Supabase**: Use connection pooler
+    ```bash
+    # Port 6543 for pooled connections
+    DATABASE_URL=postgresql://postgres:pass@db.xxx.supabase.co:6543/postgres?pgbouncer=true
+    ```
+
+    **Neon**: Automatic pooling
+    ```bash
+    DATABASE_URL=postgresql://user:pass@ep-xxx.region.aws.neon.tech/db
+    ```
+  </Tab>
+</Tabs>
+
+### Query Performance
+
+Optimize slow queries:
+
+```sql
+-- Enable query logging
+ALTER DATABASE umami SET log_min_duration_statement = 1000;
+
+-- Check slow queries
+SELECT query, calls, total_time, mean_time
+FROM pg_stat_statements
+ORDER BY mean_time DESC
+LIMIT 10;
+
+-- Analyze query plan
+EXPLAIN ANALYZE SELECT * FROM website_event WHERE website_id = 'xxx';
+```
+
+## Backup and Restore
+
+### Backup Database
+
+<CodeGroup>
+  ```bash SQL Dump
+  # Backup to SQL file
+  pg_dump -U umami -d umami > umami_backup.sql
+
+  # Compressed backup
+  pg_dump -U umami -d umami | gzip > umami_backup.sql.gz
+  ```
+
+  ```bash Custom Format
+  # Custom format (recommended)
+  pg_dump -U umami -Fc -d umami > umami_backup.dump
+
+  # With compression level
+  pg_dump -U umami -Fc -Z9 -d umami > umami_backup.dump
+  ```
+
+  ```bash Directory Format
+  # Directory format (parallel backup)
+  pg_dump -U umami -Fd -d umami -f umami_backup_dir
+  ```
+</CodeGroup>
+
+### Restore Database
+
+<CodeGroup>
+  ```bash SQL Dump
+  # Restore from SQL file
+  psql -U umami -d umami < umami_backup.sql
+
+  # From compressed
+  gunzip -c umami_backup.sql.gz | psql -U umami -d umami
+  ```
+
+  ```bash Custom Format
+  # Restore custom format
+  pg_restore -U umami -d umami umami_backup.dump
+
+  # Drop and recreate
+  pg_restore -U umami -d umami --clean --create umami_backup.dump
+  ```
+</CodeGroup>
+
+### Automated Backups
+
+Schedule regular backups with cron:
+
+```bash cron
+# Edit crontab
+crontab -e
+
+# Add daily backup at 2 AM
+0 2 * * * pg_dump -U umami -Fc umami > /backups/umami_$(date +\%Y\%m\%d).dump
+
+# Weekly backup with 30-day retention
+0 3 * * 0 find /backups -name "umami_*.dump" -mtime +30 -delete
+```
+
+<Warning>
+  **Backup Best Practices:**
+  - Store backups on different server/disk
+  - Test restore process regularly
+  - Encrypt sensitive backups
+  - Keep multiple backup versions
+  - Document restore procedures
+</Warning>
+
+## Data Retention
+
+### Clean Old Data
+
+Remove old analytics data:
+
+```sql
+-- Delete events older than 1 year
+DELETE FROM website_event 
+WHERE created_at < NOW() - INTERVAL '1 year';
+
+-- Delete old sessions
+DELETE FROM session 
+WHERE created_at < NOW() - INTERVAL '1 year';
+
+-- Vacuum after deletion
+VACUUM FULL;
+```
+
+### Automated Cleanup
+
+Create a cleanup script:
+
+```sql cleanup.sql
+-- Clean up old data (90 days)
+DELETE FROM website_event WHERE created_at < NOW() - INTERVAL '90 days';
+DELETE FROM session WHERE created_at < NOW() - INTERVAL '90 days';
+VACUUM ANALYZE;
+```
+
+Schedule with cron:
+```bash
+# Monthly cleanup
+0 4 1 * * psql -U umami -d umami -f /path/to/cleanup.sql
+```
+
+## Monitoring
+
+### Database Size
+
+```sql
+-- Database size
+SELECT pg_size_pretty(pg_database_size('umami'));
+
+-- Table sizes
+SELECT 
+  schemaname,
+  tablename,
+  pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size
+FROM pg_tables
+WHERE schemaname = 'public'
+ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
+```
+
+### Active Connections
+
+```sql
+-- Current connections
+SELECT count(*) FROM pg_stat_activity WHERE datname = 'umami';
+
+-- Connection details
+SELECT 
+  pid,
+  usename,
+  application_name,
+  client_addr,
+  state,
+  query
+FROM pg_stat_activity
+WHERE datname = 'umami';
+```
+
+### Performance Stats
+
+```sql
+-- Cache hit ratio (should be > 90%)
+SELECT 
+  sum(heap_blks_hit) / (sum(heap_blks_hit) + sum(heap_blks_read)) * 100 
+AS cache_hit_ratio
+FROM pg_statio_user_tables;
+
+-- Table statistics
+SELECT * FROM pg_stat_user_tables WHERE schemaname = 'public';
+```
+
+## Troubleshooting
+
+<Accordion title="Connection refused">
+  Check PostgreSQL is running:
+  ```bash
+  sudo systemctl status postgresql
+  ```
+
+  Verify port is open:
+  ```bash
+  netstat -an | grep 5432
+  ```
+
+  Check `pg_hba.conf` allows connections:
+  ```bash
+  sudo nano /etc/postgresql/15/main/pg_hba.conf
+  ```
+
+  Add:
+  ```
+  host    all    all    0.0.0.0/0    md5
+  ```
+</Accordion>
+
+<Accordion title="Too many connections">
+  Increase max connections in `postgresql.conf`:
+  ```bash
+  max_connections = 200
+  ```
+
+  Or use connection pooling (PgBouncer).
+
+  Restart PostgreSQL:
+  ```bash
+  sudo systemctl restart postgresql
+  ```
+</Accordion>
+
+<Accordion title="Slow queries">
+  - Add missing indexes
+  - Run VACUUM ANALYZE
+  - Check pg_stat_statements for slow queries
+  - Optimize queries in application
+  - Consider upgrading hardware
+  - Use ClickHouse for very high volume
+</Accordion>
+
+<Accordion title="Disk space full">
+  - Delete old analytics data
+  - Run VACUUM FULL to reclaim space
+  - Archive old data to backup
+  - Increase disk size
+  - Set up data retention policy
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="gear" href="/configuration/environment-variables">
+    Configure DATABASE_URL and other settings
+  </Card>
+  <Card title="Running in Production" icon="server" href="/configuration/running">
+    Production deployment guide
+  </Card>
+  <Card title="Docker Installation" icon="docker" href="/installation/docker">
+    Deploy with Docker and PostgreSQL
+  </Card>
+  <Card title="Source Installation" icon="code" href="/installation/source">
+    Build from source with PostgreSQL
+  </Card>
+</CardGroup>

@@ -1,0 +1,117 @@
+---
+title: 'Remove Team Member'
+description: 'Remove a user from a team'
+---
+
+## Remove Team Member
+
+Remove a user from a team. The user will lose access to all team resources.
+
+### Endpoint
+
+```
+DELETE /api/teams/{teamId}/users/{userId}
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="teamId" type="string" required>
+  Team UUID
+</ParamField>
+
+<ParamField path="userId" type="string" required>
+  User UUID to remove
+</ParamField>
+
+### Response
+
+Returns a 200 OK status with an empty response body on successful removal.
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X DELETE https://your-umami-instance.com/api/teams/660e8400-e29b-41d4-a716-446655440001/users/bb0e8400-e29b-41d4-a716-446655440006 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const teamId = '660e8400-e29b-41d4-a716-446655440001';
+const userId = 'bb0e8400-e29b-41d4-a716-446655440006';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/teams/${teamId}/users/${userId}`,
+  {
+    method: 'DELETE',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+    },
+  }
+);
+
+if (response.ok) {
+  console.log('Member removed successfully');
+}
+```
+
+```python Python
+import requests
+
+team_id = '660e8400-e29b-41d4-a716-446655440001'
+user_id = 'bb0e8400-e29b-41d4-a716-446655440006'
+
+response = requests.delete(
+    f'https://your-umami-instance.com/api/teams/{team_id}/users/{user_id}',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+if response.status_code == 200:
+    print('Member removed successfully')
+```
+
+</CodeGroup>
+
+### What Happens When Removed
+
+When a user is removed from a team:
+
+- They immediately lose access to all team websites
+- They can no longer view team analytics
+- They cannot create or edit team resources
+- Their user account remains active
+- Personal websites (if any) are unaffected
+
+### Error Responses
+
+<ResponseField name="400" type="error">
+  Bad Request - User does not exist on this team
+</ResponseField>
+
+<ResponseField name="401" type="error">
+  Unauthorized - You must be the owner/manager of this team
+</ResponseField>
+
+<ResponseField name="404" type="error">
+  Not Found - Team or user does not exist
+</ResponseField>
+
+### Permissions
+
+You can remove a team member if:
+- You are a team owner or manager
+- You are removing yourself from the team (any member can leave)
+
+<Warning>
+  Removing the last owner/manager from a team may make the team unmanageable. Ensure there is at least one manager remaining.
+</Warning>
+
+<Note>
+  Users can be re-added to the team later using the [Add Team Member](/api/teams/add-team-member) endpoint.
+</Note>

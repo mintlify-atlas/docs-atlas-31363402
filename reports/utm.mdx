@@ -1,0 +1,555 @@
+---
+title: 'UTM Report'
+description: 'Track and analyze UTM campaign parameters to measure marketing campaign effectiveness'
+icon: 'tag'
+---
+
+The UTM Report provides detailed analysis of your UTM campaign parameters, helping you track and measure the effectiveness of your marketing campaigns. This is essential for understanding which campaigns, sources, and content variations drive traffic and engagement.
+
+## What is a UTM Report?
+
+UTM (Urchin Tracking Module) parameters are tags added to URLs that help you track where your traffic comes from. The UTM Report shows:
+
+- Traffic breakdown by UTM parameter
+- Page views for each campaign parameter
+- Which campaigns drive the most engagement
+- Performance comparison across sources, mediums, and campaigns
+
+## UTM Parameters
+
+Umami tracks five standard UTM parameters:
+
+<CardGroup cols={2}>
+  <Card title="utm_source" icon="circle-nodes">
+    Identifies the traffic source (e.g., google, newsletter, facebook)
+  </Card>
+  <Card title="utm_medium" icon="signs-post">
+    Identifies the marketing medium (e.g., cpc, email, social)
+  </Card>
+  <Card title="utm_campaign" icon="bullhorn">
+    Identifies the specific campaign (e.g., spring_sale_2024)
+  </Card>
+  <Card title="utm_content" icon="rectangle-ad">
+    Differentiates similar content or ads (e.g., banner_a, text_ad)
+  </Card>
+  <Card title="utm_term" icon="magnifying-glass">
+    Identifies paid search keywords (e.g., privacy_analytics)
+  </Card>
+</CardGroup>
+
+## How UTM Tracking Works
+
+<Steps>
+  <Step title="Add UTM Parameters to URLs">
+    Tag your marketing links with UTM parameters before sharing them.
+    
+    ```
+    https://yoursite.com/landing?utm_source=newsletter&utm_medium=email&utm_campaign=spring_sale
+    ```
+  </Step>
+  
+  <Step title="Users Click Tagged Links">
+    When users click your tagged links, Umami captures the UTM parameters.
+  </Step>
+  
+  <Step title="Parameters are Tracked">
+    UTM parameters are stored with each page view during the user's session.
+  </Step>
+  
+  <Step title="Generate Reports">
+    The UTM Report aggregates page views by each parameter value.
+  </Step>
+</Steps>
+
+<Info>
+  UTM parameters persist throughout a user's session, so you only need to tag the entry link, not every link in your content.
+</Info>
+
+## Creating UTM-Tagged Links
+
+### Basic UTM Link Structure
+
+```
+https://yoursite.com/page?utm_source=SOURCE&utm_medium=MEDIUM&utm_campaign=CAMPAIGN
+```
+
+### Examples by Marketing Channel
+
+<Tabs>
+  <Tab title="Email Marketing">
+    **Newsletter Link:**
+    ```
+    https://yoursite.com/blog/new-post?
+      utm_source=newsletter&
+      utm_medium=email&
+      utm_campaign=weekly_digest_2024&
+      utm_content=featured_article
+    ```
+    
+    **Promotional Email:**
+    ```
+    https://yoursite.com/sale?
+      utm_source=mailchimp&
+      utm_medium=email&
+      utm_campaign=spring_sale_2024&
+      utm_content=hero_banner
+    ```
+    
+    <Tip>
+      Use utm_content to track which links or sections of your email drive the most clicks.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Social Media">
+    **Facebook Post:**
+    ```
+    https://yoursite.com/product?
+      utm_source=facebook&
+      utm_medium=social&
+      utm_campaign=product_launch&
+      utm_content=organic_post
+    ```
+    
+    **LinkedIn Article:**
+    ```
+    https://yoursite.com/whitepaper?
+      utm_source=linkedin&
+      utm_medium=social&
+      utm_campaign=thought_leadership&
+      utm_content=article_share
+    ```
+    
+    **Instagram Bio Link:**
+    ```
+    https://yoursite.com?
+      utm_source=instagram&
+      utm_medium=social&
+      utm_campaign=bio_link
+    ```
+  </Tab>
+  
+  <Tab title="Paid Advertising">
+    **Google Ads:**
+    ```
+    https://yoursite.com/landing?
+      utm_source=google&
+      utm_medium=cpc&
+      utm_campaign=brand_search&
+      utm_term=privacy_analytics&
+      utm_content=text_ad_v1
+    ```
+    
+    **Facebook Ads:**
+    ```
+    https://yoursite.com/offer?
+      utm_source=facebook&
+      utm_medium=cpc&
+      utm_campaign=remarketing_q1&
+      utm_content=carousel_ad
+    ```
+    
+    <Note>
+      For paid ads, utm_medium is typically "cpc" (cost-per-click) or "cpm" (cost-per-impression).
+    </Note>
+  </Tab>
+  
+  <Tab title="Partnerships & Affiliates">
+    **Affiliate Link:**
+    ```
+    https://yoursite.com/signup?
+      utm_source=affiliate_john&
+      utm_medium=referral&
+      utm_campaign=affiliate_program
+    ```
+    
+    **Guest Post:**
+    ```
+    https://yoursite.com/blog?
+      utm_source=techblog&
+      utm_medium=referral&
+      utm_campaign=guest_post_series
+    ```
+    
+    **Partner Newsletter:**
+    ```
+    https://yoursite.com/partner-offer?
+      utm_source=partner_newsletter&
+      utm_medium=email&
+      utm_campaign=comarketing_q2
+    ```
+  </Tab>
+</Tabs>
+
+## API Usage
+
+```bash
+curl -X POST https://your-umami-instance.com/api/reports/utm \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "websiteId": "your-website-id",
+    "parameters": {
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": "2024-01-31T23:59:59Z"
+    },
+    "filters": {}
+  }'
+```
+
+### Response Format
+
+The API returns data for all five UTM parameters:
+
+```json
+{
+  "utm_source": [
+    { "utm": "newsletter", "views": 3450 },
+    { "utm": "facebook", "views": 2890 },
+    { "utm": "google", "views": 2145 }
+  ],
+  "utm_medium": [
+    { "utm": "email", "views": 3450 },
+    { "utm": "cpc", "views": 2890 },
+    { "utm": "social", "views": 2145 }
+  ],
+  "utm_campaign": [
+    { "utm": "spring_sale_2024", "views": 5234 },
+    { "utm": "product_launch", "views": 2890 }
+  ],
+  "utm_content": [
+    { "utm": "banner_a", "views": 1890 },
+    { "utm": "text_ad", "views": 1456 }
+  ],
+  "utm_term": [
+    { "utm": "web analytics", "views": 456 },
+    { "utm": "privacy analytics", "views": 234 }
+  ]
+}
+```
+
+## Use Cases and Insights
+
+<Tabs>
+  <Tab title="Campaign Performance">
+    ### Compare Campaign Effectiveness
+    
+    Use utm_campaign to compare different marketing initiatives.
+    
+    **Questions to answer:**
+    - Which campaigns drive the most traffic?
+    - Are seasonal campaigns effective?
+    - Which campaigns have the best ROI?
+    - Should we extend or end a campaign?
+    
+    **Example analysis:**
+    ```
+    Campaign Performance:
+    - spring_sale_2024: 5,234 views
+    - product_launch: 2,890 views
+    - weekly_newsletter: 3,450 views
+    
+    Insight: Weekly newsletter drives consistent traffic.
+    Spring sale was the most successful campaign.
+    ```
+    
+    <Tip>
+      Combine UTM Report with Goal or Revenue Reports to see which campaigns drive actual conversions, not just traffic.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Channel Analysis">
+    ### Optimize Marketing Channels
+    
+    Use utm_source and utm_medium to understand channel performance.
+    
+    **Channel breakdown:**
+    - Email (medium: email)
+    - Paid search (medium: cpc, source: google)
+    - Organic social (medium: social)
+    - Referrals (medium: referral)
+    
+    **Strategic decisions:**
+    - Which channels should get more budget?
+    - Are paid channels worth the investment?
+    - Which organic channels should we focus on?
+    - Where are our best opportunities?
+    
+    **Example:**
+    ```
+    utm_medium breakdown:
+    - email: 3,450 views (lowest cost per view)
+    - cpc: 2,890 views (highest cost per view)
+    - social: 2,145 views (free, organic)
+    
+    Strategy: Grow email list and organic social.
+    Optimize paid campaigns for efficiency.
+    ```
+  </Tab>
+  
+  <Tab title="Creative Testing">
+    ### Test Ad and Content Variations
+    
+    Use utm_content to A/B test different ad creative and copy.
+    
+    **What to test:**
+    - Ad images (banner_image_a vs banner_image_b)
+    - Ad copy (headline_v1 vs headline_v2)
+    - Call-to-action buttons (cta_signup vs cta_freetrial)
+    - Email content sections (hero_cta vs footer_cta)
+    
+    **Testing workflow:**
+    ```
+    Version A:
+    utm_content=banner_hero_lifestyle
+    Result: 1,890 views
+    
+    Version B:
+    utm_content=banner_hero_product
+    Result: 2,340 views
+    
+    Winner: Product-focused banner (24% more traffic)
+    ```
+    
+    <Info>
+      Run tests for at least 1-2 weeks to account for day-of-week variations.
+    </Info>
+  </Tab>
+  
+  <Tab title="Keyword Analysis">
+    ### Optimize Paid Search Keywords
+    
+    Use utm_term to track which paid search keywords drive traffic.
+    
+    **Paid search optimization:**
+    1. Tag each keyword with utm_term
+    2. Track traffic by keyword
+    3. Combine with conversion data
+    4. Calculate cost per conversion by keyword
+    5. Pause low-performing keywords
+    6. Increase bids on high-performers
+    
+    **Example:**
+    ```
+    utm_term performance:
+    - "web analytics": 456 views, 23 conversions
+    - "privacy analytics": 234 views, 18 conversions
+    - "free analytics": 789 views, 8 conversions
+    
+    Insight: "privacy analytics" has the best
+    conversion rate despite lower traffic.
+    ```
+    
+    <Warning>
+      utm_term is primarily for paid search. For organic search keywords, use Google Search Console.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## UTM Naming Conventions
+
+Establish consistent naming conventions for your team:
+
+### Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use Lowercase" icon="text-slash">
+    Always use lowercase to avoid duplicate entries (Newsletter vs newsletter)
+  </Card>
+  <Card title="Use Underscores" icon="minus">
+    Separate words with underscores (spring_sale not spring-sale or springsale)
+  </Card>
+  <Card title="Be Descriptive" icon="align-left">
+    Use clear, meaningful names (email_newsletter not nl)
+  </Card>
+  <Card title="Stay Consistent" icon="table-list">
+    Document your conventions and enforce them across your team
+  </Card>
+</CardGroup>
+
+### Recommended Convention Template
+
+```javascript
+// utm_source: Where traffic comes from
+Format: platform_or_partner_name
+Examples: facebook, google, newsletter, affiliate_john
+
+// utm_medium: Marketing channel type
+Format: channel_type
+Examples: email, cpc, social, referral, display
+
+// utm_campaign: Specific campaign or initiative
+Format: name_timeframe or theme_name
+Examples: spring_sale_2024, product_launch_v2, weekly_newsletter
+
+// utm_content: Content or ad variation
+Format: descriptive_identifier
+Examples: banner_a, hero_cta, footer_link, video_tutorial
+
+// utm_term: Keywords (paid search)
+Format: keyword_phrase
+Examples: privacy_analytics, web_analytics_tool
+```
+
+<Tip>
+  Create a shared spreadsheet or document with your UTM naming conventions that all team members can reference.
+</Tip>
+
+## Common UTM Mistakes to Avoid
+
+<Accordion title="Using UTM on Internal Links">
+  **Problem**: Adding UTM parameters to links between pages on your own site.
+  
+  **Why it's bad**: This breaks session tracking and inflates your referral data.
+  
+  **Solution**: Only use UTM parameters on external links (emails, social media, ads, partner sites).
+  
+  ```javascript
+  // DON'T do this:
+  <a href="/contact?utm_source=homepage">Contact Us</a>
+  
+  // DO this instead:
+  <a href="/contact">Contact Us</a>
+  ```
+</Accordion>
+
+<Accordion title="Inconsistent Capitalization">
+  **Problem**: Using different capitalizations creates duplicate entries.
+  
+  **Example**:
+  - utm_source=Newsletter (150 views)
+  - utm_source=newsletter (200 views)
+  - utm_source=NEWSLETTER (50 views)
+  
+  **Solution**: Always use lowercase.
+</Accordion>
+
+<Accordion title="Using Special Characters">
+  **Problem**: Special characters can break URLs or get encoded.
+  
+  **Bad**: `utm_campaign=Spring Sale! (2024)`
+  
+  **Good**: `utm_campaign=spring_sale_2024`
+  
+  **Solution**: Use only letters, numbers, and underscores.
+</Accordion>
+
+<Accordion title="Not Using All Required Parameters">
+  **Problem**: Using only some parameters makes tracking inconsistent.
+  
+  **Minimum required**: utm_source, utm_medium, utm_campaign
+  
+  **Solution**: Always include at least these three parameters.
+  
+  ```
+  // Minimum:
+  utm_source=facebook&utm_medium=cpc&utm_campaign=spring_sale
+  
+  // Better (with optional parameters):
+  utm_source=facebook&utm_medium=cpc&utm_campaign=spring_sale&utm_content=banner_a
+  ```
+</Accordion>
+
+## UTM Builder Tools
+
+Create properly formatted UTM links using these approaches:
+
+### Manual Building
+
+```javascript
+const baseUrl = 'https://yoursite.com/landing';
+const params = {
+  utm_source: 'newsletter',
+  utm_medium: 'email',
+  utm_campaign: 'spring_sale_2024',
+  utm_content: 'hero_cta'
+};
+
+const utmUrl = baseUrl + '?' + new URLSearchParams(params).toString();
+// Result: https://yoursite.com/landing?utm_source=newsletter&utm_medium=email...
+```
+
+### Using Google's Campaign URL Builder
+
+Google provides a free UTM builder tool that validates your parameters and generates clean URLs.
+
+<Info>
+  Search for "Google Campaign URL Builder" or use ga-dev-tools.google to access Google's official UTM builder.
+</Info>
+
+## Analyzing UTM Data
+
+### Calculate Campaign ROI
+
+```javascript
+// Example: Email campaign ROI
+const emailViews = 3450; // from UTM report
+const emailConversions = 173; // from Goal report filtered by utm_medium=email
+const campaignCost = 500; // your cost
+const revenuePerConversion = 50; // average order value
+
+const conversionRate = (emailConversions / emailViews) * 100; // 5%
+const totalRevenue = emailConversions * revenuePerConversion; // $8,650
+const roi = ((totalRevenue - campaignCost) / campaignCost) * 100; // 1,630% ROI
+```
+
+### Compare Channel Performance
+
+```javascript
+// Get traffic by channel
+const channels = {
+  email: 3450,
+  cpc: 2890,
+  social: 2145
+};
+
+const totalTraffic = Object.values(channels).reduce((a, b) => a + b, 0);
+
+// Calculate channel mix
+for (const [channel, views] of Object.entries(channels)) {
+  const percentage = (views / totalTraffic * 100).toFixed(1);
+  console.log(`${channel}: ${percentage}% of traffic`);
+}
+```
+
+## Best Practices
+
+1. **Always use lowercase**: Prevents duplicate entries
+2. **Document your conventions**: Share standards with your team
+3. **Use link shorteners carefully**: Ensure they preserve UTM parameters
+4. **Test your links**: Click them before launching campaigns
+5. **Review reports regularly**: Weekly analysis helps catch issues early
+6. **Combine with other reports**: Use with Attribution, Goal, and Revenue reports for complete picture
+
+<Warning>
+  UTM parameters are visible in URLs. Don't include sensitive information in your parameter values.
+</Warning>
+
+## Troubleshooting
+
+<Accordion title="UTM parameters not showing in report">
+  **Check:**
+  - Parameters are properly formatted in URL
+  - No spaces or special characters
+  - Users actually clicked the tagged links
+  - Ad blockers aren't stripping parameters
+  
+  **Test:**
+  Click your tagged link and verify parameters appear in the browser URL bar.
+</Accordion>
+
+<Accordion title="Traffic shows as (not set)">
+  **Cause**: No UTM parameters on the link
+  
+  **Solution**: Ensure all campaign links are properly tagged before sharing.
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Attribution Report" icon="link" href="/reports/attribution">
+    See how UTM campaigns contribute to conversions
+  </Card>
+  <Card title="Goal Tracking" icon="bullseye" href="/reports/goal">
+    Measure conversions from your UTM-tagged campaigns
+  </Card>
+</CardGroup>

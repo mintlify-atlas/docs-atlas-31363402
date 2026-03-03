@@ -1,0 +1,159 @@
+---
+title: 'Update Website'
+description: 'Update website details'
+---
+
+## Update Website
+
+Update the name, domain, or share ID of an existing website.
+
+### Endpoint
+
+```
+POST /api/websites/{websiteId}
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="websiteId" type="string" required>
+  Website UUID
+</ParamField>
+
+### Request Body
+
+<ParamField body="name" type="string">
+  Updated website name (max 100 characters)
+</ParamField>
+
+<ParamField body="domain" type="string">
+  Updated website domain (max 500 characters)
+</ParamField>
+
+<ParamField body="shareId" type="string">
+  Updated share ID (max 50 characters, alphanumeric with hyphens). Set to `null` to remove public sharing.
+</ParamField>
+
+<Note>
+  All fields are optional. Only include fields you want to update.
+</Note>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Website UUID
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Updated website name
+</ResponseField>
+
+<ResponseField name="domain" type="string">
+  Updated website domain
+</ResponseField>
+
+<ResponseField name="shareId" type="string">
+  Updated share ID
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 timestamp of update
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/websites/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Website Name",
+    "domain": "newdomain.com"
+  }'
+```
+
+```javascript JavaScript
+const websiteId = '550e8400-e29b-41d4-a716-446655440000';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/websites/${websiteId}`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: 'Updated Website Name',
+      domain: 'newdomain.com',
+    }),
+  }
+);
+
+const website = await response.json();
+```
+
+```python Python
+import requests
+
+website_id = '550e8400-e29b-41d4-a716-446655440000'
+
+response = requests.post(
+    f'https://your-umami-instance.com/api/websites/{website_id}',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'},
+    json={
+        'name': 'Updated Website Name',
+        'domain': 'newdomain.com'
+    }
+)
+
+website = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Updated Website Name",
+  "domain": "newdomain.com",
+  "shareId": "abc123def456",
+  "userId": "660e8400-e29b-41d4-a716-446655440001",
+  "teamId": null,
+  "updatedAt": "2024-03-15T16:45:00.000Z"
+}
+```
+
+## Removing Share ID
+
+To disable public sharing, set `shareId` to `null`:
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/websites/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"shareId": null}'
+```
+
+### Error Responses
+
+<ResponseField name="400" type="error">
+  Bad Request - Share ID already taken by another website
+</ResponseField>
+
+<ResponseField name="401" type="error">
+  Unauthorized - You don't have permission to update this website
+</ResponseField>
+
+<Warning>
+  You must be the website owner or have update permissions to modify website settings.
+</Warning>

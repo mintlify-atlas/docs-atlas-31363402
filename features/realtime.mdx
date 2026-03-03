@@ -1,0 +1,295 @@
+---
+title: Real-time Analytics
+description: Monitor live visitor activity and see what's happening on your website right now
+---
+
+Real-time analytics provides instant visibility into current visitor activity on your website. Watch as visitors arrive, navigate through pages, and interact with your content in real-time.
+
+## Accessing Real-time View
+
+View live analytics for any website:
+
+<Steps>
+  <Step title="Select Website">
+    Navigate to the website dashboard.
+  </Step>
+  
+  <Step title="Open Real-time Tab">
+    Click on the **Realtime** tab in the website navigation.
+  </Step>
+  
+  <Step title="Monitor Activity">
+    Watch live visitor data update automatically every few seconds.
+  </Step>
+</Steps>
+
+## Real-time Metrics
+
+The real-time dashboard displays current activity across multiple dimensions:
+
+### Current Visitors
+
+<Card title="Live Visitor Count" icon="users">
+  See how many people are actively browsing your website right now. This count updates continuously as visitors arrive and leave.
+</Card>
+
+### Activity Timeline
+
+<Info>
+  The real-time chart shows visitor activity over the last 60 minutes, with data points updated every minute.
+</Info>
+
+View a minute-by-minute breakdown of:
+- Visitor arrivals
+- Page views
+- Active sessions
+- Event triggers
+
+## Real-time Activity Log
+
+Monitor individual visitor actions as they happen:
+
+<CardGroup cols={2}>
+  <Card title="Page Views" icon="file-text">
+    See each page view as it occurs:
+    - Page URL and title
+    - Timestamp
+    - Visitor location
+    - Referrer source
+  </Card>
+  
+  <Card title="Events" icon="zap">
+    Track custom events in real-time:
+    - Event names
+    - Event properties
+    - Associated visitor data
+    - Timing information
+  </Card>
+</CardGroup>
+
+### Activity Feed
+
+The activity log shows the most recent actions:
+
+```text
+2 seconds ago  •  /blog/new-post  •  United States  •  Google
+5 seconds ago  •  /products       •  Canada         •  Direct
+8 seconds ago  •  /home          •  United Kingdom •  Twitter
+```
+
+<Tip>
+  The activity log auto-scrolls to show the latest activity, but you can pause it to examine specific events.
+</Tip>
+
+## Real-time Page Analytics
+
+See which pages are getting the most attention:
+
+### Top Pages
+
+Ranked list of currently active pages:
+- Page URL and title
+- Current visitors on each page
+- Percentage of total traffic
+- Trend indicators
+
+### Top Referrers
+
+Understand where your real-time traffic originates:
+- Referrer domains
+- Social media platforms
+- Search engines
+- Direct traffic
+- Campaign sources
+
+<Accordion title="What counts as a referrer?">
+  A referrer is the source that directed a visitor to your website. This includes:
+  - Other websites that link to you
+  - Social media posts and shares
+  - Search engine results
+  - Email campaigns with tracking
+  - Advertising campaigns
+</Accordion>
+
+## Geographic Real-time Data
+
+Visualize where your visitors are located:
+
+### World Map View
+
+Interactive map showing:
+- Visitor concentration by country
+- Heat map of activity levels
+- Real-time country rankings
+- Regional distribution
+
+### Country List
+
+Detailed breakdown by location:
+
+<CardGroup cols={2}>
+  <Card title="Top Countries">
+    Ranked list of countries sending traffic:
+    - Country name and flag
+    - Current visitor count
+    - Percentage of total
+  </Card>
+  
+  <Card title="Regional Data">
+    More granular location information:
+    - State/province (where available)
+    - City (where available)
+    - Timezone considerations
+  </Card>
+</CardGroup>
+
+## Device and Browser Information
+
+Understand the technology your visitors are using:
+
+### Real-time Device Breakdown
+
+- **Desktop**: Laptop and desktop computers
+- **Mobile**: Smartphones and tablets
+- **Other**: Smart TVs, game consoles, etc.
+
+### Browser Distribution
+
+See which browsers your active visitors use:
+- Chrome, Firefox, Safari, Edge
+- Browser versions
+- Mobile vs desktop browsers
+
+### Operating Systems
+
+Track operating system usage:
+- Windows, macOS, Linux
+- iOS, Android
+- Version information
+
+## Use Cases for Real-time Analytics
+
+<CardGroup cols={2}>
+  <Card title="Content Launch" icon="rocket">
+    Monitor the immediate impact when publishing new content:
+    - Track initial traffic spikes
+    - Identify popular sections
+    - Watch social media referrals
+  </Card>
+  
+  <Card title="Campaign Monitoring" icon="megaphone">
+    Track marketing campaigns as they go live:
+    - Verify tracking is working
+    - Monitor traffic sources
+    - Measure immediate response
+  </Card>
+  
+  <Card title="Event Coverage" icon="calendar">
+    Monitor traffic during live events:
+    - Webinar attendance
+    - Product launches
+    - Breaking news coverage
+  </Card>
+  
+  <Card title="Issue Detection" icon="alert-triangle">
+    Quickly identify problems:
+    - Traffic drops
+    - Broken pages
+    - Tracking issues
+    - Bot activity
+  </Card>
+</CardGroup>
+
+## Real-time vs Historical Data
+
+<Info>
+  Real-time data shows the last 60 minutes of activity. For historical analysis, use the main dashboard and reports.
+</Info>
+
+| Feature | Real-time | Historical |
+|---------|-----------|------------|
+| **Time Range** | Last 60 minutes | Custom date ranges |
+| **Update Frequency** | Every few seconds | On-demand |
+| **Detail Level** | Individual events | Aggregated metrics |
+| **Best For** | Monitoring current activity | Trend analysis |
+
+## Privacy and Real-time Data
+
+Umami's real-time analytics respects user privacy:
+
+- No personal identifiable information (PII) is collected
+- IP addresses are anonymized
+- No cross-site tracking
+- No cookies required
+- GDPR compliant
+
+<Warning>
+  Real-time data is designed for monitoring aggregate activity. Individual user tracking is not supported to maintain privacy.
+</Warning>
+
+## Technical Details
+
+### Data Refresh Rate
+
+- **Activity log**: Updates every 3-5 seconds
+- **Metrics**: Update every 5-10 seconds
+- **Charts**: Update every minute
+
+### Data Retention
+
+<Accordion title="How long is real-time data stored?">
+  Real-time data is retained as part of your regular analytics data. The "real-time" view simply filters to show the most recent activity. All data remains available in historical reports.
+</Accordion>
+
+## Best Practices
+
+- Keep real-time view open during important launches or campaigns
+- Use real-time data to verify tracking implementation
+- Monitor for unusual spikes or drops in traffic
+- Cross-reference real-time data with external events
+- Don't rely solely on real-time data for decision-making
+- Use filters to focus on specific traffic sources
+
+## Troubleshooting
+
+<Accordion title="No real-time data appearing">
+  **Possible causes:**
+  - Tracking code not properly installed
+  - Browser extensions blocking scripts
+  - Recent website deployment not live yet
+  - DNS propagation delays
+  
+  **Solutions:**
+  - Verify tracking code in page source
+  - Test in incognito/private browsing mode
+  - Check browser console for errors
+  - Wait a few minutes and refresh
+</Accordion>
+
+<Accordion title="Real-time count seems low">
+  **Remember:**
+  - Only shows visitors in the last 60 minutes
+  - Excludes bot traffic (by design)
+  - Privacy-focused tracking may differ from other tools
+  - Users with ad blockers may not be tracked
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Dashboard Analytics" href="/features/dashboards">
+    Explore historical trends and detailed metrics
+  </Card>
+  
+  <Card title="Custom Reports" href="/features/reports">
+    Create detailed analytics reports
+  </Card>
+  
+  <Card title="Event Tracking" href="/tracking/events">
+    Set up custom event tracking
+  </Card>
+  
+  <Card title="Filters" href="/features/filters">
+    Filter real-time data by specific criteria
+  </Card>
+</CardGroup>

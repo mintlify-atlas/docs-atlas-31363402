@@ -1,0 +1,459 @@
+---
+title: 'Goal Report'
+description: 'Track specific goal completions and measure conversion rates'
+icon: 'bullseye'
+---
+
+The Goal Report helps you track specific conversion events and measure how many visitors complete desired actions. This is essential for measuring the success of your website and marketing campaigns.
+
+## What is a Goal Report?
+
+A goal represents a single, specific action you want users to complete, such as:
+- Viewing a thank-you page
+- Submitting a form
+- Clicking a button
+- Completing a purchase
+
+The Goal Report shows you:
+- How many visitors completed the goal
+- Total visitors to your site
+- Goal conversion rate
+
+## Key Metrics
+
+<CardGroup cols={2}>
+  <Card title="Goal Completions" icon="check">
+    Number of unique visitors who completed the goal
+  </Card>
+  <Card title="Total Visitors" icon="users">
+    Total number of unique visitors in the time period
+  </Card>
+  <Card title="Conversion Rate" icon="percent">
+    Percentage of visitors who completed the goal
+  </Card>
+  <Card title="Goal Value" icon="dollar-sign">
+    Optional: monetary value associated with goal completions
+  </Card>
+</CardGroup>
+
+## Goal Types
+
+Umami supports two types of goals:
+
+<Tabs>
+  <Tab title="Page View Goals">
+    Track when visitors view a specific page. This is useful for:
+    - Thank you pages after form submissions
+    - Confirmation pages after purchases
+    - Downloaded content pages
+    - Key destination pages
+    
+    **Example: Track newsletter signups**
+    ```json
+    {
+      "type": "path",
+      "value": "/newsletter/thank-you",
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+    
+    <Info>
+      Page view goals are the simplest to set up and work automatically once your Umami tracking is installed.
+    </Info>
+  </Tab>
+  
+  <Tab title="Custom Event Goals">
+    Track custom events that you send to Umami. This is useful for:
+    - Button clicks
+    - Form submissions
+    - Video plays
+    - File downloads
+    - Any custom interaction
+    
+    **Example: Track button clicks**
+    
+    First, send the event from your website:
+    ```javascript
+    // In your website code
+    umami.track('signup_click');
+    ```
+    
+    Then track it as a goal:
+    ```json
+    {
+      "type": "event",
+      "value": "signup_click",
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+    
+    <Tip>
+      Custom events give you more flexibility and don't require page navigation, making them ideal for single-page applications.
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Setting Up Goals
+
+<Steps>
+  <Step title="Identify Your Goal">
+    Decide what action represents a conversion for your business. This could be a page view (e.g., `/thank-you`) or a custom event (e.g., `purchase_complete`).
+  </Step>
+  
+  <Step title="Choose Goal Type">
+    Determine whether to track a page view or custom event based on your implementation.
+  </Step>
+  
+  <Step title="Configure the Goal">
+    Set up the goal in your reporting system with the appropriate type and value.
+  </Step>
+  
+  <Step title="Add Tracking (if needed)">
+    For custom events, add `umami.track()` calls to your website code.
+  </Step>
+  
+  <Step title="Verify">
+    Test that the goal is being tracked correctly by completing the action yourself.
+  </Step>
+</Steps>
+
+## Understanding Goal Results
+
+### Conversion Rate Calculation
+
+The conversion rate is calculated as:
+
+```
+Conversion Rate = (Goal Completions / Total Visitors) × 100
+```
+
+**Example:**
+- Total Visitors: 10,000
+- Goal Completions: 250
+- Conversion Rate: 2.5%
+
+<Note>
+  Goal completions are counted per unique session. If the same user completes the goal multiple times, it's only counted once.
+</Note>
+
+## Common Goal Examples
+
+<Accordion title="E-commerce Goals">
+  Track purchase completions and revenue:
+  
+  **Purchase Completion:**
+  - Type: Page view
+  - Value: `/checkout/thank-you`
+  
+  **Add to Cart:**
+  - Type: Custom event
+  - Value: `add_to_cart`
+  
+  **Product View:**
+  - Type: Page view
+  - Value: `/products/*` (with wildcard)
+</Accordion>
+
+<Accordion title="Lead Generation Goals">
+  Track form submissions and lead capture:
+  
+  **Contact Form Submission:**
+  - Type: Custom event
+  - Value: `contact_submit`
+  
+  **Demo Request:**
+  - Type: Page view
+  - Value: `/demo/scheduled`
+  
+  **Whitepaper Download:**
+  - Type: Custom event
+  - Value: `whitepaper_download`
+</Accordion>
+
+<Accordion title="SaaS Goals">
+  Track signups and product usage:
+  
+  **Free Trial Signup:**
+  - Type: Page view
+  - Value: `/signup/success`
+  
+  **Onboarding Completion:**
+  - Type: Custom event
+  - Value: `onboarding_complete`
+  
+  **Feature Usage:**
+  - Type: Custom event
+  - Value: `feature_export_used`
+</Accordion>
+
+<Accordion title="Content Goals">
+  Track engagement with content:
+  
+  **Newsletter Subscription:**
+  - Type: Custom event
+  - Value: `newsletter_subscribe`
+  
+  **Article Read Completion:**
+  - Type: Custom event
+  - Value: `article_read_complete`
+  
+  **Video Watch:**
+  - Type: Custom event
+  - Value: `video_watched`
+</Accordion>
+
+## Use Cases and Insights
+
+<Tabs>
+  <Tab title="Measure Marketing Effectiveness">
+    ### Track Campaign Performance
+    
+    Use goals to measure the effectiveness of marketing campaigns.
+    
+    **Workflow:**
+    1. Set up a goal for your conversion event
+    2. Add UTM parameters to campaign links
+    3. Filter goal report by UTM parameters
+    4. Compare conversion rates across campaigns
+    
+    **Example:**
+    ```json
+    {
+      "type": "path",
+      "value": "/signup/success",
+      "filters": {
+        "utm_campaign": "spring_sale_2024"
+      }
+    }
+    ```
+    
+    <Tip>
+      Combine Goal Reports with Attribution Reports to see which traffic sources drive the best conversion rates.
+    </Tip>
+  </Tab>
+  
+  <Tab title="A/B Testing">
+    ### Compare Goal Performance
+    
+    Use goals to measure the impact of changes to your site.
+    
+    **How to A/B test:**
+    1. Set up different page versions (A and B)
+    2. Create a goal for the conversion event
+    3. Route 50% of traffic to each version
+    4. Compare conversion rates
+    
+    **What to test:**
+    - Landing page designs
+    - Call-to-action copy
+    - Form layouts
+    - Pricing page structures
+    
+    <Info>
+      Run A/B tests for at least 2 weeks to gather statistically significant data.
+    </Info>
+  </Tab>
+  
+  <Tab title="Conversion Optimization">
+    ### Improve Conversion Rates
+    
+    Use goal data to identify opportunities for improvement.
+    
+    **Analysis steps:**
+    1. Establish baseline conversion rate
+    2. Identify pages/sources with low conversion
+    3. Test improvements
+    4. Measure impact on goal conversion rate
+    
+    **Common optimizations:**
+    - Simplify forms (reduce fields)
+    - Improve call-to-action clarity
+    - Add trust signals (testimonials, security badges)
+    - Optimize page load speed
+    
+    ```json
+    {
+      "type": "event",
+      "value": "form_submit",
+      "filters": {
+        "url_path": "/contact"
+      }
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Segment Analysis">
+    ### Analyze Goals by Segment
+    
+    Break down goal performance by user segments.
+    
+    **Useful segments:**
+    - **Device type**: Mobile vs desktop conversion rates
+    - **Geography**: Which countries convert best?
+    - **Traffic source**: Organic vs paid conversion rates
+    - **Landing page**: Which entry points convert better?
+    
+    **Example: Mobile vs Desktop**
+    ```bash
+    # Desktop conversion rate
+    curl -X POST .../api/reports/goal \
+      -d '{"filters": {"device": "desktop"}}'
+    
+    # Mobile conversion rate
+    curl -X POST .../api/reports/goal \
+      -d '{"filters": {"device": "mobile"}}'
+    ```
+    
+    <Warning>
+      Ensure you have sufficient traffic in each segment for meaningful analysis. Small sample sizes can be misleading.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## API Usage
+
+```bash
+curl -X POST https://your-umami-instance.com/api/reports/goal \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "websiteId": "your-website-id",
+    "parameters": {
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": "2024-01-31T23:59:59Z",
+      "type": "path",
+      "value": "/thank-you"
+    },
+    "filters": {
+      "country": "US"
+    }
+  }'
+```
+
+### Response Format
+
+```json
+{
+  "num": 250,
+  "total": 10000
+}
+```
+
+Calculate conversion rate:
+```javascript
+const conversionRate = (response.num / response.total) * 100;
+// 2.5%
+```
+
+## Tracking Custom Events
+
+To use custom event goals, add tracking to your website:
+
+### Basic Event Tracking
+
+```javascript
+// Track a simple event
+umami.track('button_click');
+
+// Track event with properties
+umami.track('purchase', { 
+  value: 99.99, 
+  currency: 'USD',
+  product: 'Premium Plan' 
+});
+```
+
+### React Example
+
+```jsx
+import { useEffect } from 'react';
+
+function SignupButton() {
+  const handleClick = () => {
+    // Track the goal
+    if (window.umami) {
+      umami.track('signup_click');
+    }
+    
+    // Your signup logic
+    handleSignup();
+  };
+  
+  return (
+    <button onClick={handleClick}>
+      Sign Up
+    </button>
+  );
+}
+```
+
+### Form Submission Example
+
+```javascript
+const form = document.querySelector('#contact-form');
+
+form.addEventListener('submit', (e) => {
+  // Track goal completion
+  umami.track('contact_form_submit');
+  
+  // Form submission continues...
+});
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Keep Goals Simple" icon="circle">
+    Track one clear action per goal. Don't combine multiple actions.
+  </Card>
+  <Card title="Use Meaningful Names" icon="tag">
+    Name events clearly (e.g., 'newsletter_subscribe' not 'event1')
+  </Card>
+  <Card title="Set Benchmarks" icon="chart-line">
+    Establish baseline conversion rates to measure improvements
+  </Card>
+  <Card title="Monitor Regularly" icon="clock">
+    Check goal conversion rates weekly to catch issues early
+  </Card>
+</CardGroup>
+
+<Tip>
+  Create multiple goals to track different stages of your conversion funnel, not just the final conversion.
+</Tip>
+
+## Troubleshooting
+
+<Accordion title="Goal shows 0 completions">
+  **Possible causes:**
+  - Goal type or value doesn't match actual events
+  - Tracking code not properly installed
+  - Ad blockers preventing tracking
+  
+  **How to fix:**
+  1. Verify the page path or event name exactly matches
+  2. Test the goal action yourself and check browser console
+  3. Ensure Umami tracking script is loaded
+</Accordion>
+
+<Accordion title="Conversion rate seems too high or low">
+  **Check:**
+  - Date range is correct
+  - Filters aren't excluding/including unexpected traffic
+  - Goal isn't being triggered multiple times per session
+  
+  **Verify:**
+  Compare with other analytics tools if available
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Funnel Analysis" icon="filter" href="/reports/funnel">
+    Track multi-step conversion processes with Funnel Reports
+  </Card>
+  <Card title="Attribution" icon="link" href="/reports/attribution">
+    See which traffic sources drive goal completions
+  </Card>
+</CardGroup>

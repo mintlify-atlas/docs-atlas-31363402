@@ -1,0 +1,585 @@
+---
+title: Database Migrations
+description: Understanding and managing Umami database migrations
+---
+
+## Overview
+
+Umami uses database migrations to evolve the schema over time. Migrations are automatically applied during the build process or when starting the application in Docker.
+
+<Info>
+  Migrations are managed by Prisma for PostgreSQL and custom SQL scripts for ClickHouse.
+</Info>
+
+## How Migrations Work
+
+Migrations are versioned changes to the database schema that:
+
+- Create new tables and columns
+- Add or modify indexes
+- Transform existing data
+- Ensure schema compatibility across versions
+
+<Tabs>
+  <Tab title="PostgreSQL">
+    - Managed by Prisma Migrate
+    - Located in `/prisma/migrations/`
+    - Automatically tracked in `_prisma_migrations` table
+    - Applied sequentially in order
+  </Tab>
+  
+  <Tab title="ClickHouse">
+    - Managed by custom migration system
+    - Located in `/db/clickhouse/migrations/`
+    - Schema defined in `/db/clickhouse/schema.sql`
+    - Applied on application startup
+  </Tab>
+</Tabs>
+
+## Automatic Migration
+
+Migrations run automatically in several scenarios:
+
+### During Build
+
+When building from source:
+
+```bash
+pnpm build
+```
+
+The build script includes:
+
+```json package.json
+{
+  "scripts": {
+    "build": "npm-run-all check-env build-db check-db build-tracker build-geo build-app",
+    "build-db": "npm-run-all build-db-client build-prisma-client",
+    "build-db-client": "prisma generate",
+    "update-db": "prisma migrate deploy"
+  }
+}
+```
+
+### Docker Startup
+
+When starting the Docker container:
+
+```bash
+docker compose up -d
+```
+
+The startup script runs:
+
+```json package.json
+{
+  "scripts": {
+    "start-docker": "npm-run-all check-db update-tracker start-server",
+    "check-db": "node scripts/check-db.js"
+  }
+}
+```
+
+The `check-db.js` script:
+
+1. Validates `DATABASE_URL` is set
+2. Tests database connection
+3. Checks PostgreSQL version (minimum 9.4.0)
+4. Runs `prisma migrate deploy`
+
+<Note>
+  Set `SKIP_DB_MIGRATION=1` to prevent automatic migrations on startup.
+</Note>
+
+## Manual Migration
+
+### PostgreSQL
+
+Run migrations manually:
+
+```bash
+# Deploy pending migrations
+pnpm prisma migrate deploy
+
+# Check migration status
+pnpm prisma migrate status
+
+# Generate Prisma client
+pnpm prisma generate
+```
+
+### ClickHouse
+
+ClickHouse migrations are applied automatically by the application. For manual application:
+
+```bash
+# Apply schema
+clickhouse-client --multiquery < db/clickhouse/schema.sql
+
+# Apply specific migration
+clickhouse-client --multiquery < db/clickhouse/migrations/08_update_hostname_view.sql
+```
+
+## Migration History
+
+### PostgreSQL Migrations
+
+Located in `/prisma/migrations/`, each migration has its own directory:
+
+<AccordionGroup>
+  <Accordion title="01_init - Initial Schema">
+    Creates the foundation:
+    
+    - User authentication tables
+    - Website configuration
+    - Session tracking
+    - Event data storage
+    - Basic indexes
+    
+    This is the largest migration, establishing all core functionality.
+  </Accordion>
+  
+  <Accordion title="02_report_schema_session_data">
+    Adds reporting features:
+    
+    - Report configuration tables
+    - Session data attributes
+    - Report parameters storage
+    
+    Enables saved reports and custom session properties.
+  </Accordion>
+  
+  <Accordion title="03_metric_performance_index">
+    Performance optimization:
+    
+    - Adds composite indexes for common queries
+    - Optimizes website_event lookups
+    - Improves session query performance
+    
+    Significantly speeds up dashboard queries.
+  </Accordion>
+  
+  <Accordion title="04_team_redesign">
+    Team collaboration features:
+    
+    - Team management tables
+    - Team membership relationships
+    - Access control
+    
+    Enables multi-user team functionality.
+  </Accordion>
+  
+  <Accordion title="05_add_visit_id">
+    Visit tracking:
+    
+    - Adds `visit_id` column to events
+    - Creates indexes for visit-based queries
+    
+    Enables visit-level analytics (distinct from sessions).
+  </Accordion>
+  
+  <Accordion title="06_session_data">
+    Enhanced session tracking:
+    
+    - Session data table improvements
+    - Additional indexes for session lookups
+    - Data type optimizations
+  </Accordion>
+  
+  <Accordion title="07_add_tag">
+    Event tagging:
+    
+    - Adds `tag` column to website_event
+    - Creates tag indexes
+    
+    Allows categorizing events with custom tags.
+  </Accordion>
+  
+  <Accordion title="08_add_utm_clid">
+    Marketing attribution:
+    
+    - UTM parameters (utm_source, utm_medium, utm_campaign, utm_content, utm_term)
+    - Click IDs (gclid, fbclid, msclkid, ttclid, li_fat_id, twclid)
+    - Indexes for attribution queries
+    
+    Comprehensive marketing campaign tracking.
+  </Accordion>
+  
+  <Accordion title="09_update_hostname_region">
+    Geographic and hostname tracking:
+    
+    - Hostname field for multi-domain tracking
+    - Region/subdivision tracking
+    - Geographic indexes
+  </Accordion>
+  
+  <Accordion title="10_add_distinct_id">
+    User identification:
+    
+    - Adds `distinct_id` for user tracking across sessions
+    - Indexes for user-level analytics
+    
+    Enables cross-session user analytics.
+  </Accordion>
+  
+  <Accordion title="11_revenue_links_pixels">
+    Additional features:
+    
+    - Revenue tracking table
+    - URL shortener (links)
+    - Tracking pixels
+    - Segment definitions
+    
+    Latest feature additions to Umami.
+  </Accordion>
+</AccordionGroup>
+
+### ClickHouse Migrations
+
+Located in `/db/clickhouse/migrations/`:
+
+| Migration | Description |
+|-----------|-------------|
+| `01_edit_keys.sql` | Schema key adjustments |
+| `02_add_visit_id.sql` | Visit tracking support |
+| `03_session_data.sql` | Session data table |
+| `04_add_tag.sql` | Event tag support |
+| `05_add_utm_clid.sql` | UTM and click ID columns |
+| `06_update_subdivision.sql` | Geographic subdivision tracking |
+| `07_add_distinct_id.sql` | User identification |
+| `08_update_hostname_view.sql` | Materialized view updates |
+
+## Migration Safety
+
+### Backup Before Migration
+
+<Warning>
+  Always backup your database before running migrations, especially in production!
+</Warning>
+
+<Tabs>
+  <Tab title="PostgreSQL">
+    ```bash
+    # Create backup
+    pg_dump -U umami -h localhost umami > backup-$(date +%Y%m%d).sql
+    
+    # Compressed backup
+    pg_dump -U umami -h localhost -Fc umami > backup-$(date +%Y%m%d).dump
+    ```
+  </Tab>
+  
+  <Tab title="Docker PostgreSQL">
+    ```bash
+    # Backup from Docker
+    docker compose exec db pg_dump -U umami umami > backup-$(date +%Y%m%d).sql
+    ```
+  </Tab>
+  
+  <Tab title="ClickHouse">
+    ```bash
+    # Freeze table (create snapshot)
+    clickhouse-client --query "ALTER TABLE umami.website_event FREEZE"
+    
+    # Or export data
+    clickhouse-client --query "SELECT * FROM umami.website_event FORMAT Native" > backup.native
+    ```
+  </Tab>
+</Tabs>
+
+### Test Migrations
+
+Test migrations in a development environment first:
+
+```bash
+# 1. Clone production database to test environment
+pg_dump -U umami production-host -Fc umami | pg_restore -U umami -d umami_test
+
+# 2. Run migration on test database
+DATABASE_URL=postgresql://user:pass@localhost/umami_test pnpm prisma migrate deploy
+
+# 3. Verify application works
+DATABASE_URL=postgresql://user:pass@localhost/umami_test pnpm start
+
+# 4. If successful, apply to production
+```
+
+## Viewing Migration Status
+
+### PostgreSQL
+
+Check which migrations have been applied:
+
+```bash
+# Using Prisma CLI
+pnpm prisma migrate status
+```
+
+Output:
+```
+Database schema is up to date!
+
+The following migrations have been applied:
+
+migrations/
+  └─ 01_init/
+      └─ migration.sql
+  └─ 02_report_schema_session_data/
+      └─ migration.sql
+  ...
+```
+
+Query the migrations table directly:
+
+```sql
+SELECT
+  migration_name,
+  finished_at,
+  applied_steps_count
+FROM _prisma_migrations
+ORDER BY finished_at DESC;
+```
+
+### ClickHouse
+
+ClickHouse doesn't have a built-in migration tracking system. Check schema version:
+
+```sql
+-- Check if table exists
+EXISTS TABLE umami.website_event;
+
+-- Check table structure
+DESCRIBE TABLE umami.website_event;
+
+-- Verify specific columns exist
+SELECT name FROM system.columns
+WHERE database = 'umami' AND table = 'website_event'
+AND name IN ('visit_id', 'tag', 'distinct_id');
+```
+
+## Rollback Strategies
+
+<Warning>
+  Prisma doesn't support automatic rollback. You must manually revert changes.
+</Warning>
+
+### Restore from Backup
+
+The safest rollback method:
+
+```bash
+# PostgreSQL
+pg_restore -U umami -d umami -c backup.dump
+
+# Or from SQL file
+psql -U umami umami < backup.sql
+```
+
+### Manual Rollback
+
+For simple migrations, manually reverse the changes:
+
+```sql
+-- If migration added a column
+ALTER TABLE website_event DROP COLUMN new_column;
+
+-- If migration added a table
+DROP TABLE new_table;
+
+-- If migration added an index
+DROP INDEX index_name;
+```
+
+Then mark the migration as not applied:
+
+```sql
+DELETE FROM _prisma_migrations
+WHERE migration_name = 'migration_to_rollback';
+```
+
+## Data Migrations
+
+Some migrations include data transformations. These are in `/db/postgresql/data-migrations/`:
+
+### populate-revenue-table.sql
+
+Populates the revenue table from event data:
+
+```sql
+-- Extracts revenue data from custom events
+INSERT INTO revenue (revenue_id, website_id, session_id, event_id, ...)
+SELECT ... FROM event_data WHERE data_key = 'revenue';
+```
+
+### convert-utm-clid-columns.sql
+
+Migrates UTM and click ID data from event_data to dedicated columns:
+
+```sql
+-- Moves utm_source from event_data to website_event column
+UPDATE website_event we
+SET utm_source = ed.string_value
+FROM event_data ed
+WHERE ed.event_id = we.event_id AND ed.data_key = 'utm_source';
+```
+
+<Info>
+  Data migrations may take considerable time on large databases. Run during low-traffic periods.
+</Info>
+
+## Troubleshooting Migrations
+
+<AccordionGroup>
+  <Accordion title="Migration fails with constraint error">
+    Usually caused by existing data violating new constraints.
+    
+    1. Check the error message for the specific constraint
+    2. Identify problematic data:
+    
+    ```sql
+    -- Example: Find null values where NOT NULL is required
+    SELECT * FROM website_event WHERE column_name IS NULL;
+    ```
+    
+    3. Fix or remove problematic data
+    4. Retry migration
+  </Accordion>
+  
+  <Accordion title="Migration timeout">
+    Large migrations may timeout:
+    
+    1. Increase timeout in Prisma:
+    
+    ```bash
+    DATABASE_URL="postgresql://...?connect_timeout=300"
+    ```
+    
+    2. Or run migration directly with psql:
+    
+    ```bash
+    psql -U umami umami < migration.sql
+    ```
+  </Accordion>
+  
+  <Accordion title="Migration already applied error">
+    If migration tracking is out of sync:
+    
+    ```bash
+    # Mark migration as resolved
+    pnpm prisma migrate resolve --applied migration_name
+    
+    # Or mark as rolled back
+    pnpm prisma migrate resolve --rolled-back migration_name
+    ```
+  </Accordion>
+  
+  <Accordion title="Schema drift detected">
+    Manual changes to the database caused drift:
+    
+    ```bash
+    # View drift
+    pnpm prisma migrate status
+    
+    # Reset to schema (DESTRUCTIVE)
+    pnpm prisma migrate reset
+    
+    # Or create migration from current state
+    pnpm prisma migrate dev
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Always Backup" icon="database">
+    Create backups before running migrations, especially in production.
+  </Card>
+  <Card title="Test First" icon="flask">
+    Test migrations on a copy of production data before applying.
+  </Card>
+  <Card title="Monitor Progress" icon="chart-line">
+    Watch logs during migration for errors or warnings.
+  </Card>
+  <Card title="Plan Downtime" icon="clock">
+    Large migrations may require application downtime.
+  </Card>
+</CardGroup>
+
+### Migration Checklist
+
+<Accordion title="Pre-Migration Checklist">
+  - [ ] Backup database
+  - [ ] Test migration in staging environment
+  - [ ] Check disk space (migrations may temporarily double space)
+  - [ ] Review migration SQL for expected changes
+  - [ ] Plan maintenance window if needed
+  - [ ] Notify users of potential downtime
+  - [ ] Have rollback plan ready
+</Accordion>
+
+<Accordion title="During Migration">
+  - [ ] Monitor migration logs
+  - [ ] Watch database performance metrics
+  - [ ] Check for lock conflicts
+  - [ ] Verify migration completes successfully
+</Accordion>
+
+<Accordion title="Post-Migration">
+  - [ ] Verify application functionality
+  - [ ] Check migration status
+  - [ ] Review database logs for errors
+  - [ ] Test critical user workflows
+  - [ ] Monitor performance for issues
+  - [ ] Keep backup until stability confirmed
+</Accordion>
+
+## Skipping Migrations
+
+In some scenarios, you may want to skip automatic migrations:
+
+```bash
+# Skip database check and migration
+SKIP_DB_CHECK=1 pnpm start
+
+# Skip only migration (still checks connection)
+SKIP_DB_MIGRATION=1 pnpm start
+```
+
+<Warning>
+  Only skip migrations if you're managing schema manually. Running Umami with outdated schema will cause errors.
+</Warning>
+
+## Creating Custom Migrations
+
+If you're modifying Umami's source:
+
+```bash
+# Create a new migration
+pnpm prisma migrate dev --name description_of_changes
+
+# This will:
+# 1. Generate migration SQL
+# 2. Apply it to your database
+# 3. Regenerate Prisma Client
+```
+
+<Note>
+  Custom migrations are for development only. Production deployments should use official migrations.
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="PostgreSQL" icon="database" href="/self-hosting/postgresql">
+    Configure PostgreSQL database
+  </Card>
+  <Card title="ClickHouse" icon="database" href="/self-hosting/clickhouse">
+    Set up ClickHouse for scale
+  </Card>
+  <Card title="Upgrading" icon="arrow-up" href="/self-hosting/upgrading">
+    Update Umami to new versions
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/self-hosting/troubleshooting">
+    Solve migration issues
+  </Card>
+</CardGroup>

@@ -1,0 +1,207 @@
+---
+title: 'Authentication'
+description: 'Authenticate with the Umami API'
+---
+
+## Login
+
+Authenticate with your username and password to obtain an access token.
+
+<Note>
+  Access tokens are required for most API endpoints. Include the token in the `Authorization` header as a Bearer token.
+</Note>
+
+### Endpoint
+
+```
+POST /api/auth/login
+```
+
+### Request Body
+
+<ParamField body="username" type="string" required>
+  Your Umami username
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Your Umami password
+</ParamField>
+
+### Response
+
+<ResponseField name="token" type="string">
+  Bearer token for authentication
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  User information
+  
+  <Expandable title="user object">
+    <ResponseField name="id" type="string">
+      User UUID
+    </ResponseField>
+    
+    <ResponseField name="username" type="string">
+      Username
+    </ResponseField>
+    
+    <ResponseField name="role" type="string">
+      User role (admin or user)
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+    
+    <ResponseField name="isAdmin" type="boolean">
+      Whether user has admin privileges
+    </ResponseField>
+    
+    <ResponseField name="teams" type="array">
+      Array of team objects the user belongs to
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "your-password"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://your-umami-instance.com/api/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    username: 'admin',
+    password: 'your-password',
+  }),
+});
+
+const data = await response.json();
+console.log(data.token);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://your-umami-instance.com/api/auth/login',
+    json={
+        'username': 'admin',
+        'password': 'your-password'
+    }
+)
+
+data = response.json()
+token = data['token']
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "username": "admin",
+    "role": "admin",
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "isAdmin": true,
+    "teams": [
+      {
+        "id": "660e8400-e29b-41d4-a716-446655440001",
+        "name": "Engineering",
+        "role": "team-manager"
+      }
+    ]
+  }
+}
+```
+
+## Verify Token
+
+Verify that your authentication token is valid and retrieve current user information.
+
+### Endpoint
+
+```
+POST /api/auth/verify
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token obtained from login
+</ParamField>
+
+### Example Request
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/auth/verify \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Example Response
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "username": "admin",
+  "role": "admin",
+  "teams": [
+    {
+      "id": "660e8400-e29b-41d4-a716-446655440001",
+      "name": "Engineering"
+    }
+  ]
+}
+```
+
+## Using the Token
+
+Include the token in the `Authorization` header for all authenticated requests:
+
+```bash
+curl https://your-umami-instance.com/api/websites \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+<Warning>
+  Store tokens securely and never expose them in client-side code or public repositories.
+</Warning>
+
+## Logout
+
+Invalidate the current authentication token.
+
+### Endpoint
+
+```
+POST /api/auth/logout
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token to invalidate
+</ParamField>
+
+### Example Request
+
+```bash curl
+curl -X POST https://your-umami-instance.com/api/auth/logout \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```

@@ -1,0 +1,414 @@
+---
+title: Features
+description: Comprehensive overview of Umami's analytics features and capabilities
+---
+
+# Features
+
+Umami provides a comprehensive suite of analytics features designed to give you valuable insights while respecting user privacy.
+
+## Core Analytics Features
+
+### Real-Time Analytics
+
+<Card title="Live Visitor Tracking" icon="activity">
+  Monitor your website traffic as it happens. See active visitors, current pageviews, and live events in real-time without delays.
+</Card>
+
+**What you get:**
+- Current active visitors on your site
+- Real-time pageview stream
+- Live event tracking
+- Instant metric updates
+
+### Pageview Tracking
+
+<Info>
+  Umami automatically tracks every page visit on your website with detailed information about the visitor's session.
+</Info>
+
+Tracked automatically:
+- **Page URLs**: Full path of visited pages
+- **Page titles**: Document title of each page
+- **Referrers**: Where visitors came from
+- **Visit timestamp**: Exact time of visit
+- **Session duration**: Time spent on site
+
+### Visitor Metrics
+
+Understand your audience with comprehensive visitor analytics:
+
+<CardGroup cols={2}>
+  <Card title="Unique Visitors" icon="users">
+    Count distinct visitors without invasive tracking or cookies
+  </Card>
+  <Card title="Pageviews" icon="eye">
+    Total number of pages viewed across all sessions
+  </Card>
+  <Card title="Bounce Rate" icon="door-open">
+    Percentage of single-page visits
+  </Card>
+  <Card title="Visit Duration" icon="clock">
+    Average time visitors spend on your site
+  </Card>
+</CardGroup>
+
+## Technology Analytics
+
+### Browser Detection
+
+Track which browsers your visitors use:
+- Chrome, Firefox, Safari, Edge
+- Browser versions
+- Market share by browser
+- Trends over time
+
+### Operating System
+
+Understand your visitors' platforms:
+- Windows, macOS, Linux
+- iOS, Android
+- OS versions and distributions
+
+### Device Analytics
+
+<Tabs>
+  <Tab title="Device Type">
+    - Desktop
+    - Mobile
+    - Tablet
+    - Device distribution percentages
+  </Tab>
+  <Tab title="Screen Resolution">
+    - Common screen sizes
+    - Mobile vs desktop resolutions
+    - Viewport dimensions
+  </Tab>
+  <Tab title="Language">
+    - Browser language preferences
+    - Geographic language distribution
+    - Multi-language site analytics
+  </Tab>
+</Tabs>
+
+## Geographic Analytics
+
+### Location Tracking
+
+<Note>
+  Geographic data is determined by IP address but stored anonymously. No personal identifiable information is collected.
+</Note>
+
+Track visitors by:
+- **Countries**: Global visitor distribution
+- **Regions**: State/province level data
+- **Cities**: City-level geographic insights
+- **Map visualization**: Visual geographic heatmap
+
+## Traffic Sources
+
+### Referrer Analytics
+
+Understand where your traffic comes from:
+
+<CardGroup cols={2}>
+  <Card title="Direct Traffic" icon="arrow-right">
+    Visitors who typed your URL directly or used bookmarks
+  </Card>
+  <Card title="Referral Sites" icon="link">
+    Other websites that link to yours
+  </Card>
+  <Card title="Search Engines" icon="search">
+    Organic search traffic from Google, Bing, etc.
+  </Card>
+  <Card title="Social Media" icon="share-2">
+    Traffic from social platforms
+  </Card>
+</CardGroup>
+
+### UTM Parameter Tracking
+
+Track marketing campaigns with UTM parameters:
+- `utm_source`: Campaign source
+- `utm_medium`: Campaign medium
+- `utm_campaign`: Campaign name
+- `utm_content`: Ad content variation
+- `utm_term`: Paid search keywords
+
+## Custom Event Tracking
+
+### Event Analytics
+
+<Tip>
+  Track any user interaction on your website with custom events - button clicks, form submissions, video plays, downloads, and more.
+</Tip>
+
+Event tracking capabilities:
+
+```javascript
+// Track a button click
+umami.track('button-click', { button: 'signup' });
+
+// Track a form submission
+umami.track('form-submit', { form: 'contact', type: 'email' });
+
+// Track a file download
+umami.track('download', { file: 'whitepaper.pdf' });
+
+// Track video engagement
+umami.track('video-play', { video: 'product-demo', duration: 120 });
+```
+
+**Event features:**
+- Custom event names
+- Event properties/metadata
+- Event counts and trends
+- Event conversion funnels
+
+## Advanced Features
+
+### Multi-Website Management
+
+<Card title="Manage Multiple Sites" icon="layout-grid">
+  Track unlimited websites from a single Umami instance. Perfect for agencies, multiple projects, or client websites.
+</Card>
+
+Features:
+- Unlimited websites per account
+- Individual dashboards per site
+- Separate tracking codes
+- Aggregate reporting across sites
+- Team access controls
+
+### Team Collaboration
+
+<Info>
+  Umami supports teams and organizations with role-based access control.
+</Info>
+
+Team features:
+- **Team workspaces**: Organize websites by team
+- **User roles**: Admin, user, and view-only permissions
+- **Team invitations**: Invite team members by email
+- **Shared dashboards**: Collaborate on analytics
+
+### Data Filtering and Segmentation
+
+Filter your analytics data:
+
+<Accordion title="Date Range Filtering">
+  - Last 24 hours
+  - Last 7 days
+  - Last 30 days
+  - Last 90 days
+  - Custom date ranges
+  - Compare time periods
+</Accordion>
+
+<Accordion title="Dimension Filtering">
+  Filter by any dimension:
+  - Specific pages or page groups
+  - Traffic sources
+  - Countries or regions
+  - Browsers or devices
+  - Custom event properties
+</Accordion>
+
+### Data Sharing
+
+<CardGroup cols={2}>
+  <Card title="Public Dashboards" icon="share">
+    Create public share links to display analytics on your website or share with stakeholders
+  </Card>
+  <Card title="Private Sharing" icon="lock">
+    Share specific reports with team members or clients with access controls
+  </Card>
+</CardGroup>
+
+### Data Export
+
+Export your analytics data:
+- **CSV Export**: Download data for Excel/Sheets
+- **JSON Export**: Programmatic data access
+- **API Access**: Real-time data via REST API
+- **Custom Reports**: Build custom analytics views
+
+## Privacy Features
+
+### GDPR Compliance
+
+<CardGroup cols={2}>
+  <Card title="No Cookies" icon="cookie">
+    Umami doesn't use cookies, so no cookie consent banners needed
+  </Card>
+  <Card title="Anonymous Data" icon="shield-check">
+    All data is anonymized - no personal information collected
+  </Card>
+  <Card title="Data Ownership" icon="database">
+    You own 100% of your data - it never leaves your infrastructure
+  </Card>
+  <Card title="No Cross-Site Tracking" icon="ban">
+    Visitors aren't tracked across different websites
+  </Card>
+</CardGroup>
+
+### Privacy-First Design
+
+<Note>
+  Umami is designed from the ground up to respect user privacy while still providing valuable analytics insights.
+</Note>
+
+Privacy features:
+- **No persistent identifiers**: No cookies or localStorage tracking
+- **IP address anonymization**: IPs are hashed and not stored
+- **No fingerprinting**: No browser fingerprinting techniques
+- **GDPR compliant**: Meets EU data protection requirements
+- **No data selling**: Your data is never shared or sold
+
+## Performance Features
+
+### Lightweight Tracking Script
+
+<Info>
+  The Umami tracking script is less than 2KB - 20x smaller than Google Analytics.
+</Info>
+
+**Performance benefits:**
+- Tiny file size (< 2KB gzipped)
+- Async loading (won't block page rendering)
+- Minimal CPU/memory usage
+- Fast data collection
+- No impact on page speed scores
+
+### Scalable Architecture
+
+<Tabs>
+  <Tab title="PostgreSQL">
+    Default database for most installations:
+    - Handles millions of pageviews
+    - Proven reliability
+    - Easy backup and replication
+    - Good for small to medium traffic sites
+  </Tab>
+  <Tab title="ClickHouse (Optional)">
+    For high-volume analytics:
+    - Billions of events
+    - Ultra-fast queries
+    - Columnar storage
+    - Real-time aggregation
+  </Tab>
+</Tabs>
+
+## API Features
+
+### REST API
+
+Access all analytics data via API:
+
+```bash
+# Get website stats
+GET /api/websites/{websiteId}/stats
+
+# Get pageviews
+GET /api/websites/{websiteId}/pageviews
+
+# Get events
+GET /api/websites/{websiteId}/events
+
+# Get active users
+GET /api/websites/{websiteId}/active
+```
+
+**API capabilities:**
+- Full CRUD operations
+- Real-time data access
+- Custom integrations
+- Automated reporting
+- Third-party tool integration
+
+### Webhooks
+
+<Tip>
+  Integrate Umami with other tools using webhooks to receive real-time notifications about website activity.
+</Tip>
+
+## Customization Features
+
+### Custom Domains
+
+Serve tracking script from your own domain:
+- First-party tracking (avoid ad blockers)
+- Custom script names
+- Brand consistency
+
+### Theme Customization
+
+- Light and dark modes
+- Custom branding
+- Logo customization
+- Color scheme options
+
+### Language Support
+
+Umami supports multiple languages:
+- English, Spanish, French, German
+- Chinese, Japanese, Korean
+- Portuguese, Russian, Italian
+- And many more through community translations
+
+## Reporting Features
+
+### Built-in Reports
+
+<CardGroup cols={2}>
+  <Card title="Overview Dashboard" icon="layout-dashboard">
+    High-level metrics and trends at a glance
+  </Card>
+  <Card title="Detailed Analytics" icon="bar-chart">
+    Deep dive into specific metrics and dimensions
+  </Card>
+  <Card title="Real-time View" icon="activity">
+    Live visitor tracking and current activity
+  </Card>
+  <Card title="Historical Trends" icon="trending-up">
+    Long-term trends and growth metrics
+  </Card>
+</CardGroup>
+
+### Custom Reports
+
+Create your own custom reports:
+- Select specific metrics
+- Choose date ranges
+- Filter by dimensions
+- Save and reuse reports
+- Share with team members
+
+## Integration Features
+
+### Easy Integration
+
+<Steps>
+  <Step title="Single Script Tag">
+    Just add one line of code to your website
+  </Step>
+  <Step title="Works Everywhere">
+    HTML, React, Vue, WordPress, any website
+  </Step>
+  <Step title="No Configuration Required">
+    Works out of the box with sensible defaults
+  </Step>
+</Steps>
+
+### Platform Support
+
+Umami works with:
+- Static HTML websites
+- React, Next.js, Vue, Nuxt, Svelte
+- WordPress, Drupal, Joomla
+- Shopify, Wix, Squarespace
+- Any website that supports JavaScript
+
+<Warning>
+  Some website builders may restrict script insertion. Check your platform's documentation for adding custom scripts.
+</Warning>

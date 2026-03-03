@@ -1,0 +1,490 @@
+---
+title: Railway Deployment
+description: Deploy Umami to Railway with one click
+---
+
+# Deploy to Railway
+
+Railway is a modern deployment platform that makes it easy to deploy Umami with PostgreSQL in minutes. No Docker knowledge required.
+
+## What is Railway?
+
+<Info>
+  [Railway](https://railway.app/) is a deployment platform that provisions infrastructure, automatically deploys your code, and handles scaling. Perfect for hosting Umami with minimal configuration.
+</Info>
+
+**Benefits:**
+- One-click deployment
+- Automatic PostgreSQL provisioning
+- Free tier available (with limits)
+- Automatic HTTPS
+- Custom domains
+- Environment variable management
+- Automatic deploys from Git
+
+## Quick Deploy
+
+The fastest way to deploy Umami to Railway:
+
+<Steps>
+  <Step title="Create Railway Account">
+    Sign up at [railway.app](https://railway.app/) using:
+    - GitHub account (recommended)
+    - Email and password
+
+    <Tip>
+      Using GitHub allows automatic deployments when you push code changes.
+    </Tip>
+  </Step>
+
+  <Step title="Fork the Repository (Optional)">
+    If you want to customize Umami or enable automatic deployments:
+
+    1. Go to [github.com/umami-software/umami](https://github.com/umami-software/umami)
+    2. Click **Fork** in the top right
+    3. This creates a copy in your GitHub account
+  </Step>
+
+  <Step title="Deploy to Railway">
+    <Tabs>
+      <Tab title="From Template">
+        Click the deploy button (if available in Umami's README) or:
+
+        1. Go to Railway dashboard
+        2. Click **New Project**
+        3. Select **Deploy from GitHub repo**
+        4. Choose `umami-software/umami` or your fork
+        5. Click **Deploy Now**
+      </Tab>
+
+      <Tab title="Manual Setup">
+        1. Click **New Project** in Railway
+        2. Select **Empty Project**
+        3. Click **+ New** → **Database** → **PostgreSQL**
+        4. Click **+ New** → **GitHub Repo**
+        5. Select the Umami repository
+        6. Railway will auto-detect and deploy
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Add PostgreSQL Database">
+    If not already added:
+
+    1. In your project, click **+ New**
+    2. Select **Database**
+    3. Choose **PostgreSQL**
+    4. Railway automatically creates the database
+
+    <Info>
+      Railway automatically sets the `DATABASE_URL` environment variable connecting your app to the database.
+    </Info>
+  </Step>
+
+  <Step title="Configure Environment Variables">
+    Add required environment variables:
+
+    1. Click on your Umami service
+    2. Go to **Variables** tab
+    3. Add the following:
+
+    ```bash
+    APP_SECRET=your-random-secret-here
+    ```
+
+    Generate a random secret:
+    ```bash
+    openssl rand -base64 32
+    ```
+
+    <Warning>
+      The `DATABASE_URL` is automatically set by Railway. Don't override it unless you're using an external database.
+    </Warning>
+  </Step>
+
+  <Step title="Deploy">
+    Railway automatically deploys when you:
+    - Push changes to your GitHub repository
+    - Add a service or database
+    - Change environment variables
+
+    Watch the deployment logs in the Railway dashboard.
+  </Step>
+
+  <Step title="Get Your URL">
+    Once deployed:
+
+    1. Click on your Umami service
+    2. Go to **Settings** tab
+    3. Find **Domains** section
+    4. Railway provides a free domain: `your-app.up.railway.app`
+    5. Click **Generate Domain** if not already created
+
+    Access Umami at: `https://your-app.up.railway.app`
+  </Step>
+
+  <Step title="Login and Configure">
+    Open your Umami URL and login:
+    - Username: `admin`
+    - Password: `umami`
+
+    <Warning>
+      Change the default password immediately in Settings → Profile!
+    </Warning>
+  </Step>
+</Steps>
+
+## Custom Domain Setup
+
+Add your own domain to Railway:
+
+<Steps>
+  <Step title="Add Domain in Railway">
+    1. Go to your Umami service
+    2. Click **Settings** tab
+    3. Scroll to **Domains**
+    4. Click **+ Custom Domain**
+    5. Enter your domain (e.g., `analytics.yourdomain.com`)
+  </Step>
+
+  <Step title="Configure DNS">
+    Railway will show you DNS records to add:
+
+    <Tabs>
+      <Tab title="CNAME Record">
+        Add a CNAME record in your domain registrar:
+        
+        ```
+        Type: CNAME
+        Name: analytics (or your subdomain)
+        Value: your-app.up.railway.app
+        TTL: 3600
+        ```
+      </Tab>
+
+      <Tab title="A Record (Alternative)">
+        If Railway provides an IP address:
+        
+        ```
+        Type: A
+        Name: analytics
+        Value: <Railway IP address>
+        TTL: 3600
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Wait for DNS Propagation">
+    DNS changes can take 5 minutes to 48 hours to propagate globally.
+
+    Check status:
+    ```bash
+    dig analytics.yourdomain.com
+    ```
+  </Step>
+
+  <Step title="Verify SSL">
+    Railway automatically provisions SSL certificates via Let's Encrypt.
+    
+    Access your domain with HTTPS:
+    ```
+    https://analytics.yourdomain.com
+    ```
+  </Step>
+</Steps>
+
+## Environment Variables
+
+Configurable options for Railway deployment:
+
+<Accordion title="Required Variables">
+  ```bash
+  APP_SECRET=your-random-secret-string
+  ```
+  
+  - **APP_SECRET**: Random string for encrypting sessions (required)
+  - **DATABASE_URL**: Automatically set by Railway PostgreSQL
+</Accordion>
+
+<Accordion title="Optional Variables">
+  ```bash
+  # Custom port (Railway sets this automatically)
+  PORT=3000
+
+  # Base path for serving Umami
+  BASE_PATH=/analytics
+
+  # Disable telemetry
+  NEXT_TELEMETRY_DISABLED=1
+
+  # Custom tracker script name
+  TRACKER_SCRIPT_NAME=custom-script.js
+
+  # Force SSL
+  FORCE_SSL=1
+
+  # CORS max age
+  CORS_MAX_AGE=86400
+  ```
+</Accordion>
+
+<Accordion title="Advanced Options">
+  See the full list in [Environment Variables](/configuration/environment-variables).
+</Accordion>
+
+## Database Management
+
+### Access Railway PostgreSQL
+
+Connect to your Railway PostgreSQL database:
+
+<Tabs>
+  <Tab title="Railway CLI">
+    Install Railway CLI:
+    ```bash
+    npm install -g @railway/cli
+    ```
+
+    Login and connect:
+    ```bash
+    railway login
+    railway link
+    railway connect postgres
+    ```
+  </Tab>
+
+  <Tab title="External Client">
+    Get connection details:
+    1. Click on PostgreSQL service
+    2. Go to **Variables** tab
+    3. Copy connection details:
+       - `PGHOST`
+       - `PGPORT`
+       - `PGUSER`
+       - `PGPASSWORD`
+       - `PGDATABASE`
+
+    Connect with psql:
+    ```bash
+    psql postgresql://user:password@host:port/database
+    ```
+  </Tab>
+</Tabs>
+
+### Backup Database
+
+<Warning>
+  Railway doesn't automatically backup your database. Set up regular backups!
+</Warning>
+
+```bash
+# Using Railway CLI
+railway run pg_dump -Fc > backup.dump
+
+# Using connection URL
+pg_dump -Fc postgresql://user:password@host:port/db > backup.dump
+```
+
+Restore from backup:
+```bash
+pg_restore -d $DATABASE_URL backup.dump
+```
+
+## Scaling and Resources
+
+### Monitor Usage
+
+Railway provides resource monitoring:
+
+1. Go to your service
+2. Check **Metrics** tab for:
+   - CPU usage
+   - Memory usage
+   - Network traffic
+   - Deployment history
+
+### Upgrade Resources
+
+<Info>
+  Railway's free tier includes:
+  - 500 hours of usage per month
+  - $5 credit
+  - Shared CPU and memory
+  
+  Upgrade to Pro for:
+  - Unlimited usage
+  - Better performance
+  - More databases
+  - Priority support
+</Info>
+
+To upgrade:
+1. Click on your workspace name
+2. Go to **Billing**
+3. Choose a plan
+
+## Deployment Settings
+
+### Configure Build Settings
+
+1. Click on Umami service
+2. Go to **Settings**
+3. Adjust:
+
+<Accordion title="Build Command">
+  Railway auto-detects the build command from `package.json`:
+  ```bash
+  pnpm run build-docker
+  ```
+  
+  This is configured in the Umami repository.
+</Accordion>
+
+<Accordion title="Start Command">
+  Railway runs:
+  ```bash
+  pnpm start-docker
+  ```
+  
+  This starts Umami in production mode.
+</Accordion>
+
+<Accordion title="Healthcheck">
+  Railway monitors:
+  ```
+  GET /api/heartbeat
+  ```
+  
+  Returns 200 OK when Umami is healthy.
+</Accordion>
+
+### Auto-Deploy from GitHub
+
+Enable automatic deployments:
+
+1. Connect your GitHub account
+2. Fork the Umami repository
+3. Link it to Railway
+4. Railway deploys on every push to main branch
+
+<Tip>
+  Create a `railway.json` in your repository to customize deployments.
+</Tip>
+
+## Troubleshooting
+
+<Accordion title="Deployment failed">
+  Check deployment logs:
+  1. Click on your service
+  2. Go to **Deployments** tab
+  3. Click on failed deployment
+  4. View logs for errors
+
+  Common issues:
+  - Missing APP_SECRET
+  - Database connection failed
+  - Build errors
+  - Out of memory
+</Accordion>
+
+<Accordion title="Database connection error">
+  Verify PostgreSQL is running:
+  1. Click on PostgreSQL service
+  2. Check status is "Active"
+  3. Verify DATABASE_URL is set in Umami service
+  
+  If using external database, check:
+  - Firewall allows Railway IPs
+  - Credentials are correct
+  - Database is accessible
+</Accordion>
+
+<Accordion title="App is slow or crashes">
+  Check resource usage:
+  1. View **Metrics** tab
+  2. Look for CPU/memory spikes
+  3. Upgrade plan if consistently high
+  
+  Optimize:
+  - Use ClickHouse for high-volume sites
+  - Enable caching
+  - Optimize database queries
+</Accordion>
+
+<Accordion title="Custom domain not working">
+  Verify DNS configuration:
+  ```bash
+  dig your-domain.com
+  ```
+  
+  Check:
+  - DNS records point to Railway
+  - SSL certificate provisioned (can take a few minutes)
+  - No conflicting DNS records
+  - Wait for DNS propagation (up to 48 hours)
+</Accordion>
+
+## Updating Umami
+
+Update to the latest version:
+
+<Tabs>
+  <Tab title="Automatic (GitHub)">
+    If you connected via GitHub:
+
+    1. Sync your fork with upstream:
+       ```bash
+       git remote add upstream https://github.com/umami-software/umami.git
+       git fetch upstream
+       git merge upstream/main
+       git push
+       ```
+    
+    2. Railway auto-deploys the update
+  </Tab>
+
+  <Tab title="Manual Redeploy">
+    1. Go to **Deployments** tab
+    2. Click on latest successful deployment
+    3. Click **Redeploy**
+    4. Railway rebuilds with latest code
+  </Tab>
+</Tabs>
+
+<Info>
+  Database migrations run automatically during deployment.
+</Info>
+
+## Cost Optimization
+
+<Tip>
+  Tips to stay within Railway's free tier:
+  - Use the free 500 hours efficiently
+  - Stop services when not needed
+  - Delete unused databases
+  - Monitor resource usage
+  - Optimize database queries
+</Tip>
+
+Estimated costs:
+- **Free tier**: $0 (with limits)
+- **Hobby**: $5/month
+- **Pro**: $20/month (unlimited usage)
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Add Your Website" icon="plus" href="/quickstart#add-your-first-website">
+    Start tracking your first website
+  </Card>
+  <Card title="Custom Domain" icon="globe">
+    Set up your own domain for Umami
+  </Card>
+  <Card title="Environment Variables" icon="gear" href="/configuration/environment-variables">
+    Configure advanced features
+  </Card>
+  <Card title="Database Backups" icon="database" href="/configuration/database-setup">
+    Set up automated backups
+  </Card>
+</CardGroup>

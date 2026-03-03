@@ -1,0 +1,714 @@
+---
+title: Kubernetes Deployment
+description: Deploy Umami on Kubernetes for scalable, production-grade infrastructure
+---
+
+## Overview
+
+Deploying Umami on Kubernetes provides scalability, high availability, and enterprise-grade infrastructure management. This guide covers deployment strategies, configurations, and best practices.
+
+<Note>
+  This guide assumes you have a working Kubernetes cluster and kubectl configured.
+</Note>
+
+## Architecture Overview
+
+A typical Umami Kubernetes deployment consists of:
+
+<CardGroup cols={2}>
+  <Card title="Umami Deployment" icon="box">
+    StatefulSet or Deployment running Umami containers
+  </Card>
+  <Card title="PostgreSQL" icon="database">
+    StatefulSet for database with persistent storage
+  </Card>
+  <Card title="Service" icon="network-wired">
+    ClusterIP service for internal communication
+  </Card>
+  <Card title="Ingress" icon="globe">
+    Ingress controller for external access with SSL
+  </Card>
+</CardGroup>
+
+## Prerequisites
+
+<Steps>
+  <Step title="Kubernetes cluster">
+    A running Kubernetes cluster (1.19+) with kubectl access
+  </Step>
+  
+  <Step title="Ingress controller">
+    Nginx Ingress Controller or Traefik installed
+  </Step>
+  
+  <Step title="cert-manager (optional)">
+    For automatic SSL certificate management
+  </Step>
+  
+  <Step title="Persistent storage">
+    StorageClass configured for database volumes
+  </Step>
+</Steps>
+
+## Namespace Setup
+
+Create a dedicated namespace for Umami:
+
+```yaml namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: umami
+```
+
+```bash
+kubectl apply -f namespace.yaml
+```
+
+## Secrets Configuration
+
+Store sensitive data in Kubernetes secrets:
+
+```yaml secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: umami-secrets
+  namespace: umami
+type: Opaque
+stringData:
+  DATABASE_URL: postgresql://umami:your-password@postgres:5432/umami
+  APP_SECRET: your-generated-secret-key
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secrets
+  namespace: umami
+type: Opaque
+stringData:
+  POSTGRES_USER: umami
+  POSTGRES_PASSWORD: your-password
+  POSTGRES_DB: umami
+```
+
+<Warning>
+  Generate a secure APP_SECRET:
+  ```bash
+  openssl rand -base64 32
+  ```
+  
+  Never commit secrets to version control!
+</Warning>
+
+```bash
+kubectl apply -f secrets.yaml
+```
+
+## PostgreSQL Deployment
+
+Deploy PostgreSQL as a StatefulSet with persistent storage:
+
+```yaml postgres.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: umami
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: umami
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        envFrom:
+        - secretRef:
+            name: postgres-secrets
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - umami
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - umami
+          initialDelaySeconds: 5
+          periodSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard  # Adjust to your StorageClass
+      resources:
+        requests:
+          storage: 20Gi
+```
+
+<Info>
+  Adjust `storageClassName` and storage size based on your cluster configuration and needs.
+</Info>
+
+```bash
+kubectl apply -f postgres.yaml
+```
+
+## Umami Deployment
+
+Deploy Umami with multiple replicas for high availability:
+
+```yaml umami.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: umami
+  namespace: umami
+spec:
+  selector:
+    app: umami
+  ports:
+    - port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: umami
+  namespace: umami
+spec:
+  replicas: 2  # Adjust based on load
+  selector:
+    matchLabels:
+      app: umami
+  template:
+    metadata:
+      labels:
+        app: umami
+    spec:
+      initContainers:
+      - name: wait-for-db
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z postgres 5432; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+      containers:
+      - name: umami
+        image: ghcr.io/umami-software/umami:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: umami-secrets
+              key: DATABASE_URL
+        - name: APP_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: umami-secrets
+              key: APP_SECRET
+        - name: PORT
+          value: "3000"
+        - name: HOSTNAME
+          value: "0.0.0.0"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /api/heartbeat
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/heartbeat
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+```
+
+```bash
+kubectl apply -f umami.yaml
+```
+
+## Ingress Configuration
+
+Expose Umami to the internet with SSL:
+
+<Tabs>
+  <Tab title="Nginx Ingress">
+    ```yaml ingress-nginx.yaml
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: umami-ingress
+      namespace: umami
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    spec:
+      ingressClassName: nginx
+      tls:
+      - hosts:
+        - analytics.yourdomain.com
+        secretName: umami-tls
+      rules:
+      - host: analytics.yourdomain.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: umami
+                port:
+                  number: 3000
+    ```
+  </Tab>
+  
+  <Tab title="Traefik Ingress">
+    ```yaml ingress-traefik.yaml
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: umami-ingress
+      namespace: umami
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+    spec:
+      ingressClassName: traefik
+      tls:
+      - hosts:
+        - analytics.yourdomain.com
+        secretName: umami-tls
+      rules:
+      - host: analytics.yourdomain.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: umami
+                port:
+                  number: 3000
+    ```
+  </Tab>
+</Tabs>
+
+```bash
+kubectl apply -f ingress-nginx.yaml
+```
+
+## ConfigMap for Environment Variables
+
+Store non-sensitive configuration in ConfigMaps:
+
+```yaml configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: umami-config
+  namespace: umami
+data:
+  CORS_MAX_AGE: "86400"
+  DEFAULT_LOCALE: "en-US"
+  FORCE_SSL: "1"
+  # Add other non-sensitive variables here
+```
+
+Reference in deployment:
+
+```yaml
+envFrom:
+- configMapRef:
+    name: umami-config
+```
+
+## Horizontal Pod Autoscaling
+
+Automatically scale based on CPU/memory usage:
+
+```yaml hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: umami-hpa
+  namespace: umami
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: umami
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+```
+
+```bash
+kubectl apply -f hpa.yaml
+```
+
+## Redis for Session Storage (Optional)
+
+For multi-replica deployments, use Redis for shared sessions:
+
+```yaml redis.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: umami
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: umami
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+```
+
+Add to Umami deployment:
+
+```yaml
+env:
+- name: REDIS_URL
+  value: redis://redis:6379
+```
+
+## Monitoring and Logging
+
+<Tabs>
+  <Tab title="Check Logs">
+    ```bash
+    # View Umami logs
+    kubectl logs -n umami -l app=umami -f
+    
+    # View PostgreSQL logs
+    kubectl logs -n umami -l app=postgres -f
+    
+    # View logs from specific pod
+    kubectl logs -n umami <pod-name>
+    ```
+  </Tab>
+  
+  <Tab title="Check Status">
+    ```bash
+    # Get all resources
+    kubectl get all -n umami
+    
+    # Check pod status
+    kubectl get pods -n umami
+    
+    # Describe pod for issues
+    kubectl describe pod -n umami <pod-name>
+    
+    # Check events
+    kubectl get events -n umami --sort-by='.lastTimestamp'
+    ```
+  </Tab>
+  
+  <Tab title="Resource Usage">
+    ```bash
+    # Check resource usage
+    kubectl top pods -n umami
+    
+    # Check node resources
+    kubectl top nodes
+    
+    # Check HPA status
+    kubectl get hpa -n umami
+    ```
+  </Tab>
+</Tabs>
+
+## Database Migrations
+
+Migrations run automatically when Umami starts. For manual migration:
+
+```bash
+# Execute migration in pod
+kubectl exec -n umami -it deploy/umami -- pnpm prisma migrate deploy
+```
+
+## Backup Strategy
+
+<Steps>
+  <Step title="Create backup script">
+    ```bash backup.sh
+    #!/bin/bash
+    NAMESPACE=umami
+    BACKUP_DIR=/backups
+    DATE=$(date +%Y%m%d-%H%M%S)
+    
+    # Backup PostgreSQL
+    kubectl exec -n $NAMESPACE postgres-0 -- \
+      pg_dump -U umami umami | \
+      gzip > $BACKUP_DIR/umami-$DATE.sql.gz
+    ```
+  </Step>
+  
+  <Step title="Schedule with CronJob">
+    ```yaml cronjob-backup.yaml
+    apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      name: postgres-backup
+      namespace: umami
+    spec:
+      schedule: "0 2 * * *"  # Daily at 2 AM
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              containers:
+              - name: backup
+                image: postgres:15-alpine
+                command:
+                - sh
+                - -c
+                - |
+                  pg_dump -h postgres -U umami umami | \
+                  gzip > /backup/umami-$(date +%Y%m%d-%H%M%S).sql.gz
+                env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-secrets
+                      key: POSTGRES_PASSWORD
+                volumeMounts:
+                - name: backup
+                  mountPath: /backup
+              restartPolicy: OnFailure
+              volumes:
+              - name: backup
+                persistentVolumeClaim:
+                  claimName: backup-pvc
+    ```
+  </Step>
+</Steps>
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Network Policies" icon="shield">
+    Implement network policies to restrict pod-to-pod communication.
+  </Card>
+  <Card title="RBAC" icon="lock">
+    Use Role-Based Access Control for kubectl access.
+  </Card>
+  <Card title="Security Context" icon="user-shield">
+    Run containers as non-root users with read-only filesystems.
+  </Card>
+  <Card title="Image Scanning" icon="magnifying-glass">
+    Scan images for vulnerabilities before deployment.
+  </Card>
+</CardGroup>
+
+### Example Network Policy
+
+```yaml networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: umami-network-policy
+  namespace: umami
+spec:
+  podSelector:
+    matchLabels:
+      app: umami
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:  # Allow DNS
+    - namespaceSelector: {}
+    ports:
+    - protocol: UDP
+      port: 53
+```
+
+## Production Checklist
+
+<Accordion title="Pre-deployment Checklist">
+  - [ ] Secrets are properly configured and secured
+  - [ ] Resource limits are set on all containers
+  - [ ] Persistent volumes are configured with appropriate size
+  - [ ] Ingress is configured with SSL/TLS
+  - [ ] Health checks are properly configured
+  - [ ] Backup strategy is in place
+  - [ ] Monitoring and logging are configured
+  - [ ] Network policies are applied
+  - [ ] HPA is configured for auto-scaling
+  - [ ] Database connection pooling is optimized
+</Accordion>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Pods stuck in Pending state">
+    Check if storage is available:
+    
+    ```bash
+    kubectl get pvc -n umami
+    kubectl describe pvc -n umami postgres-data-postgres-0
+    ```
+    
+    Verify StorageClass exists:
+    
+    ```bash
+    kubectl get storageclass
+    ```
+  </Accordion>
+  
+  <Accordion title="Database connection errors">
+    Verify secrets are correct:
+    
+    ```bash
+    kubectl get secret -n umami umami-secrets -o yaml
+    ```
+    
+    Check PostgreSQL is running:
+    
+    ```bash
+    kubectl exec -n umami postgres-0 -- pg_isready
+    ```
+  </Accordion>
+  
+  <Accordion title="Ingress not accessible">
+    Check ingress status:
+    
+    ```bash
+    kubectl get ingress -n umami
+    kubectl describe ingress -n umami umami-ingress
+    ```
+    
+    Verify DNS records point to your cluster's load balancer.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="gear" href="/self-hosting/environment-variables">
+    Configure Umami settings
+  </Card>
+  <Card title="PostgreSQL" icon="database" href="/self-hosting/postgresql">
+    Optimize database performance
+  </Card>
+  <Card title="Upgrading" icon="arrow-up" href="/self-hosting/upgrading">
+    Update deployments
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/self-hosting/troubleshooting">
+    Solve common issues
+  </Card>
+</CardGroup>

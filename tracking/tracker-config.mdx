@@ -1,0 +1,422 @@
+---
+title: Tracker Configuration
+description: Configure the Umami tracker with data attributes to customize its behavior.
+---
+
+The Umami tracker can be configured using data attributes on the script tag. These attributes control how the tracker behaves, what data it collects, and where it sends that data.
+
+## Configuration Attributes
+
+All configuration is done through HTML data attributes on the script tag:
+
+```html
+<script
+  defer
+  src="https://cloud.umami.is/script.js"
+  data-website-id="your-website-id"
+  data-auto-track="true"
+  data-do-not-track="false"
+></script>
+```
+
+## Available Options
+
+### Required Options
+
+<ParamField path="data-website-id" type="string" required>
+  Your unique website identifier (UUID format).
+  
+  ```html
+  <script
+    defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="b59e9c65-ae32-47f1-8400-119fcf4861c4"
+  ></script>
+  ```
+  
+  <Warning>
+    The tracker will not function without a valid `data-website-id`.
+  </Warning>
+</ParamField>
+
+### Server Configuration
+
+<ParamField path="data-host-url" type="string">
+  The URL of your Umami server. Required for self-hosted instances.
+  
+  ```html
+  <script
+    defer
+    src="https://analytics.mysite.com/script.js"
+    data-website-id="your-website-id"
+    data-host-url="https://analytics.mysite.com"
+  ></script>
+  ```
+  
+  <Info>
+    If not specified, the tracker automatically determines the host from the script source URL.
+  </Info>
+</ParamField>
+
+### Tracking Behavior
+
+<ParamField path="data-auto-track" type="boolean" default="true">
+  Enable or disable automatic page view tracking.
+  
+  ```html
+  <!-- Disable automatic tracking -->
+  <script
+    defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="your-website-id"
+    data-auto-track="false"
+  ></script>
+  ```
+  
+  <Tip>
+    Set to `false` if you want to manually control all tracking using `umami.track()`.
+  </Tip>
+</ParamField>
+
+<ParamField path="data-do-not-track" type="boolean" default="false">
+  Respect the browser's Do Not Track (DNT) setting.
+  
+  ```html
+  <script
+    defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="your-website-id"
+    data-do-not-track="true"
+  ></script>
+  ```
+  
+  When enabled, the tracker will not send any data if the user has DNT enabled in their browser.
+</ParamField>
+
+### URL Handling
+
+<ParamField path="data-exclude-search" type="boolean" default="false">
+  Exclude query parameters from tracked URLs.
+  
+  ```html
+  <script
+    defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="your-website-id"
+    data-exclude-search="true"
+  ></script>
+  ```
+  
+  **Example:**
+  - Original URL: `/page?utm_source=google&id=123`
+  - Tracked URL: `/page`
+  
+  <Tip>
+    Useful for avoiding tracking of dynamic query parameters that would create duplicate page entries.
+  </Tip>
+</ParamField>
+
+<ParamField path="data-exclude-hash" type="boolean" default="false">
+  Exclude URL hash fragments from tracked URLs.
+  
+  ```html
+  <script
+    defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="your-website-id"
+    data-exclude-hash="true"
+  ></script>
+  ```
+  
+  **Example:**
+  - Original URL: `/docs#installation`
+  - Tracked URL: `/docs`
+</ParamField>
+
+### Domain Filtering
+
+<ParamField path="data-domains" type="string">
+  Comma-separated list of domains where tracking should be active. Useful when the same script is used across multiple domains.
+  
+  ```html
+  <script
+    defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="your-website-id"
+    data-domains="mysite.com,app.mysite.com"
+  ></script>
+  ```
+  
+  <Info>
+    If the current hostname doesn't match any domain in the list, tracking will be disabled.
+  </Info>
+  
+  **Use cases:**
+  - Prevent tracking on staging/development environments
+  - Use the same script across multiple sites but only track on specific domains
+</ParamField>
+
+### Advanced Options
+
+<ParamField path="data-tag" type="string">
+  Add a custom tag to all events from this tracker. Useful for distinguishing between different versions or environments.
+  
+  ```html
+  <script
+    defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="your-website-id"
+    data-tag="production"
+  ></script>
+  ```
+  
+  **Example use cases:**
+  - Tag events by environment: `production`, `staging`, `development`
+  - Tag events by version: `v2`, `beta`
+  - Tag events by segment: `mobile-app`, `desktop-app`
+</ParamField>
+
+<ParamField path="data-before-send" type="string">
+  Name of a global function to call before sending each event. Allows you to modify or cancel events.
+  
+  ```html
+  <script>
+    window.beforeSendUmami = function(type, payload) {
+      // Modify the payload
+      payload.custom_field = 'value';
+      
+      // Return the modified payload
+      return payload;
+      
+      // Or return null to cancel the event
+      // return null;
+    };
+  </script>
+  
+  <script
+    defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="your-website-id"
+    data-before-send="beforeSendUmami"
+  ></script>
+  ```
+  
+  <Warning>
+    The function must be defined before the tracker script loads.
+  </Warning>
+</ParamField>
+
+<ParamField path="data-fetch-credentials" type="string" default="omit">
+  Controls whether cookies are sent with tracking requests. Valid values: `omit`, `same-origin`, `include`.
+  
+  ```html
+  <script
+    defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="your-website-id"
+    data-fetch-credentials="same-origin"
+  ></script>
+  ```
+  
+  <Info>
+    Most users should leave this at the default value of `omit`.
+  </Info>
+</ParamField>
+
+## Configuration Examples
+
+### Production Setup
+
+```html
+<script
+  defer
+  src="https://cloud.umami.is/script.js"
+  data-website-id="b59e9c65-ae32-47f1-8400-119fcf4861c4"
+  data-domains="mysite.com,www.mysite.com"
+  data-exclude-search="true"
+></script>
+```
+
+### Self-Hosted with Custom Configuration
+
+```html
+<script
+  defer
+  src="https://analytics.mysite.com/script.js"
+  data-website-id="b59e9c65-ae32-47f1-8400-119fcf4861c4"
+  data-host-url="https://analytics.mysite.com"
+  data-auto-track="true"
+  data-do-not-track="true"
+  data-exclude-search="true"
+  data-exclude-hash="true"
+></script>
+```
+
+### Manual Tracking Only
+
+```html
+<script
+  defer
+  src="https://cloud.umami.is/script.js"
+  data-website-id="b59e9c65-ae32-47f1-8400-119fcf4861c4"
+  data-auto-track="false"
+></script>
+
+<script>
+  // Manually track page views
+  window.addEventListener('load', () => {
+    if (window.umami) {
+      umami.track();
+    }
+  });
+</script>
+```
+
+### Development vs Production
+
+<CodeGroup>
+```html Development
+<script
+  defer
+  src="https://cloud.umami.is/script.js"
+  data-website-id="dev-website-id"
+  data-domains="localhost,dev.mysite.com"
+  data-tag="development"
+></script>
+```
+
+```html Production
+<script
+  defer
+  src="https://cloud.umami.is/script.js"
+  data-website-id="prod-website-id"
+  data-domains="mysite.com,www.mysite.com"
+  data-tag="production"
+  data-exclude-search="true"
+></script>
+```
+</CodeGroup>
+
+### Privacy-Focused Configuration
+
+```html
+<script
+  defer
+  src="https://cloud.umami.is/script.js"
+  data-website-id="your-website-id"
+  data-do-not-track="true"
+  data-exclude-search="true"
+  data-exclude-hash="true"
+></script>
+```
+
+## Using beforeSend Hook
+
+The `data-before-send` hook allows you to intercept and modify events before they're sent:
+
+```html
+<script>
+  window.customBeforeSend = function(type, payload) {
+    console.log('Event type:', type);
+    console.log('Payload:', payload);
+    
+    // Add custom data to all events
+    if (type === 'event') {
+      payload.environment = 'production';
+      payload.app_version = '2.0.0';
+    }
+    
+    // Filter out specific URLs
+    if (payload.url.includes('/admin/')) {
+      return null; // Cancel this event
+    }
+    
+    // Mask sensitive data
+    if (payload.url.includes('/user/')) {
+      payload.url = '/user/[id]';
+    }
+    
+    return payload;
+  };
+</script>
+
+<script
+  defer
+  src="https://cloud.umami.is/script.js"
+  data-website-id="your-website-id"
+  data-before-send="customBeforeSend"
+></script>
+```
+
+<Tip>
+  Return `null` from the beforeSend function to cancel an event. Return the modified payload to send it.
+</Tip>
+
+## Environment-Based Configuration
+
+Use JavaScript to dynamically set configuration based on environment:
+
+```html
+<script>
+  const config = {
+    production: {
+      websiteId: 'prod-website-id',
+      domains: 'mysite.com,www.mysite.com',
+      tag: 'production'
+    },
+    staging: {
+      websiteId: 'staging-website-id',
+      domains: 'staging.mysite.com',
+      tag: 'staging'
+    },
+    development: {
+      websiteId: 'dev-website-id',
+      domains: 'localhost,dev.mysite.com',
+      tag: 'development'
+    }
+  };
+  
+  const env = process.env.NODE_ENV || 'development';
+  const { websiteId, domains, tag } = config[env];
+  
+  const script = document.createElement('script');
+  script.defer = true;
+  script.src = 'https://cloud.umami.is/script.js';
+  script.setAttribute('data-website-id', websiteId);
+  script.setAttribute('data-domains', domains);
+  script.setAttribute('data-tag', tag);
+  document.head.appendChild(script);
+</script>
+```
+
+## Troubleshooting
+
+<Accordion title="Tracker not sending data">
+  - Verify `data-website-id` is correct
+  - Check if domain filtering is blocking your hostname
+  - Ensure Do Not Track isn't blocking tracking when enabled
+  - Check browser console for JavaScript errors
+</Accordion>
+
+<Accordion title="beforeSend hook not working">
+  - Ensure the function is defined before the script loads
+  - Verify the function name matches the `data-before-send` value
+  - Check that the function returns a valid payload or null
+</Accordion>
+
+<Accordion title="URL tracking issues">
+  - Check if `data-exclude-search` or `data-exclude-hash` are affecting your URLs
+  - Verify the URL normalization is working as expected
+  - Test with different URL formats
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Tracker Functions" icon="function" href="/tracking/tracker-functions">
+    Learn about available JavaScript functions
+  </Card>
+  <Card title="Event Tracking" icon="cursor-click" href="/tracking/events">
+    Start tracking custom events
+  </Card>
+</CardGroup>

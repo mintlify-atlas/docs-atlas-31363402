@@ -1,0 +1,463 @@
+---
+title: Custom Events
+description: Track custom events programmatically using the JavaScript API.
+---
+
+While HTML attributes are great for tracking clicks, sometimes you need more control. The `umami.track()` function allows you to track events programmatically from your JavaScript code.
+
+## The track() Function
+
+The Umami tracker exposes a global `umami` object with a `track()` function:
+
+```javascript
+umami.track(eventName, eventData);
+```
+
+<Info>
+  The `umami` object is automatically available on `window` after the tracking script loads.
+</Info>
+
+## Basic Usage
+
+### Track an Event by Name
+
+The simplest way to track an event is by passing an event name:
+
+```javascript
+umami.track('signup-button');
+```
+
+<Note>
+  Event names will be truncated past 50 characters.
+</Note>
+
+### Track an Event with Data
+
+Attach custom data to your events:
+
+```javascript
+umami.track('purchase', {
+  product: 'Pro Plan',
+  price: 29.99,
+  currency: 'USD'
+});
+```
+
+## Function Signatures
+
+The `track()` function accepts multiple signatures for different use cases:
+
+<Tabs>
+  <Tab title="Event Name">
+    Track a simple event with just a name:
+    
+    ```typescript
+    umami.track(eventName: string): Promise<string>
+    ```
+    
+    **Example:**
+    ```javascript
+    umami.track('button-click');
+    ```
+  </Tab>
+  
+  <Tab title="Event Name + Data">
+    Track an event with custom data:
+    
+    ```typescript
+    umami.track(eventName: string, eventData: EventData): Promise<string>
+    ```
+    
+    **Example:**
+    ```javascript
+    umami.track('signup', {
+      plan: 'premium',
+      referral: 'google'
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Page View Object">
+    Track a custom page view with all properties:
+    
+    ```typescript
+    umami.track(properties: PageViewProperties): Promise<string>
+    ```
+    
+    **Example:**
+    ```javascript
+    umami.track({
+      website: 'e676c9b4-11e4-4ef1-a4d7-87001773e9f2',
+      url: '/home',
+      title: 'Home page'
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Custom Function">
+    Use a function for dynamic tracking:
+    
+    ```typescript
+    umami.track(eventFunction: (props) => EventProperties): Promise<string>
+    ```
+    
+    **Example:**
+    ```javascript
+    umami.track(props => ({
+      ...props,
+      name: 'signup',
+      data: { plan: 'premium' }
+    }));
+    ```
+  </Tab>
+  
+  <Tab title="No Arguments">
+    Track a page view manually:
+    
+    ```typescript
+    umami.track(): Promise<string>
+    ```
+    
+    **Example:**
+    ```javascript
+    umami.track();
+    ```
+  </Tab>
+</Tabs>
+
+## Common Use Cases
+
+### Form Submissions
+
+Track form submissions with form data:
+
+```javascript
+function handleSubmit(event) {
+  event.preventDefault();
+  
+  const formData = new FormData(event.target);
+  
+  umami.track('form-submit', {
+    formName: 'contact',
+    email: formData.get('email'),
+    topic: formData.get('topic')
+  });
+  
+  // Submit the form
+  event.target.submit();
+}
+```
+
+### Button Clicks
+
+Track button clicks with contextual information:
+
+```javascript
+document.querySelector('#checkout-btn').addEventListener('click', () => {
+  umami.track('checkout-started', {
+    cart_value: 149.99,
+    item_count: 3,
+    has_coupon: true
+  });
+});
+```
+
+### API Responses
+
+Track API calls and their outcomes:
+
+```javascript
+async function fetchUserData() {
+  try {
+    const response = await fetch('/api/user');
+    const data = await response.json();
+    
+    umami.track('api-call', {
+      endpoint: '/api/user',
+      status: response.status,
+      success: true
+    });
+    
+    return data;
+  } catch (error) {
+    umami.track('api-call', {
+      endpoint: '/api/user',
+      success: false,
+      error: error.message
+    });
+    
+    throw error;
+  }
+}
+```
+
+### Video Players
+
+Track video interactions:
+
+```javascript
+const video = document.querySelector('#my-video');
+
+video.addEventListener('play', () => {
+  umami.track('video-play', {
+    video_id: 'product-demo',
+    duration: video.duration
+  });
+});
+
+video.addEventListener('ended', () => {
+  umami.track('video-complete', {
+    video_id: 'product-demo',
+    watch_time: video.currentTime
+  });
+});
+```
+
+### Search Queries
+
+Track user searches:
+
+```javascript
+function handleSearch(query) {
+  umami.track('search', {
+    query: query,
+    results_count: results.length,
+    has_filters: filters.length > 0
+  });
+}
+```
+
+## Framework Integration
+
+<Tabs>
+  <Tab title="React">
+    Use `umami.track()` in event handlers:
+    
+    ```jsx
+    function SignupButton() {
+      const handleClick = () => {
+        umami.track('signup-click', {
+          source: 'homepage',
+          timestamp: Date.now()
+        });
+      };
+      
+      return (
+        <button onClick={handleClick}>
+          Sign Up
+        </button>
+      );
+    }
+    ```
+    
+    Track in useEffect:
+    ```jsx
+    import { useEffect } from 'react';
+    
+    function Dashboard() {
+      useEffect(() => {
+        umami.track('dashboard-view', {
+          user_type: 'premium'
+        });
+      }, []);
+      
+      return <div>Dashboard</div>;
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Vue">
+    Use `umami.track()` in methods:
+    
+    ```vue
+    <template>
+      <button @click="handleSignup">Sign Up</button>
+    </template>
+    
+    <script>
+    export default {
+      methods: {
+        handleSignup() {
+          window.umami.track('signup-click', {
+            source: 'homepage'
+          });
+        }
+      }
+    }
+    </script>
+    ```
+  </Tab>
+  
+  <Tab title="Angular">
+    Create a service for tracking:
+    
+    ```typescript
+    import { Injectable } from '@angular/core';
+    
+    declare global {
+      interface Window {
+        umami: any;
+      }
+    }
+    
+    @Injectable({ providedIn: 'root' })
+    export class AnalyticsService {
+      track(eventName: string, data?: any) {
+        if (window.umami) {
+          window.umami.track(eventName, data);
+        }
+      }
+    }
+    ```
+    
+    Use in components:
+    ```typescript
+    export class AppComponent {
+      constructor(private analytics: AnalyticsService) {}
+      
+      onSignup() {
+        this.analytics.track('signup-click', {
+          source: 'homepage'
+        });
+      }
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Svelte">
+    Use `umami.track()` in event handlers:
+    
+    ```svelte
+    <script>
+      function handleSignup() {
+        window.umami.track('signup-click', {
+          source: 'homepage'
+        });
+      }
+    </script>
+    
+    <button on:click={handleSignup}>
+      Sign Up
+    </button>
+    ```
+  </Tab>
+</Tabs>
+
+## Advanced Tracking
+
+### Track with Function
+
+Use a function to access default properties and customize the payload:
+
+```javascript
+umami.track(props => ({
+  ...props,
+  name: 'custom-event',
+  data: {
+    custom_field: 'value',
+    timestamp: Date.now()
+  }
+}));
+```
+
+<Info>
+  The `props` parameter contains default properties: `website`, `hostname`, `language`, `referrer`, `screen`, `title`, and `url`.
+</Info>
+
+### Track Custom Page Views
+
+Manually track page views in single-page applications:
+
+```javascript
+// In your router
+router.afterEach((to, from) => {
+  umami.track({
+    website: 'e676c9b4-11e4-4ef1-a4d7-87001773e9f2',
+    url: to.path,
+    title: to.meta.title || document.title
+  });
+});
+```
+
+### Conditional Tracking
+
+Track events based on conditions:
+
+```javascript
+function trackPurchase(order) {
+  // Only track high-value orders
+  if (order.total > 100) {
+    umami.track('high-value-purchase', {
+      total: order.total,
+      items: order.items.length,
+      payment_method: order.payment
+    });
+  }
+}
+```
+
+## Best Practices
+
+<Steps>
+  <Step title="Check if umami exists">
+    Always verify the tracker is loaded before calling `track()`:
+    
+    ```javascript
+    if (window.umami) {
+      umami.track('my-event');
+    }
+    ```
+  </Step>
+  
+  <Step title="Use descriptive event names">
+    Choose clear, consistent names:
+    
+    ```javascript
+    // Good
+    umami.track('newsletter-subscribe');
+    umami.track('product-view');
+    
+    // Avoid
+    umami.track('click');
+    umami.track('event1');
+    ```
+  </Step>
+  
+  <Step title="Structure your event data">
+    Keep event data organized and meaningful:
+    
+    ```javascript
+    umami.track('purchase', {
+      product_id: '123',
+      product_name: 'Pro Plan',
+      category: 'subscription',
+      price: 29.99,
+      currency: 'USD'
+    });
+    ```
+  </Step>
+  
+  <Step title="Handle async operations">
+    The `track()` function returns a Promise:
+    
+    ```javascript
+    await umami.track('critical-event');
+    // Continue after tracking completes
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  Event names are truncated at 50 characters. Keep names concise to avoid data loss.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Event Data" icon="database" href="/tracking/event-data">
+    Learn about event data structure and limitations
+  </Card>
+  <Card title="Tracker Functions" icon="function" href="/tracking/tracker-functions">
+    Explore all available tracker functions
+  </Card>
+</CardGroup>

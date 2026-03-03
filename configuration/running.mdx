@@ -1,0 +1,655 @@
+---
+title: Running in Production
+description: Best practices for deploying and running Umami in production
+---
+
+# Running in Production
+
+This guide covers best practices, security considerations, and optimization strategies for running Umami in production environments.
+
+## Production Checklist
+
+Before deploying to production:
+
+<Steps>
+  <Step title="Security">
+    <CardGroup cols={2}>
+      <Card title="Change Default Password" icon="lock">
+        Change the default admin password (username: `admin`, password: `umami`) immediately after first login.
+      </Card>
+      <Card title="Secure APP_SECRET" icon="key">
+        Use a strong, random APP_SECRET (32+ characters).
+      </Card>
+      <Card title="Database Credentials" icon="database">
+        Use strong passwords for database users.
+      </Card>
+      <Card title="Enable HTTPS" icon="shield">
+        Configure SSL/TLS certificates for encrypted connections.
+      </Card>
+    </CardGroup>
+  </Step>
+
+  <Step title="Configuration">
+    - Set `NODE_ENV=production`
+    - Configure `DATABASE_URL` for production database
+    - Set up proper `HOSTNAME` and `PORT`
+    - Enable `FORCE_SSL=1` if using HTTPS
+    - Configure custom `TRACKER_SCRIPT_NAME` to avoid ad blockers
+  </Step>
+
+  <Step title="Infrastructure">
+    - Set up reverse proxy (nginx, Caddy, Traefik)
+    - Configure database backups
+    - Set up monitoring and alerting
+    - Implement log aggregation
+    - Configure firewall rules
+  </Step>
+
+  <Step title="Performance">
+    - Enable connection pooling
+    - Configure caching (Redis optional)
+    - Set up CDN for static assets
+    - Optimize database indexes
+    - Monitor resource usage
+  </Step>
+</Steps>
+
+## Reverse Proxy Setup
+
+Use a reverse proxy for SSL termination, load balancing, and security.
+
+### Nginx
+
+<Steps>
+  <Step title="Install Nginx">
+    ```bash
+    sudo apt update
+    sudo apt install nginx
+    ```
+  </Step>
+
+  <Step title="Create Configuration">
+    Create `/etc/nginx/sites-available/umami`:
+
+    ```nginx /etc/nginx/sites-available/umami
+    server {
+        listen 80;
+        server_name analytics.yourdomain.com;
+
+        # Redirect HTTP to HTTPS
+        return 301 https://$server_name$request_uri;
+    }
+
+    server {
+        listen 443 ssl http2;
+        server_name analytics.yourdomain.com;
+
+        # SSL Configuration
+        ssl_certificate /etc/letsencrypt/live/analytics.yourdomain.com/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/analytics.yourdomain.com/privkey.pem;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers on;
+
+        # Security Headers
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+
+        # Logging
+        access_log /var/log/nginx/umami_access.log;
+        error_log /var/log/nginx/umami_error.log;
+
+        # Proxy Configuration
+        location / {
+            proxy_pass http://localhost:3000;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+        # Cache static assets
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+            proxy_pass http://localhost:3000;
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+    ```
+  </Step>
+
+  <Step title="Enable Site">
+    ```bash
+    sudo ln -s /etc/nginx/sites-available/umami /etc/nginx/sites-enabled/
+    sudo nginx -t
+    sudo systemctl reload nginx
+    ```
+  </Step>
+</Steps>
+
+### Caddy
+
+Caddy automatically handles SSL certificates:
+
+```caddyfile Caddyfile
+analytics.yourdomain.com {
+    reverse_proxy localhost:3000
+
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+    }
+
+    # Enable compression
+    encode gzip
+
+    # Cache static assets
+    @static {
+        path *.js *.css *.png *.jpg *.jpeg *.gif *.ico *.svg
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+}
+```
+
+Start Caddy:
+```bash
+caddy run --config Caddyfile
+```
+
+### Traefik
+
+For Docker deployments with automatic SSL:
+
+```yaml docker-compose.yml
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=your@email.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/letsencrypt
+
+  umami:
+    image: ghcr.io/umami-software/umami:latest
+    environment:
+      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      APP_SECRET: your-secret
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.umami.rule=Host(`analytics.yourdomain.com`)"
+      - "traefik.http.routers.umami.entrypoints=websecure"
+      - "traefik.http.routers.umami.tls.certresolver=myresolver"
+```
+
+## SSL/TLS Configuration
+
+### Let's Encrypt with Certbot
+
+<Steps>
+  <Step title="Install Certbot">
+    ```bash
+    sudo apt install certbot python3-certbot-nginx
+    ```
+  </Step>
+
+  <Step title="Obtain Certificate">
+    ```bash
+    sudo certbot --nginx -d analytics.yourdomain.com
+    ```
+
+    Certbot will:
+    - Verify domain ownership
+    - Obtain SSL certificate
+    - Configure nginx automatically
+    - Set up auto-renewal
+  </Step>
+
+  <Step title="Verify Auto-Renewal">
+    ```bash
+    sudo certbot renew --dry-run
+    ```
+  </Step>
+</Steps>
+
+<Info>
+  Let's Encrypt certificates are valid for 90 days. Certbot automatically renews them.
+</Info>
+
+### Manual SSL Certificate
+
+If using purchased certificates:
+
+```nginx
+ssl_certificate /path/to/fullchain.pem;
+ssl_certificate_key /path/to/privkey.pem;
+```
+
+## Process Management
+
+### Using PM2
+
+PM2 keeps Umami running and restarts it on crashes:
+
+<Steps>
+  <Step title="Install PM2">
+    ```bash
+    npm install -g pm2
+    ```
+  </Step>
+
+  <Step title="Start Umami">
+    ```bash
+    cd /path/to/umami
+    pm2 start pnpm --name umami -- start
+    ```
+  </Step>
+
+  <Step title="Configure Auto-Start">
+    ```bash
+    pm2 startup
+    pm2 save
+    ```
+
+    This creates a systemd service that starts PM2 on boot.
+  </Step>
+
+  <Step title="Manage Process">
+    ```bash
+    # View status
+    pm2 status
+
+    # View logs
+    pm2 logs umami
+
+    # Restart
+    pm2 restart umami
+
+    # Stop
+    pm2 stop umami
+
+    # Monitor
+    pm2 monit
+    ```
+  </Step>
+</Steps>
+
+### Using systemd
+
+Create a systemd service:
+
+```ini /etc/systemd/system/umami.service
+[Unit]
+Description=Umami Analytics
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=umami
+WorkingDirectory=/opt/umami
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+EnvironmentFile=/opt/umami/.env
+ExecStart=/usr/bin/pnpm start
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=umami
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Manage the service:
+
+```bash
+# Enable and start
+sudo systemctl enable umami
+sudo systemctl start umami
+
+# Check status
+sudo systemctl status umami
+
+# View logs
+sudo journalctl -u umami -f
+
+# Restart
+sudo systemctl restart umami
+```
+
+## Performance Optimization
+
+### Database Optimization
+
+<Accordion title="Connection Pooling">
+  Use PgBouncer for connection pooling:
+
+  ```bash
+  sudo apt install pgbouncer
+  ```
+
+  Configure `/etc/pgbouncer/pgbouncer.ini`:
+  ```ini
+  [databases]
+  umami = host=localhost port=5432 dbname=umami
+
+  [pgbouncer]
+  pool_mode = transaction
+  max_client_conn = 100
+  default_pool_size = 20
+  ```
+
+  Update DATABASE_URL:
+  ```bash
+  DATABASE_URL=postgresql://umami:password@localhost:6432/umami
+  ```
+</Accordion>
+
+<Accordion title="Redis Caching">
+  Enable Redis for caching and sessions:
+
+  ```bash
+  # Install Redis
+  sudo apt install redis-server
+  sudo systemctl enable redis-server
+  ```
+
+  Configure Umami:
+  ```bash .env
+  REDIS_URL=redis://localhost:6379
+  ```
+
+  Benefits:
+  - Faster session management
+  - Reduced database load
+  - Better performance
+</Accordion>
+
+<Accordion title="Database Indexes">
+  Umami creates indexes automatically, but verify:
+
+  ```sql
+  -- Check indexes
+  \di
+
+  -- Analyze query performance
+  EXPLAIN ANALYZE SELECT * FROM website_event 
+  WHERE website_id = 'xxx' 
+  AND created_at > NOW() - INTERVAL '7 days';
+  ```
+</Accordion>
+
+### Application Optimization
+
+<CardGroup cols={2}>
+  <Card title="Enable Production Mode" icon="rocket">
+    ```bash
+    NODE_ENV=production
+    ```
+    Optimizes Next.js for performance
+  </Card>
+  <Card title="Increase Memory" icon="memory-stick">
+    ```bash
+    NODE_OPTIONS="--max-old-space-size=4096"
+    ```
+    Allocate more memory for Node.js
+  </Card>
+  <Card title="Enable Compression" icon="file-archive">
+    Nginx/Caddy automatically compress responses
+  </Card>
+  <Card title="CDN for Assets" icon="cloud">
+    Serve static assets from CDN for global performance
+  </Card>
+</CardGroup>
+
+## Monitoring and Logging
+
+### Application Logs
+
+<Tabs>
+  <Tab title="PM2">
+    ```bash
+    # Real-time logs
+    pm2 logs umami
+
+    # Last 100 lines
+    pm2 logs umami --lines 100
+
+    # Log files location
+    ~/.pm2/logs/
+    ```
+  </Tab>
+
+  <Tab title="systemd">
+    ```bash
+    # Follow logs
+    sudo journalctl -u umami -f
+
+    # Last 100 lines
+    sudo journalctl -u umami -n 100
+
+    # Logs since today
+    sudo journalctl -u umami --since today
+    ```
+  </Tab>
+
+  <Tab title="Docker">
+    ```bash
+    # Follow logs
+    docker compose logs -f umami
+
+    # Last 100 lines
+    docker compose logs --tail=100 umami
+
+    # Save to file
+    docker compose logs umami > umami.log
+    ```
+  </Tab>
+</Tabs>
+
+### Database Monitoring
+
+```sql
+-- Active connections
+SELECT count(*) FROM pg_stat_activity WHERE datname = 'umami';
+
+-- Database size
+SELECT pg_size_pretty(pg_database_size('umami'));
+
+-- Slow queries
+SELECT query, calls, total_time, mean_time
+FROM pg_stat_statements
+ORDER BY mean_time DESC
+LIMIT 10;
+```
+
+### Health Checks
+
+Umami provides a heartbeat endpoint:
+
+```bash
+curl http://localhost:3000/api/heartbeat
+```
+
+Returns `200 OK` if healthy.
+
+**Monitor with cron:**
+```bash cron
+*/5 * * * * curl -f http://localhost:3000/api/heartbeat || systemctl restart umami
+```
+
+## Backup Strategy
+
+<Steps>
+  <Step title="Database Backups">
+    Daily automated backups:
+
+    ```bash backup.sh
+    #!/bin/bash
+    BACKUP_DIR="/backups/umami"
+    DATE=$(date +%Y%m%d_%H%M%S)
+    
+    # Create backup
+    pg_dump -U umami -Fc umami > $BACKUP_DIR/umami_$DATE.dump
+    
+    # Keep only last 30 days
+    find $BACKUP_DIR -name "umami_*.dump" -mtime +30 -delete
+    ```
+
+    Schedule with cron:
+    ```bash
+    0 2 * * * /opt/scripts/backup.sh
+    ```
+  </Step>
+
+  <Step title="Configuration Backups">
+    Backup `.env` and configuration files:
+
+    ```bash
+    tar -czf config_backup.tar.gz .env docker-compose.yml nginx.conf
+    ```
+  </Step>
+
+  <Step title="Offsite Storage">
+    Upload to S3, Google Cloud Storage, or another server:
+
+    ```bash
+    # Using rclone
+    rclone copy /backups/umami remote:umami-backups
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  Test your backup restoration process regularly to ensure backups are valid.
+</Warning>
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Firewall Configuration" icon="shield">
+    ```bash
+    # Allow SSH, HTTP, HTTPS
+    sudo ufw allow 22
+    sudo ufw allow 80
+    sudo ufw allow 443
+    sudo ufw enable
+    
+    # Block direct access to app port
+    sudo ufw deny 3000
+    ```
+  </Card>
+  <Card title="Regular Updates" icon="refresh-cw">
+    Keep Umami and dependencies updated:
+    ```bash
+    git pull
+    pnpm install
+    pnpm build
+    pm2 restart umami
+    ```
+  </Card>
+  <Card title="Secure Database" icon="database">
+    - Use strong passwords
+    - Limit network access
+    - Enable SSL connections
+    - Regular security updates
+  </Card>
+  <Card title="Monitor Access" icon="eye">
+    - Review nginx access logs
+    - Set up fail2ban
+    - Monitor failed logins
+    - Use intrusion detection
+  </Card>
+</CardGroup>
+
+## Scaling Strategies
+
+### Vertical Scaling
+
+Increase resources on single server:
+- Upgrade CPU and RAM
+- Use faster SSD storage
+- Optimize database configuration
+- Enable Redis caching
+
+### Horizontal Scaling
+
+For very high traffic:
+
+1. **Load Balancer**: Distribute traffic across multiple Umami instances
+2. **Read Replicas**: Use PostgreSQL read replicas for queries
+3. **ClickHouse**: Switch to ClickHouse for analytics data
+4. **Redis Cluster**: Distributed caching
+
+<Info>
+  Most self-hosted installations won't need horizontal scaling. A properly configured single server can handle millions of pageviews.
+</Info>
+
+## Troubleshooting
+
+<Accordion title="High Memory Usage">
+  - Increase Node.js memory limit
+  - Check for memory leaks in logs
+  - Restart application periodically
+  - Optimize database queries
+  - Enable garbage collection: `NODE_OPTIONS="--max-old-space-size=4096 --expose-gc"`
+</Accordion>
+
+<Accordion title="Slow Response Times">
+  - Enable Redis caching
+  - Use connection pooling
+  - Check database query performance
+  - Verify server resources aren't exhausted
+  - Enable nginx caching for static assets
+</Accordion>
+
+<Accordion title="Database Connection Errors">
+  - Check PostgreSQL is running
+  - Verify DATABASE_URL is correct
+  - Increase max_connections in PostgreSQL
+  - Use connection pooling (PgBouncer)
+  - Check network connectivity
+</Accordion>
+
+<Accordion title="SSL Certificate Issues">
+  - Verify certificate paths in nginx config
+  - Check certificate expiration: `openssl x509 -in cert.pem -noout -dates`
+  - Test renewal: `sudo certbot renew --dry-run`
+  - Check DNS records point to server
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="gear" href="/configuration/environment-variables">
+    Advanced configuration options
+  </Card>
+  <Card title="Database Setup" icon="database" href="/configuration/database-setup">
+    Optimize database performance
+  </Card>
+  <Card title="Docker Installation" icon="docker" href="/installation/docker">
+    Production Docker deployment
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Getting started guide
+  </Card>
+</CardGroup>

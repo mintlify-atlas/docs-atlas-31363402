@@ -1,0 +1,512 @@
+---
+title: Install from Source
+description: Build and run Umami from source code
+---
+
+# Installing from Source
+
+Installing Umami from source gives you complete control over the build process and allows you to customize the application. This method is recommended for developers or advanced users.
+
+## Prerequisites
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    Version 18.18 or higher required
+  </Card>
+  <Card title="PostgreSQL" icon="database">
+    Version 12.14 or higher required
+  </Card>
+  <Card title="pnpm" icon="package">
+    Package manager (installed via npm)
+  </Card>
+  <Card title="Git" icon="git-branch">
+    For cloning the repository
+  </Card>
+</CardGroup>
+
+<Info>
+  Umami uses **pnpm** as its package manager. Make sure you have it installed before proceeding.
+</Info>
+
+## Installation Steps
+
+<Steps>
+  <Step title="Install Node.js">
+    Ensure you have Node.js 18.18 or higher:
+
+    ```bash
+    node --version
+    ```
+
+    If you need to install or update Node.js, visit [nodejs.org](https://nodejs.org/) or use a version manager like [nvm](https://github.com/nvm-sh/nvm):
+
+    ```bash
+    # Using nvm
+    nvm install 18
+    nvm use 18
+    ```
+  </Step>
+
+  <Step title="Install pnpm">
+    Install pnpm globally:
+
+    ```bash
+    npm install -g pnpm
+    ```
+
+    Verify installation:
+
+    ```bash
+    pnpm --version
+    ```
+  </Step>
+
+  <Step title="Set Up PostgreSQL Database">
+    You need a running PostgreSQL database. Install PostgreSQL if you haven't already:
+
+    <Tabs>
+      <Tab title="Ubuntu/Debian">
+        ```bash
+        sudo apt update
+        sudo apt install postgresql postgresql-contrib
+        sudo systemctl start postgresql
+        sudo systemctl enable postgresql
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        # Using Homebrew
+        brew install postgresql@15
+        brew services start postgresql@15
+        ```
+      </Tab>
+      <Tab title="Windows">
+        Download and install from [postgresql.org](https://www.postgresql.org/download/windows/)
+      </Tab>
+    </Tabs>
+
+    Create a database for Umami:
+
+    ```bash
+    # Switch to postgres user (Linux)
+    sudo -u postgres psql
+
+    # Or connect directly (macOS/Windows)
+    psql postgres
+    ```
+
+    In the PostgreSQL shell:
+
+    ```sql
+    CREATE DATABASE umami;
+    CREATE USER umami WITH PASSWORD 'your-secure-password';
+    GRANT ALL PRIVILEGES ON DATABASE umami TO umami;
+    \q
+    ```
+  </Step>
+
+  <Step title="Clone the Repository">
+    Get the Umami source code:
+
+    ```bash
+    git clone https://github.com/umami-software/umami.git
+    cd umami
+    ```
+
+    Optionally, checkout a specific version:
+
+    ```bash
+    # List available versions
+    git tag
+
+    # Checkout a specific version
+    git checkout v3.0.3
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    Install all required packages using pnpm:
+
+    ```bash
+    pnpm install
+    ```
+
+    This will install all dependencies listed in `package.json`, including:
+    - Next.js 15.5.9
+    - React 19.2.3
+    - Prisma 6.18.0
+    - And all other required packages
+  </Step>
+
+  <Step title="Configure Environment Variables">
+    Create a `.env` file in the root directory:
+
+    ```bash
+    touch .env
+    ```
+
+    Add the following configuration:
+
+    ```bash .env
+    DATABASE_URL=postgresql://umami:your-secure-password@localhost:5432/umami
+    APP_SECRET=replace-with-random-string
+    ```
+
+    <Warning>
+      Generate a secure random string for `APP_SECRET`:
+      ```bash
+      openssl rand -base64 32
+      ```
+    </Warning>
+
+    **Connection URL format:**
+    ```
+    postgresql://username:password@hostname:port/database
+    ```
+
+    Example:
+    ```bash
+    DATABASE_URL=postgresql://umami:mypassword@localhost:5432/umami
+    ```
+  </Step>
+
+  <Step title="Build the Application">
+    Build Umami, which will also set up the database schema:
+
+    ```bash
+    pnpm run build
+    ```
+
+    This command will:
+    - Check environment variables
+    - Generate the Prisma client
+    - Run database migrations
+    - Build the tracker script
+    - Build the Next.js application
+    - Create default admin user
+
+    <Info>
+      The build process automatically creates tables and a default admin account:
+      - **Username**: `admin`
+      - **Password**: `umami`
+    </Info>
+  </Step>
+
+  <Step title="Start Umami">
+    Start the production server:
+
+    ```bash
+    pnpm start
+    ```
+
+    Umami will start on `http://localhost:3000` by default.
+  </Step>
+
+  <Step title="Access the Dashboard">
+    Open your browser and navigate to:
+
+    ```
+    http://localhost:3000
+    ```
+
+    Login with:
+    - Username: `admin`
+    - Password: `umami`
+
+    <Warning>
+      **Important**: Change the default password immediately after your first login!
+    </Warning>
+  </Step>
+</Steps>
+
+## Development Mode
+
+For development with hot reloading:
+
+```bash
+pnpm dev
+```
+
+<Note>
+  Development mode runs on port **3001** by default (not 3000) and includes:
+  - Hot module replacement
+  - Detailed error messages
+  - Turbopack for faster builds
+</Note>
+
+## Build Scripts Explained
+
+Umami's build process includes several important steps:
+
+<Accordion title="pnpm run build">
+  Complete production build:
+  ```bash
+  pnpm run build
+  ```
+  
+  This runs:
+  1. `check-env` - Validates required environment variables
+  2. `build-db` - Generates Prisma client
+  3. `check-db` - Verifies database connection
+  4. `build-tracker` - Builds the tracking script (script.js)
+  5. `build-geo` - Downloads GeoIP data
+  6. `build-app` - Builds Next.js application
+</Accordion>
+
+<Accordion title="pnpm run update-db">
+  Run database migrations:
+  ```bash
+  pnpm run update-db
+  ```
+  
+  Use this when updating to a new version to migrate the database schema.
+</Accordion>
+
+<Accordion title="pnpm run build-tracker">
+  Rebuild just the tracking script:
+  ```bash
+  pnpm run build-tracker
+  ```
+  
+  Useful if you've modified the tracker source code.
+</Accordion>
+
+## Configuration Options
+
+### Change Port
+
+To run on a different port:
+
+```bash
+# Production
+PORT=8080 pnpm start
+
+# Development (uses -p flag)
+pnpm dev -- -p 8080
+```
+
+### Use Custom Base Path
+
+If serving Umami from a subdirectory:
+
+```bash .env
+BASE_PATH=/analytics
+```
+
+Then rebuild:
+
+```bash
+pnpm run build
+```
+
+Access at: `http://localhost:3000/analytics`
+
+## Updating Umami
+
+To update to the latest version:
+
+<Steps>
+  <Step title="Pull Latest Changes">
+    ```bash
+    git pull
+    ```
+  </Step>
+
+  <Step title="Install New Dependencies">
+    ```bash
+    pnpm install
+    ```
+  </Step>
+
+  <Step title="Rebuild Application">
+    ```bash
+    pnpm build
+    ```
+    
+    This will automatically run database migrations.
+  </Step>
+
+  <Step title="Restart Server">
+    Stop the current process (Ctrl+C) and start again:
+    ```bash
+    pnpm start
+    ```
+  </Step>
+</Steps>
+
+## Running as a Service
+
+### Using PM2
+
+PM2 is a process manager that keeps Umami running:
+
+<Steps>
+  <Step title="Install PM2">
+    ```bash
+    npm install -g pm2
+    ```
+  </Step>
+
+  <Step title="Start Umami with PM2">
+    ```bash
+    pm2 start pnpm --name umami -- start
+    ```
+  </Step>
+
+  <Step title="Configure Auto-start">
+    ```bash
+    pm2 startup
+    pm2 save
+    ```
+  </Step>
+
+  <Step title="Manage Process">
+    ```bash
+    # View status
+    pm2 status
+
+    # View logs
+    pm2 logs umami
+
+    # Restart
+    pm2 restart umami
+
+    # Stop
+    pm2 stop umami
+    ```
+  </Step>
+</Steps>
+
+### Using systemd (Linux)
+
+Create a systemd service file:
+
+```bash
+sudo nano /etc/systemd/system/umami.service
+```
+
+Add the following:
+
+```ini /etc/systemd/system/umami.service
+[Unit]
+Description=Umami Analytics
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=your-username
+WorkingDirectory=/path/to/umami
+Environment="NODE_ENV=production"
+ExecStart=/usr/bin/pnpm start
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+
+```bash
+sudo systemctl enable umami
+sudo systemctl start umami
+sudo systemctl status umami
+```
+
+## Troubleshooting
+
+<Accordion title="Build fails with DATABASE_URL error">
+  Make sure your `.env` file exists and contains a valid DATABASE_URL:
+  ```bash
+  cat .env
+  ```
+
+  Test database connection:
+  ```bash
+  psql $DATABASE_URL -c "SELECT version();"
+  ```
+</Accordion>
+
+<Accordion title="Port already in use">
+  Change the port:
+  ```bash
+  PORT=8080 pnpm start
+  ```
+
+  Or find what's using port 3000:
+  ```bash
+  lsof -i :3000
+  kill -9 <PID>
+  ```
+</Accordion>
+
+<Accordion title="Prisma client generation fails">
+  Manually generate the Prisma client:
+  ```bash
+  pnpm run build-db-client
+  ```
+
+  If issues persist, delete generated files:
+  ```bash
+  rm -rf src/generated
+  pnpm run build-db
+  ```
+</Accordion>
+
+<Accordion title="Database migration errors">
+  Reset the database (WARNING: deletes all data):
+  ```bash
+  # In PostgreSQL
+  DROP DATABASE umami;
+  CREATE DATABASE umami;
+  ```
+
+  Then rebuild:
+  ```bash
+  pnpm run build
+  ```
+</Accordion>
+
+<Accordion title="Missing dependencies error">
+  Clear pnpm cache and reinstall:
+  ```bash
+  rm -rf node_modules
+  pnpm store prune
+  pnpm install
+  ```
+</Accordion>
+
+## Production Deployment
+
+<Warning>
+  For production deployments:
+  1. Use a strong `APP_SECRET`
+  2. Use secure database credentials
+  3. Set up a reverse proxy (nginx, Apache)
+  4. Enable HTTPS with SSL certificates
+  5. Configure firewall rules
+  6. Set up automated backups
+  7. Use a process manager (PM2, systemd)
+  8. Change default admin password
+</Warning>
+
+<Tip>
+  See [Running in Production](/configuration/running) for detailed production deployment instructions.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="gear" href="/configuration/environment-variables">
+    Configure advanced features
+  </Card>
+  <Card title="Database Setup" icon="database" href="/configuration/database-setup">
+    Optimize database configuration
+  </Card>
+  <Card title="Add Website" icon="plus" href="/quickstart#add-your-first-website">
+    Start tracking analytics
+  </Card>
+  <Card title="Production Guide" icon="server" href="/configuration/running">
+    Deploy to production
+  </Card>
+</CardGroup>

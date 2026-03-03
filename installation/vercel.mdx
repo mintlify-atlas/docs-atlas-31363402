@@ -1,0 +1,574 @@
+---
+title: Vercel Deployment
+description: Deploy Umami to Vercel with serverless architecture
+---
+
+# Deploy to Vercel
+
+Deploy Umami to Vercel's serverless platform for automatic scaling and global CDN distribution.
+
+## Prerequisites
+
+<Warning>
+  **Important**: Vercel deployment requires an external PostgreSQL database. Vercel doesn't provide a built-in database, so you'll need to use a service like:
+  - [Supabase](https://supabase.com/) (recommended, free tier available)
+  - [Neon](https://neon.tech/) (serverless PostgreSQL)
+  - [Railway](https://railway.app/) (PostgreSQL only)
+  - [AWS RDS](https://aws.amazon.com/rds/)
+  - Self-hosted PostgreSQL
+</Warning>
+
+<Info>
+  Vercel is a serverless platform optimized for Next.js applications. It provides:
+  - Automatic deployments from Git
+  - Global CDN
+  - Automatic HTTPS
+  - Environment variable management
+  - Free tier for hobby projects
+</Info>
+
+## Quick Deploy
+
+<Steps>
+  <Step title="Set Up PostgreSQL Database">
+    Before deploying to Vercel, create a PostgreSQL database:
+
+    <Tabs>
+      <Tab title="Supabase (Recommended)">
+        1. Go to [supabase.com](https://supabase.com/)
+        2. Create a free account
+        3. Create a new project
+        4. Wait for database provisioning
+        5. Go to **Settings** → **Database**
+        6. Copy the **Connection String** (URI format)
+        
+        Format:
+        ```
+        postgresql://postgres:[PASSWORD]@db.[PROJECT].supabase.co:5432/postgres
+        ```
+      </Tab>
+
+      <Tab title="Neon">
+        1. Go to [neon.tech](https://neon.tech/)
+        2. Sign up for free account
+        3. Create a new project
+        4. Copy the connection string
+        
+        Format:
+        ```
+        postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname
+        ```
+      </Tab>
+
+      <Tab title="Railway PostgreSQL">
+        1. Go to [railway.app](https://railway.app/)
+        2. Create new project
+        3. Add **PostgreSQL** database
+        4. Go to **Variables** tab
+        5. Copy `DATABASE_URL`
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Fork the Repository">
+    Fork Umami to your GitHub account:
+
+    1. Go to [github.com/umami-software/umami](https://github.com/umami-software/umami)
+    2. Click **Fork** button
+    3. Choose your account
+  </Step>
+
+  <Step title="Deploy to Vercel">
+    <Tabs>
+      <Tab title="Deploy Button">
+        If available, use the Vercel deploy button in the README, or:
+
+        1. Go to [vercel.com/new](https://vercel.com/new)
+        2. Import your forked repository
+        3. Click **Import**
+      </Tab>
+
+      <Tab title="Manual Import">
+        1. Go to [vercel.com](https://vercel.com/)
+        2. Sign up or login
+        3. Click **Add New** → **Project**
+        4. Import your forked Umami repository
+        5. Click **Import**
+      </Tab>
+
+      <Tab title="Vercel CLI">
+        Install Vercel CLI:
+        ```bash
+        npm install -g vercel
+        ```
+
+        Deploy from local:
+        ```bash
+        git clone https://github.com/your-username/umami.git
+        cd umami
+        vercel
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Configure Environment Variables">
+    Add environment variables in Vercel:
+
+    1. In the import screen, expand **Environment Variables**
+    2. Add the following:
+
+    ```bash
+    DATABASE_URL=your-postgresql-connection-string
+    APP_SECRET=your-random-secret-string
+    ```
+
+    <Warning>
+      Generate a secure random string for APP_SECRET:
+      ```bash
+      openssl rand -base64 32
+      ```
+    </Warning>
+
+    Make sure to add variables for all environments:
+    - Production
+    - Preview
+    - Development (optional)
+  </Step>
+
+  <Step title="Deploy">
+    1. Click **Deploy**
+    2. Vercel will build and deploy Umami
+    3. Wait for deployment to complete (2-5 minutes)
+    4. Click **Visit** to open your Umami instance
+  </Step>
+
+  <Step title="Initialize Database">
+    On first deployment, you need to initialize the database:
+
+    <Tabs>
+      <Tab title="Automatic (Recommended)">
+        The build process should automatically create tables:
+        
+        1. Check deployment logs for database migration
+        2. If successful, tables are created automatically
+      </Tab>
+
+      <Tab title="Manual Migration">
+        If automatic migration fails:
+
+        ```bash
+        # Clone your repository locally
+        git clone https://github.com/your-username/umami.git
+        cd umami
+
+        # Install dependencies
+        pnpm install
+
+        # Set DATABASE_URL
+        export DATABASE_URL="your-connection-string"
+
+        # Run migration
+        pnpm prisma migrate deploy
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Access Umami">
+    Your Umami instance is now live at:
+    ```
+    https://your-project.vercel.app
+    ```
+
+    Login with default credentials:
+    - Username: `admin`
+    - Password: `umami`
+
+    <Warning>
+      Change the default password immediately!
+    </Warning>
+  </Step>
+</Steps>
+
+## Custom Domain Setup
+
+Add your own domain to Vercel:
+
+<Steps>
+  <Step title="Add Domain in Vercel">
+    1. Go to your project in Vercel
+    2. Click **Settings** tab
+    3. Click **Domains** in sidebar
+    4. Enter your domain (e.g., `analytics.yourdomain.com`)
+    5. Click **Add**
+  </Step>
+
+  <Step title="Configure DNS">
+    Vercel will show you DNS records to add:
+
+    <Tabs>
+      <Tab title="Subdomain (CNAME)">
+        For subdomains like `analytics.yourdomain.com`:
+        
+        ```
+        Type: CNAME
+        Name: analytics
+        Value: cname.vercel-dns.com
+        TTL: 3600
+        ```
+      </Tab>
+
+      <Tab title="Root Domain (A)">
+        For root domains like `yourdomain.com`:
+        
+        ```
+        Type: A
+        Name: @
+        Value: 76.76.21.21
+        TTL: 3600
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Verify Domain">
+    1. Wait for DNS propagation (5 minutes - 48 hours)
+    2. Vercel automatically verifies and provisions SSL
+    3. Access your Umami at `https://your-domain.com`
+  </Step>
+</Steps>
+
+## Environment Variables
+
+Configure Umami on Vercel:
+
+<Accordion title="Required Variables">
+  ```bash
+  # PostgreSQL connection (required)
+  DATABASE_URL=postgresql://user:password@host:5432/database
+
+  # Encryption secret (required)
+  APP_SECRET=random-secret-string-here
+  ```
+</Accordion>
+
+<Accordion title="Optional Variables">
+  ```bash
+  # Disable Next.js telemetry
+  NEXT_TELEMETRY_DISABLED=1
+
+  # Custom base path
+  BASE_PATH=/analytics
+
+  # Custom tracker script name
+  TRACKER_SCRIPT_NAME=umami.js,analytics.js
+
+  # Force SSL
+  FORCE_SSL=1
+
+  # Allowed frame ancestors (for embedding)
+  ALLOWED_FRAME_URLS=https://yourdomain.com
+
+  # CORS settings
+  CORS_MAX_AGE=86400
+  ```
+</Accordion>
+
+### Update Environment Variables
+
+1. Go to **Settings** → **Environment Variables**
+2. Click **Edit** on the variable
+3. Update the value
+4. Click **Save**
+5. Redeploy for changes to take effect
+
+## Database Configuration
+
+### Connection Pooling
+
+<Info>
+  Vercel serverless functions create many database connections. Use connection pooling to avoid "too many connections" errors.
+</Info>
+
+<Tabs>
+  <Tab title="Supabase">
+    Use the **connection pooling** endpoint:
+    
+    ```bash
+    # Instead of direct connection:
+    # postgresql://postgres:[PASSWORD]@db.xxx.supabase.co:5432/postgres
+    
+    # Use pooler (port 6543):
+    DATABASE_URL=postgresql://postgres:[PASSWORD]@db.xxx.supabase.co:6543/postgres?pgbouncer=true
+    ```
+  </Tab>
+
+  <Tab title="Neon">
+    Neon automatically handles connection pooling:
+    
+    ```bash
+    DATABASE_URL=postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname
+    ```
+  </Tab>
+
+  <Tab title="PgBouncer">
+    Set up PgBouncer for your PostgreSQL:
+    
+    ```bash
+    # Connect through PgBouncer
+    DATABASE_URL=postgresql://user:password@pgbouncer-host:6432/database
+    ```
+  </Tab>
+</Tabs>
+
+### Database Performance
+
+<Warning>
+  Vercel's free tier has limitations:
+  - 100GB bandwidth/month
+  - 100 hours serverless function execution
+  - 6,000 serverless function invocations per day
+  
+  High-traffic sites should upgrade to Pro.
+</Warning>
+
+## Build Configuration
+
+### Build Settings
+
+Vercel auto-detects Next.js projects. Default settings:
+
+```bash
+# Build Command
+pnpm run build
+
+# Output Directory
+.next
+
+# Install Command
+pnpm install
+
+# Development Command
+pnpm dev
+```
+
+### Custom Build Settings
+
+Override in `vercel.json`:
+
+```json vercel.json
+{
+  "buildCommand": "pnpm run build",
+  "devCommand": "pnpm dev",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next"
+}
+```
+
+## Deployment Settings
+
+### Auto-Deploy from Git
+
+Vercel automatically deploys:
+- **Production**: Pushes to `main` branch
+- **Preview**: Pushes to other branches or pull requests
+
+<Tip>
+  Every pull request gets a unique preview URL for testing changes.
+</Tip>
+
+### Disable Auto-Deploy
+
+1. Go to **Settings** → **Git**
+2. Toggle **Production Branch** or **Preview Branches**
+3. Click **Save**
+
+## Monitoring and Logs
+
+### View Logs
+
+1. Go to your project dashboard
+2. Click on a deployment
+3. View:
+   - **Build Logs**: Compilation output
+   - **Function Logs**: Runtime logs
+   - **Error Logs**: Runtime errors
+
+### Real-time Logs
+
+Use Vercel CLI:
+
+```bash
+vercel logs your-project.vercel.app
+
+# Follow logs in real-time
+vercel logs --follow
+```
+
+### Analytics
+
+Enable Vercel Analytics:
+
+1. Go to **Analytics** tab
+2. Click **Enable Analytics**
+3. View:
+   - Pageviews
+   - Top pages
+   - Top referrers
+   - Device breakdown
+
+<Note>
+  Vercel Analytics is separate from Umami. Umami tracks your websites, while Vercel Analytics tracks the Umami dashboard itself.
+</Note>
+
+## Troubleshooting
+
+<Accordion title="Build fails with database error">
+  The build process needs DATABASE_URL:
+  
+  1. Go to **Settings** → **Environment Variables**
+  2. Ensure `DATABASE_URL` is set for all environments
+  3. Redeploy
+  
+  If Prisma migration fails:
+  - Run migrations manually (see Initialize Database step)
+  - Check database connection from your local machine
+</Accordion>
+
+<Accordion title="Too many database connections">
+  Enable connection pooling:
+  
+  - Use Supabase pooler (port 6543)
+  - Use Neon (built-in pooling)
+  - Set up PgBouncer
+  - Reduce concurrent function executions
+</Accordion>
+
+<Accordion title="Function timeout errors">
+  Vercel has execution limits:
+  - Hobby: 10 seconds
+  - Pro: 60 seconds
+  - Enterprise: 900 seconds
+  
+  Solutions:
+  - Upgrade to Pro for longer timeouts
+  - Optimize slow database queries
+  - Use background jobs for long tasks
+</Accordion>
+
+<Accordion title="Deployment stuck or failed">
+  Check deployment logs:
+  1. Click on failed deployment
+  2. View build logs for errors
+  3. Common issues:
+     - Missing environment variables
+     - Database connection failed
+     - Build errors in code
+     - Out of memory
+  
+  Try:
+  - Redeploy
+  - Clear build cache: Settings → General → Clear Cache
+  - Check Vercel status page
+</Accordion>
+
+<Accordion title="App is slow">
+  Optimize performance:
+  - Use connection pooling
+  - Add database indexes
+  - Enable Redis caching (if using REDIS_URL)
+  - Upgrade to Pro for better resources
+  - Use ClickHouse for high-volume analytics
+</Accordion>
+
+## Updating Umami
+
+<Steps>
+  <Step title="Sync Fork with Upstream">
+    Keep your fork updated:
+
+    ```bash
+    # Add upstream remote
+    git remote add upstream https://github.com/umami-software/umami.git
+
+    # Fetch updates
+    git fetch upstream
+
+    # Merge updates
+    git checkout main
+    git merge upstream/main
+
+    # Push to your fork
+    git push origin main
+    ```
+  </Step>
+
+  <Step title="Auto-Deploy">
+    Vercel automatically deploys when you push to main:
+    
+    1. Watch deployment progress in Vercel dashboard
+    2. Database migrations run automatically
+    3. New version is live when deployment completes
+  </Step>
+
+  <Step title="Verify Update">
+    Check the version:
+    1. Login to Umami
+    2. Go to Settings
+    3. Check version number at bottom
+  </Step>
+</Steps>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use Connection Pooling" icon="database">
+    Prevents "too many connections" errors in serverless environment
+  </Card>
+  <Card title="Enable Preview Deployments" icon="git-branch">
+    Test changes in preview URLs before merging to production
+  </Card>
+  <Card title="Set Up Database Backups" icon="hard-drive">
+    Regularly backup your PostgreSQL database
+  </Card>
+  <Card title="Monitor Function Usage" icon="activity">
+    Track Vercel usage to avoid hitting free tier limits
+  </Card>
+</CardGroup>
+
+<Tip>
+  For high-traffic sites, consider using Railway or self-hosting instead. Vercel's serverless model can be expensive at scale.
+</Tip>
+
+## Cost Optimization
+
+Stay within Vercel's free tier:
+- Free tier: Unlimited for personal projects with usage limits
+- Pro: $20/month per member (better limits)
+- Enterprise: Custom pricing
+
+**Tips:**
+- Use efficient database queries
+- Enable caching where possible
+- Monitor function execution time
+- Optimize images and assets
+- Consider upgrading for high-traffic sites
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Add Website" icon="plus" href="/quickstart#add-your-first-website">
+    Start tracking your first website
+  </Card>
+  <Card title="Configure Variables" icon="gear" href="/configuration/environment-variables">
+    Set up advanced features
+  </Card>
+  <Card title="Database Optimization" icon="database" href="/configuration/database-setup">
+    Optimize PostgreSQL performance
+  </Card>
+  <Card title="Custom Domain" icon="globe">
+    Set up your own domain
+  </Card>
+</CardGroup>

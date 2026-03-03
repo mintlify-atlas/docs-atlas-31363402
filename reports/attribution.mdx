@@ -1,0 +1,510 @@
+---
+title: 'Attribution Report'
+description: 'Understand which traffic sources drive conversions and revenue using first-click or last-click attribution models'
+icon: 'link'
+---
+
+The Attribution Report helps you understand which traffic sources, marketing campaigns, and channels drive conversions and revenue. This is essential for optimizing your marketing spend and understanding the customer journey.
+
+## What is an Attribution Report?
+
+Attribution is the process of assigning credit to the marketing touchpoints that led to a conversion. The Attribution Report shows:
+
+- Which referrers drive conversions
+- Which paid advertising platforms generate results
+- Which UTM campaign parameters perform best
+- How different traffic sources contribute to goals and revenue
+
+## Key Concepts
+
+<CardGroup cols={2}>
+  <Card title="Attribution Model" icon="diagram-project">
+    The method used to assign credit to touchpoints (first-click or last-click)
+  </Card>
+  <Card title="Touchpoint" icon="hand-pointer">
+    Any interaction a user has with your marketing (ad click, referral visit, etc.)
+  </Card>
+  <Card title="Conversion Event" icon="bullseye">
+    The goal or revenue event you're measuring (signup, purchase, etc.)
+  </Card>
+  <Card title="Attribution Window" icon="clock">
+    The time period before conversion to consider for attribution
+  </Card>
+</CardGroup>
+
+## Attribution Models
+
+Umami supports two attribution models:
+
+<Tabs>
+  <Tab title="First-Click Attribution">
+    ### First-Click (First-Touch) Attribution
+    
+    Gives 100% credit to the first touchpoint that brought the user to your site.
+    
+    **When to use:**
+    - Understanding top-of-funnel effectiveness
+    - Measuring awareness campaigns
+    - Evaluating new user acquisition channels
+    - Planning brand marketing budgets
+    
+    **Example:**
+    ```
+    User Journey:
+    1. Google Organic → First visit
+    2. Facebook Ad → Return visit
+    3. Direct → Return visit (conversion)
+    
+    Credit: 100% to Google Organic
+    ```
+    
+    **Advantages:**
+    - Shows which channels introduce new customers
+    - Simple to understand and explain
+    - Good for measuring brand awareness
+    
+    **Limitations:**
+    - Ignores the role of nurturing touchpoints
+    - May overvalue top-of-funnel channels
+    
+    <Info>
+      First-click attribution is ideal for businesses focused on customer acquisition and brand awareness.
+    </Info>
+  </Tab>
+  
+  <Tab title="Last-Click Attribution">
+    ### Last-Click (Last-Touch) Attribution
+    
+    Gives 100% credit to the last touchpoint before conversion.
+    
+    **When to use:**
+    - Measuring direct conversion drivers
+    - Optimizing retargeting campaigns
+    - Understanding what closes the deal
+    - Evaluating bottom-of-funnel tactics
+    
+    **Example:**
+    ```
+    User Journey:
+    1. Google Organic → First visit
+    2. Facebook Ad → Return visit
+    3. Email Campaign → Return visit (conversion)
+    
+    Credit: 100% to Email Campaign
+    ```
+    
+    **Advantages:**
+    - Shows what directly drives conversions
+    - Easy to implement and understand
+    - Aligns with short sales cycles
+    
+    **Limitations:**
+    - Ignores the awareness and consideration phases
+    - May undervalue top-of-funnel efforts
+    
+    <Tip>
+      Last-click attribution works well for businesses with short sales cycles and direct conversion paths.
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Attribution Report Components
+
+The Attribution Report breaks down performance across multiple dimensions:
+
+<Accordion title="Referrers">
+  Shows which external websites drive conversions.
+  
+  **Includes:**
+  - Referrer domain (e.g., google.com, facebook.com)
+  - Number of conversions or revenue attributed
+  
+  **Use cases:**
+  - Identify valuable partnerships
+  - Find guest posting opportunities
+  - Track PR and link-building results
+  
+  <Note>
+    Only shows external referrers. Direct traffic and same-domain referrers are excluded.
+  </Note>
+</Accordion>
+
+<Accordion title="Paid Ads">
+  Automatically detects traffic from major advertising platforms.
+  
+  **Supported platforms:**
+  - Google Ads (gclid parameter)
+  - Facebook/Meta Ads (fbclid parameter)
+  - Microsoft Ads (msclkid parameter)
+  - TikTok Ads (ttclid parameter)
+  - LinkedIn Ads (li_fat_id parameter)
+  - Twitter/X Ads (twclid parameter)
+  
+  **What you see:**
+  Platform name and conversions/revenue attributed to each.
+  
+  <Info>
+    Paid ad detection happens automatically based on click ID parameters in the URL.
+  </Info>
+</Accordion>
+
+<Accordion title="UTM Parameters">
+  Shows performance of your UTM-tagged campaigns.
+  
+  **Available breakdowns:**
+  - **utm_source**: Campaign source (e.g., google, newsletter, affiliate)
+  - **utm_medium**: Marketing medium (e.g., cpc, email, social)
+  - **utm_campaign**: Campaign name (e.g., summer_sale_2024)
+  - **utm_content**: Ad variant (e.g., banner_a, text_ad_b)
+  - **utm_term**: Keyword terms for paid search
+  
+  **Use cases:**
+  - Compare campaign performance
+  - Optimize ad creative and copy
+  - Measure channel effectiveness
+  - Calculate campaign ROI
+</Accordion>
+
+## Setting Up Attribution Tracking
+
+<Steps>
+  <Step title="Define Your Conversion Event">
+    Choose what action you want to attribute (goal or revenue event).
+    
+    - Page view (e.g., `/thank-you`)
+    - Custom event (e.g., `purchase`)
+  </Step>
+  
+  <Step title="Choose Attribution Model">
+    Decide whether first-click or last-click attribution best fits your business.
+  </Step>
+  
+  <Step title="Add UTM Parameters">
+    Tag all marketing campaigns with UTM parameters.
+    
+    ```
+    https://yoursite.com/landing?utm_source=facebook&utm_medium=cpc&utm_campaign=spring_sale
+    ```
+  </Step>
+  
+  <Step title="Configure the Report">
+    Set the conversion event and attribution model in your report parameters.
+  </Step>
+</Steps>
+
+## API Usage
+
+```bash
+curl -X POST https://your-umami-instance.com/api/reports/attribution \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "websiteId": "your-website-id",
+    "parameters": {
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": "2024-01-31T23:59:59Z",
+      "model": "last-click",
+      "type": "path",
+      "step": "/thank-you",
+      "currency": "USD"
+    },
+    "filters": {}
+  }'
+```
+
+### Parameters
+
+- **model**: Attribution model (`first-click` or `last-click`)
+- **type**: Conversion type (`path` for page views, `event` for custom events)
+- **step**: The page path or event name that represents a conversion
+- **currency** (optional): For revenue attribution, specify currency code
+
+### Response Format
+
+```json
+{
+  "referrer": [
+    { "name": "google.com", "value": 245 },
+    { "name": "facebook.com", "value": 123 }
+  ],
+  "paidAds": [
+    { "name": "Google Ads", "value": 189 },
+    { "name": "Facebook / Meta", "value": 98 }
+  ],
+  "utm_source": [
+    { "name": "newsletter", "value": 156 },
+    { "name": "affiliate", "value": 87 }
+  ],
+  "utm_medium": [
+    { "name": "email", "value": 156 },
+    { "name": "cpc", "value": 287 }
+  ],
+  "utm_campaign": [
+    { "name": "spring_sale", "value": 312 },
+    { "name": "welcome_series", "value": 156 }
+  ],
+  "utm_content": [
+    { "name": "banner_a", "value": 178 },
+    { "name": "text_ad", "value": 134 }
+  ],
+  "utm_term": [
+    { "name": "web analytics", "value": 45 },
+    { "name": "privacy analytics", "value": 32 }
+  ],
+  "total": {
+    "pageviews": 45230,
+    "visitors": 12456,
+    "visits": 15678
+  }
+}
+```
+
+## Use Cases and Insights
+
+<Tabs>
+  <Tab title="Channel Performance">
+    ### Compare Marketing Channels
+    
+    Understand which channels drive the most conversions.
+    
+    **Analysis:**
+    1. Review utm_medium breakdown
+    2. Compare conversions across email, social, paid, organic
+    3. Calculate conversion rate by channel
+    4. Determine which channels to invest in
+    
+    **Example insights:**
+    - Email drives 30% of conversions at lowest cost
+    - Paid search has high volume but low conversion rate
+    - Social media introduces new users (first-click) but email closes sales (last-click)
+    
+    <Tip>
+      Run the same attribution report with both first-click and last-click models to understand the full customer journey.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Campaign ROI">
+    ### Calculate Return on Ad Spend (ROAS)
+    
+    Measure revenue generated by each campaign.
+    
+    **Steps:**
+    1. Run attribution report with currency parameter
+    2. Get revenue attributed to each utm_campaign
+    3. Compare to campaign costs
+    4. Calculate ROAS
+    
+    **Example:**
+    ```javascript
+    Campaign: spring_sale_2024
+    Revenue: $25,000 (from attribution report)
+    Cost: $5,000 (from ad platform)
+    ROAS = $25,000 / $5,000 = 5.0x
+    
+    For every $1 spent, you earned $5 in revenue.
+    ```
+    
+    <Info>
+      A ROAS of 3-4x is often considered good, but it varies by industry and profit margins.
+    </Info>
+  </Tab>
+  
+  <Tab title="Content Attribution">
+    ### Measure Content Marketing Impact
+    
+    Track which content sources drive conversions.
+    
+    **Sources to track:**
+    - Guest posts on other sites
+    - Social media posts
+    - Email newsletters
+    - Partner websites
+    
+    **Implementation:**
+    ```
+    Guest Post Link:
+    https://yoursite.com/landing?
+      utm_source=partner_blog&
+      utm_medium=referral&
+      utm_campaign=guest_post_series
+    
+    Newsletter Link:
+    https://yoursite.com/blog/post?
+      utm_source=newsletter&
+      utm_medium=email&
+      utm_campaign=weekly_digest
+    ```
+    
+    **Insights:**
+    - Which guest posts drive the most conversions?
+    - Are newsletter subscribers converting?
+    - Which partners should you work with more?
+  </Tab>
+  
+  <Tab title="A/B Testing Attribution">
+    ### Test Ad Variations
+    
+    Use utm_content to compare different ad variations.
+    
+    **Setup:**
+    ```
+    Ad Variation A:
+    utm_content=banner_hero_image
+    
+    Ad Variation B:
+    utm_content=banner_product_shot
+    
+    Ad Variation C:
+    utm_content=banner_testimonial
+    ```
+    
+    **Analysis:**
+    Compare conversions/revenue from each utm_content value to determine the winning variation.
+    
+    **What to test:**
+    - Ad creative (images, videos)
+    - Ad copy and headlines
+    - Call-to-action buttons
+    - Landing page variations
+    
+    <Warning>
+      Ensure sufficient traffic to each variation for statistically significant results (typically 100+ conversions per variation).
+    </Warning>
+  </Tab>
+</Tabs>
+
+## UTM Parameter Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use Consistent Naming" icon="tags">
+    Create a naming convention and stick to it. Use lowercase and underscores.
+  </Card>
+  <Card title="Don't Use for Internal Links" icon="ban">
+    UTM parameters are for external campaigns only. Don't use on internal site links.
+  </Card>
+  <Card title="Document Your Campaigns" icon="book">
+    Keep a spreadsheet of all UTM parameters for consistency across your team.
+  </Card>
+  <Card title="Keep It Simple" icon="circle">
+    Use clear, descriptive values. Avoid codes that only you understand.
+  </Card>
+</CardGroup>
+
+### UTM Naming Convention Example
+
+```
+utm_source:
+  - google (paid)
+  - facebook (paid)
+  - newsletter (email)
+  - linkedin (organic posts)
+
+utm_medium:
+  - cpc (cost-per-click)
+  - cpm (cost-per-impression)
+  - email (email marketing)
+  - social (organic social)
+  - referral (partner/affiliate)
+
+utm_campaign:
+  - {season}_{year}_{product} 
+  - spring_2024_sale
+  - q4_2024_product_launch
+```
+
+<Tip>
+  Use a URL builder tool to create consistently formatted UTM links and avoid typos.
+</Tip>
+
+## Common Attribution Patterns
+
+<Accordion title="Social → Search → Email (Conversion)">
+  Users discover you on social media, research via search, then convert from email.
+  
+  **First-click**: Credit to social media
+  **Last-click**: Credit to email
+  
+  **Strategy**: 
+  - Invest in social for awareness
+  - Capture emails early in journey
+  - Nurture with email campaigns
+</Accordion>
+
+<Accordion title="Paid Ad → Direct → Direct (Conversion)">
+  User clicks a paid ad, returns directly twice before converting.
+  
+  **First-click**: Credit to paid ad
+  **Last-click**: Credit to paid ad (last non-direct touchpoint)
+  
+  **Strategy**:
+  - Paid ads are effective at introduction
+  - Strong brand recall (direct returns)
+  - Consider retargeting for users who don't convert immediately
+</Accordion>
+
+<Accordion title="Organic → Email → Paid Ad (Conversion)">
+  User finds you organically, subscribes to email, converts from retargeting ad.
+  
+  **First-click**: Credit to organic search
+  **Last-click**: Credit to paid ad
+  
+  **Strategy**:
+  - SEO brings quality traffic
+  - Email list is valuable
+  - Retargeting seals the deal
+</Accordion>
+
+## Troubleshooting Attribution
+
+<Accordion title="Direct traffic getting too much credit">
+  **Issue**: Last-click model attributes too much to direct traffic.
+  
+  **Why**: Users often return directly after initial discovery.
+  
+  **Solution**: Use first-click attribution or track the last non-direct touchpoint.
+</Accordion>
+
+<Accordion title="Attribution doesn't match ad platform data">
+  **Issue**: Conversion numbers differ between Umami and ad platforms.
+  
+  **Why**: 
+  - Different attribution windows
+  - Ad blockers affecting tracking
+  - View-through conversions counted differently
+  
+  **Solution**: Understand that some variance is normal. Focus on trends rather than exact numbers.
+</Accordion>
+
+<Accordion title="Missing UTM parameters in report">
+  **Issue**: Some traffic shows "(not set)" or empty UTM values.
+  
+  **Why**: UTM parameters weren't included in the link or were stripped.
+  
+  **Solution**: 
+  - Audit all campaign links
+  - Use link shorteners that preserve parameters
+  - Implement link validation before campaigns launch
+</Accordion>
+
+## Best Practices
+
+1. **Compare attribution models**: Run reports with both first-click and last-click to see the full picture
+2. **Set up consistent UTM tagging**: Use the same naming convention across all campaigns
+3. **Track both goals and revenue**: Measure both conversion events and monetary value
+4. **Regular reporting**: Review attribution weekly to catch issues and optimize campaigns
+5. **Combine with other reports**: Use Funnel and Journey reports to understand the complete user path
+
+<Warning>
+  Attribution models are simplifications. No single model tells the complete story. Use multiple models and reports to inform decisions.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="UTM Tracking" icon="tag" href="/reports/utm">
+    Deep dive into UTM parameter performance
+  </Card>
+  <Card title="Revenue Report" icon="dollar-sign" href="/reports/revenue">
+    Track the monetary value of conversions
+  </Card>
+</CardGroup>

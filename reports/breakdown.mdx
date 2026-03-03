@@ -1,0 +1,204 @@
+---
+title: 'Breakdown Report'
+description: 'Analyze your website metrics broken down by dimensions like pages, countries, devices, and browsers'
+icon: 'chart-bar'
+---
+
+The Breakdown Report is one of the most versatile reports in Umami, allowing you to analyze your website metrics across multiple dimensions simultaneously. This report helps you understand how different segments of your traffic perform.
+
+## What is a Breakdown Report?
+
+A Breakdown Report aggregates your website metrics (views, visitors, visits, bounce rate, and time on site) and breaks them down by one or more dimensions. This allows you to answer questions like:
+
+- Which pages get the most traffic?
+- What countries do my visitors come from?
+- Which browsers and devices are most popular?
+- How do different referrers perform?
+
+## Key Metrics
+
+The Breakdown Report calculates the following metrics:
+
+<CardGroup cols={2}>
+  <Card title="Views" icon="eye">
+    Total number of page views for each dimension value
+  </Card>
+  <Card title="Visitors" icon="users">
+    Number of unique visitors (sessions) for each dimension value
+  </Card>
+  <Card title="Visits" icon="arrow-right-to-bracket">
+    Number of unique visits for each dimension value
+  </Card>
+  <Card title="Bounces" icon="right-from-bracket">
+    Number of single-page sessions (visits with only one page view)
+  </Card>
+</CardGroup>
+
+### Calculated Metrics
+
+- **Bounce Rate**: Percentage of visits that were bounces (single-page sessions)
+- **Average Time**: Average time spent per visit
+
+## Available Dimensions
+
+You can break down your data by the following dimensions:
+
+<Accordion title="Page Dimensions">
+  - **URL Path**: The page path (e.g., `/products`, `/about`)
+  - **Referrer Path**: The referrer page path
+  - **Query String**: URL query parameters
+</Accordion>
+
+<Accordion title="Geographic Dimensions">
+  - **Country**: Visitor's country
+  - **Region**: Geographic region
+  - **City**: City location
+</Accordion>
+
+<Accordion title="Technology Dimensions">
+  - **Browser**: Web browser used (Chrome, Firefox, Safari, etc.)
+  - **OS**: Operating system (Windows, macOS, iOS, Android, Linux)
+  - **Device**: Device type (desktop, mobile, tablet)
+  - **Screen Size**: Screen resolution
+</Accordion>
+
+<Accordion title="Traffic Source Dimensions">
+  - **Referrer Domain**: The domain that referred traffic
+  - **UTM Parameters**: utm_source, utm_medium, utm_campaign, utm_content, utm_term
+</Accordion>
+
+## How to Use the Breakdown Report
+
+<Steps>
+  <Step title="Select Date Range">
+    Choose the time period you want to analyze. You can select predefined ranges (last 7 days, last 30 days, etc.) or a custom date range.
+  </Step>
+  
+  <Step title="Choose Dimensions">
+    Select one or more fields to break down your data. You can combine multiple dimensions for deeper analysis (e.g., country + device).
+  </Step>
+  
+  <Step title="Apply Filters (Optional)">
+    Filter your data to focus on specific segments. For example, filter by a specific country or device type.
+  </Step>
+  
+  <Step title="Analyze Results">
+    Review the breakdown table showing metrics for each dimension value. Results are sorted by views and limited to the top 500 entries.
+  </Step>
+</Steps>
+
+## Use Cases and Insights
+
+<Tabs>
+  <Tab title="Content Performance">
+    ### Analyze Page Performance
+    
+    Break down by **URL Path** to see which pages drive the most traffic and engagement.
+    
+    **Insights you can gain:**
+    - Which pages have the highest bounce rates?
+    - Which pages keep visitors engaged the longest?
+    - Are there pages with high traffic but low engagement?
+    
+    ```json
+    {
+      "fields": ["url_path"],
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Audience Analysis">
+    ### Understand Your Audience
+    
+    Break down by **Country**, **Device**, and **Browser** to understand your audience demographics.
+    
+    **Insights you can gain:**
+    - Which countries should you focus your marketing efforts on?
+    - Is your site mobile-friendly? Check mobile vs desktop traffic.
+    - Do you need to support specific browsers?
+    
+    ```json
+    {
+      "fields": ["country", "device"],
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Traffic Sources">
+    ### Analyze Traffic Sources
+    
+    Break down by **Referrer Domain** and **UTM parameters** to see where your traffic comes from.
+    
+    **Insights you can gain:**
+    - Which external sites drive the most traffic?
+    - Which marketing campaigns are most effective?
+    - What's the quality of traffic from different sources?
+    
+    ```json
+    {
+      "fields": ["referrer_domain", "utm_campaign"],
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## API Usage
+
+You can generate Breakdown Reports programmatically using the Umami API:
+
+```bash
+curl -X POST https://your-umami-instance.com/api/reports/breakdown \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "websiteId": "your-website-id",
+    "parameters": {
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": "2024-01-31T23:59:59Z",
+      "fields": ["url_path", "country"]
+    },
+    "filters": {}
+  }'
+```
+
+<Info>
+  The Breakdown Report is limited to 500 results per query. Results are sorted by views in descending order.
+</Info>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Combine Dimensions" icon="layer-group">
+    Combine 2-3 related dimensions for deeper insights (e.g., page + device + country)
+  </Card>
+  <Card title="Use Filters" icon="filter">
+    Apply filters to focus on specific segments and reduce noise in your data
+  </Card>
+  <Card title="Compare Time Periods" icon="calendar-days">
+    Run the same breakdown for different time periods to identify trends
+  </Card>
+  <Card title="Monitor Bounce Rates" icon="chart-line">
+    High bounce rates may indicate poor user experience or irrelevant traffic
+  </Card>
+</CardGroup>
+
+<Warning>
+  Combining too many dimensions can make results difficult to interpret. Start with 1-2 dimensions and add more as needed.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Track Conversions" icon="bullseye" href="/reports/funnel">
+    Use Funnel Reports to track multi-step conversions
+  </Card>
+  <Card title="Analyze User Journeys" icon="route" href="/reports/journey">
+    See the paths users take through your site
+  </Card>
+</CardGroup>

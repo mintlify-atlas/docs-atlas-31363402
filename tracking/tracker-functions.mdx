@@ -1,0 +1,554 @@
+---
+title: Tracker Functions
+description: Comprehensive reference for all Umami tracker JavaScript functions and APIs.
+---
+
+The Umami tracker exposes a global `umami` object with functions for tracking events, page views, and user identification. These functions provide programmatic control over analytics tracking.
+
+## Global API
+
+Once the tracking script loads, the `umami` object is available on `window`:
+
+```javascript
+window.umami.track();
+window.umami.identify();
+
+// Or use it directly
+umami.track('event-name');
+umami.identify('user-id');
+```
+
+<Info>
+  All tracker functions return Promises that resolve when the tracking request completes.
+</Info>
+
+## umami.track()
+
+The `track()` function is used to track page views and custom events.
+
+### Function Signatures
+
+<Tabs>
+  <Tab title="No Arguments">
+    **Track a page view**
+    
+    ```typescript
+    umami.track(): Promise<string>
+    ```
+    
+    Tracks a page view with all default properties (hostname, language, referrer, screen, title, url, website).
+    
+    **Example:**
+    ```javascript
+    umami.track();
+    ```
+  </Tab>
+  
+  <Tab title="Event Name">
+    **Track a named event**
+    
+    ```typescript
+    umami.track(eventName: string): Promise<string>
+    ```
+    
+    Tracks a custom event with the specified name.
+    
+    **Example:**
+    ```javascript
+    umami.track('signup-button');
+    ```
+    
+    <Note>
+      Event names are truncated at 50 characters.
+    </Note>
+  </Tab>
+  
+  <Tab title="Event + Data">
+    **Track an event with data**
+    
+    ```typescript
+    umami.track(eventName: string, eventData: EventData): Promise<string>
+    ```
+    
+    Tracks a custom event with additional data.
+    
+    **Example:**
+    ```javascript
+    umami.track('purchase', {
+      product: 'Pro Plan',
+      price: 29.99,
+      currency: 'USD'
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Properties Object">
+    **Track with custom properties**
+    
+    ```typescript
+    umami.track(properties: PageViewProperties): Promise<string>
+    ```
+    
+    Tracks a page view with custom properties.
+    
+    **Example:**
+    ```javascript
+    umami.track({
+      website: 'e676c9b4-11e4-4ef1-a4d7-87001773e9f2',
+      url: '/custom-page',
+      title: 'Custom Page Title',
+      referrer: 'https://example.com'
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Function">
+    **Track with dynamic data**
+    
+    ```typescript
+    umami.track(fn: (props) => EventProperties | PageViewProperties): Promise<string>
+    ```
+    
+    Passes default properties to a function that returns custom tracking data.
+    
+    **Example:**
+    ```javascript
+    umami.track(props => ({
+      ...props,
+      name: 'custom-event',
+      data: {
+        timestamp: Date.now(),
+        user_type: 'premium'
+      }
+    }));
+    ```
+  </Tab>
+</Tabs>
+
+### Return Value
+
+All `track()` variants return a Promise that resolves with a string (typically empty or a cache identifier):
+
+```javascript
+const result = await umami.track('my-event');
+console.log('Tracking complete:', result);
+```
+
+### Default Properties
+
+When tracking, these properties are automatically included:
+
+```typescript
+interface TrackedProperties {
+  website: string;      // Website ID
+  hostname: string;     // window.location.hostname
+  language: string;     // window.navigator.language
+  referrer: string;     // document.referrer
+  screen: string;       // "${width}x${height}"
+  title: string;        // document.title
+  url: string;          // Current page URL
+}
+```
+
+### Track Implementation
+
+From the source code (`index.js:194-199`):
+
+```javascript
+const track = (name, data) => {
+  if (typeof name === 'string') return send({ ...getPayload(), name, data });
+  if (typeof name === 'object') return send({ ...name });
+  if (typeof name === 'function') return send(name(getPayload()));
+  return send(getPayload());
+};
+```
+
+## umami.identify()
+
+The `identify()` function associates a user identity with subsequent events and allows tracking users across sessions.
+
+### Function Signatures
+
+<Tabs>
+  <Tab title="User ID Only">
+    **Identify a user by ID**
+    
+    ```typescript
+    umami.identify(userId: string): Promise<string>
+    ```
+    
+    Associates subsequent events with the specified user ID.
+    
+    **Example:**
+    ```javascript
+    umami.identify('user-12345');
+    ```
+  </Tab>
+  
+  <Tab title="User ID + Data">
+    **Identify with additional data**
+    
+    ```typescript
+    umami.identify(userId: string, userData: EventData): Promise<string>
+    ```
+    
+    Associates a user ID and attaches additional user properties.
+    
+    **Example:**
+    ```javascript
+    umami.identify('user-12345', {
+      email: 'user@example.com',
+      plan: 'premium',
+      signup_date: '2024-01-15'
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Data Only">
+    **Update user data without changing ID**
+    
+    ```typescript
+    umami.identify(userData: EventData): Promise<string>
+    ```
+    
+    Updates user properties for the currently identified user.
+    
+    **Example:**
+    ```javascript
+    // First identify the user
+    umami.identify('user-12345');
+    
+    // Later update their data
+    umami.identify({
+      last_login: Date.now(),
+      plan: 'enterprise'
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### How It Works
+
+From the source code (`index.js:201-214`):
+
+```javascript
+const identify = (id, data) => {
+  if (typeof id === 'string') {
+    identity = id;
+  }
+
+  cache = '';
+  return send(
+    {
+      ...getPayload(),
+      data: typeof id === 'object' ? id : data,
+    },
+    'identify',
+  );
+};
+```
+
+Key behaviors:
+- Sets the internal `identity` variable for subsequent events
+- Clears the cache to ensure the identify event is sent
+- Sends an `identify` type event (not a regular `event` type)
+- The identity is included in all future `track()` calls via the payload
+
+### Identity Persistence
+
+Once you call `identify()`, the user ID is included in all subsequent events:
+
+```javascript
+// Identify the user
+await umami.identify('user-12345');
+
+// All subsequent events include the user ID
+umami.track('page-view');        // Includes user-12345
+umami.track('button-click');     // Includes user-12345
+umami.track('purchase');         // Includes user-12345
+```
+
+From the payload function (`index.js:56-66`):
+
+```javascript
+const getPayload = () => ({
+  website,
+  screen,
+  language,
+  title: document.title,
+  hostname,
+  url: currentUrl,
+  referrer: currentRef,
+  tag,
+  id: identity ? identity : undefined,  // User ID included here
+});
+```
+
+## Usage Examples
+
+### Basic Tracking
+
+```javascript
+// Track a page view
+umami.track();
+
+// Track a named event
+umami.track('button-click');
+
+// Track with data
+umami.track('purchase', {
+  product: 'Premium Plan',
+  amount: 99.99
+});
+```
+
+### User Identification
+
+```javascript
+// When user logs in
+async function handleLogin(user) {
+  await umami.identify(user.id, {
+    email: user.email,
+    plan: user.subscription.plan,
+    signup_date: user.createdAt
+  });
+  
+  // Track the login event
+  umami.track('user-login');
+}
+
+// When user logs out
+function handleLogout() {
+  umami.track('user-logout');
+  // Note: Identity persists until page reload
+}
+```
+
+### Custom Page Views
+
+```javascript
+// Track custom page views in SPAs
+router.afterEach((to, from) => {
+  umami.track({
+    website: 'your-website-id',
+    url: to.path,
+    title: to.meta.title || document.title,
+    referrer: from.path
+  });
+});
+```
+
+### Advanced Tracking
+
+```javascript
+// Use function for dynamic data
+umami.track(props => {
+  const userData = getCurrentUser();
+  
+  return {
+    ...props,
+    name: 'page-view',
+    data: {
+      user_type: userData?.type || 'guest',
+      theme: document.body.dataset.theme,
+      viewport: window.innerWidth + 'x' + window.innerHeight
+    }
+  };
+});
+```
+
+### Error Tracking
+
+```javascript
+window.addEventListener('error', (event) => {
+  umami.track('javascript-error', {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno
+  });
+});
+```
+
+### Performance Tracking
+
+```javascript
+window.addEventListener('load', () => {
+  const perfData = performance.getEntriesByType('navigation')[0];
+  
+  umami.track('page-performance', {
+    load_time: perfData.loadEventEnd - perfData.loadEventStart,
+    dom_ready: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
+    first_paint: performance.getEntriesByType('paint')[0]?.startTime
+  });
+});
+```
+
+## Framework Integration
+
+<Tabs>
+  <Tab title="React">
+    ```jsx
+    import { useEffect } from 'react';
+    
+    function App() {
+      // Track page views
+      useEffect(() => {
+        if (window.umami) {
+          umami.track();
+        }
+      }, []);
+      
+      // Identify users
+      useEffect(() => {
+        const user = getCurrentUser();
+        if (user && window.umami) {
+          umami.identify(user.id, {
+            email: user.email,
+            plan: user.plan
+          });
+        }
+      }, []);
+      
+      return <div>App</div>;
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Vue">
+    ```vue
+    <script setup>
+    import { onMounted } from 'vue';
+    
+    onMounted(() => {
+      // Track page view
+      if (window.umami) {
+        window.umami.track();
+      }
+    });
+    
+    const handleEvent = () => {
+      window.umami?.track('button-click');
+    };
+    </script>
+    ```
+  </Tab>
+  
+  <Tab title="Next.js">
+    ```jsx
+    // pages/_app.js
+    import { useEffect } from 'react';
+    import { useRouter } from 'next/router';
+    
+    function MyApp({ Component, pageProps }) {
+      const router = useRouter();
+      
+      useEffect(() => {
+        const handleRouteChange = () => {
+          if (window.umami) {
+            umami.track();
+          }
+        };
+        
+        router.events.on('routeChangeComplete', handleRouteChange);
+        return () => {
+          router.events.off('routeChangeComplete', handleRouteChange);
+        };
+      }, [router.events]);
+      
+      return <Component {...pageProps} />;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Best Practices
+
+<Steps>
+  <Step title="Check for umami existence">
+    Always verify the tracker is loaded:
+    
+    ```javascript
+    if (window.umami) {
+      umami.track('my-event');
+    }
+    ```
+  </Step>
+  
+  <Step title="Handle async operations">
+    Use async/await for critical tracking:
+    
+    ```javascript
+    async function handleCriticalAction() {
+      await umami.track('critical-event');
+      // Continue after tracking completes
+    }
+    ```
+  </Step>
+  
+  <Step title="Identify users early">
+    Call `identify()` as soon as user information is available:
+    
+    ```javascript
+    // In your auth callback
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        umami.identify(user.uid, {
+          email: user.email
+        });
+      }
+    });
+    ```
+  </Step>
+  
+  <Step title="Use consistent naming">
+    Establish naming conventions for events:
+    
+    ```javascript
+    // Good
+    umami.track('user-signup');
+    umami.track('user-login');
+    umami.track('user-logout');
+    
+    // Avoid
+    umami.track('signup');
+    umami.track('logged_in');
+    umami.track('logout-event');
+    ```
+  </Step>
+</Steps>
+
+## TypeScript Support
+
+The tracker includes TypeScript definitions (`index.d.ts`):
+
+```typescript
+import type { UmamiTracker, EventData } from './tracker';
+
+declare global {
+  interface Window {
+    umami: UmamiTracker;
+  }
+}
+
+// Type-safe tracking
+window.umami.track('event-name');
+
+// With event data
+const eventData: EventData = {
+  product: 'Pro Plan',
+  price: 29.99
+};
+window.umami.track('purchase', eventData);
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Event Tracking" icon="cursor-click" href="/tracking/events">
+    Learn about HTML-based event tracking
+  </Card>
+  <Card title="User Identification" icon="user" href="/tracking/identify">
+    Deep dive into user identification
+  </Card>
+</CardGroup>

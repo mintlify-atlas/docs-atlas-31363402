@@ -1,0 +1,191 @@
+---
+title: 'Get Team Members'
+description: 'Retrieve members of a team'
+---
+
+## Get Team Members
+
+Retrieve a list of all members in a team.
+
+### Endpoint
+
+```
+GET /api/teams/{teamId}/users
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="teamId" type="string" required>
+  Team UUID
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="page" type="number">
+  Page number for pagination (default: 1)
+</ParamField>
+
+<ParamField query="pageSize" type="number">
+  Number of results per page
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search term to filter members by username
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of team member objects
+  
+  <Expandable title="member object">
+    <ResponseField name="id" type="string">
+      Team user relationship UUID
+    </ResponseField>
+    
+    <ResponseField name="userId" type="string">
+      User UUID
+    </ResponseField>
+    
+    <ResponseField name="teamId" type="string">
+      Team UUID
+    </ResponseField>
+    
+    <ResponseField name="role" type="string">
+      Member role: `team-member`, `team-view-only`, or `team-manager`
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp when user joined team
+    </ResponseField>
+    
+    <ResponseField name="user" type="object">
+      User information
+      
+      <Expandable title="user object">
+        <ResponseField name="id" type="string">
+          User UUID
+        </ResponseField>
+        
+        <ResponseField name="username" type="string">
+          Username
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="count" type="number">
+  Total number of members
+</ResponseField>
+
+<ResponseField name="page" type="number">
+  Current page number
+</ResponseField>
+
+<ResponseField name="pageSize" type="number">
+  Results per page
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl https://your-umami-instance.com/api/teams/660e8400-e29b-41d4-a716-446655440001/users \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const teamId = '660e8400-e29b-41d4-a716-446655440001';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/teams/${teamId}/users`,
+  {
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+    },
+  }
+);
+
+const members = await response.json();
+```
+
+```python Python
+import requests
+
+team_id = '660e8400-e29b-41d4-a716-446655440001'
+
+response = requests.get(
+    f'https://your-umami-instance.com/api/teams/{team_id}/users',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+members = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "880e8400-e29b-41d4-a716-446655440003",
+      "userId": "990e8400-e29b-41d4-a716-446655440004",
+      "teamId": "660e8400-e29b-41d4-a716-446655440001",
+      "role": "team-manager",
+      "createdAt": "2024-01-10T08:00:00.000Z",
+      "user": {
+        "id": "990e8400-e29b-41d4-a716-446655440004",
+        "username": "john.doe"
+      }
+    },
+    {
+      "id": "aa0e8400-e29b-41d4-a716-446655440005",
+      "userId": "bb0e8400-e29b-41d4-a716-446655440006",
+      "teamId": "660e8400-e29b-41d4-a716-446655440001",
+      "role": "team-member",
+      "createdAt": "2024-01-15T12:00:00.000Z",
+      "user": {
+        "id": "bb0e8400-e29b-41d4-a716-446655440006",
+        "username": "jane.smith"
+      }
+    }
+  ],
+  "count": 2,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+### Team Roles
+
+<ResponseField name="team-manager" type="role">
+  Full permissions to manage team settings, members, and resources
+</ResponseField>
+
+<ResponseField name="team-member" type="role">
+  Can view and edit team resources but cannot manage team settings or members
+</ResponseField>
+
+<ResponseField name="team-view-only" type="role">
+  Read-only access to team resources
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  Unauthorized - You must be a member of this team
+</ResponseField>
+
+<Note>
+  You must be a member of the team to view its member list. Members are ordered by their join date (oldest first).
+</Note>

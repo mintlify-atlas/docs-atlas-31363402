@@ -1,0 +1,98 @@
+---
+title: 'Delete Report'
+description: 'Delete a saved report'
+---
+
+## Delete Report
+
+Permanently delete a saved report.
+
+<Note>
+  This only deletes the saved report configuration. The underlying analytics data remains intact.
+</Note>
+
+### Endpoint
+
+```
+DELETE /api/reports/{reportId}
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="reportId" type="string" required>
+  Report UUID to delete
+</ParamField>
+
+### Response
+
+Returns a 200 OK status with an empty response body on successful deletion.
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X DELETE https://your-umami-instance.com/api/reports/dd0e8400-e29b-41d4-a716-446655440008 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const reportId = 'dd0e8400-e29b-41d4-a716-446655440008';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/reports/${reportId}`,
+  {
+    method: 'DELETE',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+    },
+  }
+);
+
+if (response.ok) {
+  console.log('Report deleted successfully');
+}
+```
+
+```python Python
+import requests
+
+report_id = 'dd0e8400-e29b-41d4-a716-446655440008'
+
+response = requests.delete(
+    f'https://your-umami-instance.com/api/reports/{report_id}',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+if response.status_code == 200:
+    print('Report deleted successfully')
+```
+
+</CodeGroup>
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  Unauthorized - You don't have permission to delete this report
+</ResponseField>
+
+<ResponseField name="404" type="error">
+  Not Found - Report does not exist
+</ResponseField>
+
+### What Gets Deleted
+
+When you delete a report:
+- The saved report configuration is permanently removed
+- Analytics data is NOT deleted
+- You can recreate the report with the same parameters later
+
+### Permissions
+
+You must have delete permissions for the website that owns this report.

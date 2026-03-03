@@ -1,0 +1,701 @@
+---
+title: Environment Variables
+description: Complete guide to configuring Umami with environment variables
+---
+
+## Overview
+
+Umami uses environment variables for configuration. Variables are read from the environment or from a `.env` file in the application root.
+
+<Info>
+  Environment variables are defined in `/next.config.ts` and loaded using dotenv.
+</Info>
+
+## Core Variables
+
+### DATABASE_URL (Required)
+
+PostgreSQL database connection string.
+
+```bash
+DATABASE_URL=postgresql://username:password@hostname:port/database
+```
+
+<Tabs>
+  <Tab title="Local">
+    ```bash
+    DATABASE_URL=postgresql://umami:password@localhost:5432/umami
+    ```
+  </Tab>
+  
+  <Tab title="Docker">
+    ```bash
+    DATABASE_URL=postgresql://umami:password@db:5432/umami
+    ```
+  </Tab>
+  
+  <Tab title="With SSL">
+    ```bash
+    DATABASE_URL=postgresql://user:pass@host:5432/umami?sslmode=require
+    ```
+  </Tab>
+  
+  <Tab title="With Schema">
+    ```bash
+    DATABASE_URL=postgresql://user:pass@host:5432/umami?schema=analytics
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  Never commit `.env` files containing DATABASE_URL to version control!
+</Warning>
+
+### APP_SECRET
+
+Secret key for securing sessions and cryptographic operations.
+
+```bash
+APP_SECRET=your-random-secret-key
+```
+
+**Generate a secure secret:**
+
+```bash
+openssl rand -base64 32
+```
+
+<Warning>
+  - Use a long, random string (32+ characters)
+  - Never use the default value in production
+  - Changing this will invalidate all existing sessions
+</Warning>
+
+## Server Configuration
+
+### PORT
+
+Server listening port.
+
+```bash
+PORT=3000
+```
+
+**Default:** `3000`
+
+<Note>
+  In Docker, the internal port is always 3000. Map to a different external port using `ports` in docker-compose.yml.
+</Note>
+
+### HOSTNAME
+
+Server bind address.
+
+```bash
+HOSTNAME=0.0.0.0
+```
+
+**Default:** `0.0.0.0` (all interfaces)
+
+**Options:**
+- `0.0.0.0` - Listen on all network interfaces
+- `127.0.0.1` - Listen only on localhost
+- `::` - Listen on all IPv6 interfaces
+
+### BASE_PATH
+
+Serve Umami from a subdirectory.
+
+```bash
+BASE_PATH=/analytics
+```
+
+**Default:** None (root path)
+
+<Tabs>
+  <Tab title="Root Path">
+    ```bash
+    # No BASE_PATH
+    # Access at: https://example.com/
+    ```
+  </Tab>
+  
+  <Tab title="Subdirectory">
+    ```bash
+    BASE_PATH=/analytics
+    # Access at: https://example.com/analytics
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  When using BASE_PATH, you must rebuild the application. It cannot be changed at runtime.
+</Note>
+
+## Database Configuration
+
+### CLICKHOUSE_URL
+
+ClickHouse database connection for high-volume analytics.
+
+```bash
+CLICKHOUSE_URL=http://localhost:8123/umami
+```
+
+**Default:** None (uses PostgreSQL only)
+
+<Tabs>
+  <Tab title="HTTP">
+    ```bash
+    CLICKHOUSE_URL=http://localhost:8123/umami
+    ```
+  </Tab>
+  
+  <Tab title="With Auth">
+    ```bash
+    CLICKHOUSE_URL=http://username:password@localhost:8123/umami
+    ```
+  </Tab>
+  
+  <Tab title="HTTPS">
+    ```bash
+    CLICKHOUSE_URL=https://clickhouse.example.com:8443/umami
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+  When CLICKHOUSE_URL is set, Umami uses dual databases: PostgreSQL for user data, ClickHouse for analytics.
+</Info>
+
+### REDIS_URL
+
+Redis connection for session storage and caching.
+
+```bash
+REDIS_URL=redis://localhost:6379
+```
+
+**Default:** None (in-memory sessions)
+
+<Tabs>
+  <Tab title="Local">
+    ```bash
+    REDIS_URL=redis://localhost:6379
+    ```
+  </Tab>
+  
+  <Tab title="With Password">
+    ```bash
+    REDIS_URL=redis://:password@localhost:6379
+    ```
+  </Tab>
+  
+  <Tab title="With Database">
+    ```bash
+    REDIS_URL=redis://localhost:6379/0
+    ```
+  </Tab>
+  
+  <Tab title="TLS">
+    ```bash
+    REDIS_URL=rediss://user:pass@localhost:6380
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  REDIS_URL is **required** when running multiple Umami instances for session sharing.
+</Warning>
+
+## Security Configuration
+
+### FORCE_SSL
+
+Enforce HTTPS by adding Strict-Transport-Security header.
+
+```bash
+FORCE_SSL=1
+```
+
+**Default:** Not set
+
+**Values:**
+- `1` - Enable HSTS header
+- Not set - No HSTS header
+
+When enabled, adds header:
+```
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+```
+
+<Note>
+  Only enable this if Umami is served over HTTPS. Enabling on HTTP will break access.
+</Note>
+
+### ALLOWED_FRAME_URLS
+
+Allow embedding Umami in iframes from specific domains.
+
+```bash
+ALLOWED_FRAME_URLS=https://example.com https://app.example.com
+```
+
+**Default:** `'self'` (only same origin)
+
+Updates Content-Security-Policy `frame-ancestors` directive:
+
+```
+Content-Security-Policy: frame-ancestors 'self' https://example.com https://app.example.com;
+```
+
+<Warning>
+  Only add trusted domains. Allowing untrusted domains creates clickjacking risks.
+</Warning>
+
+### CORS_MAX_AGE
+
+Maximum age for CORS preflight cache (in seconds).
+
+```bash
+CORS_MAX_AGE=86400
+```
+
+**Default:** `86400` (24 hours)
+
+Sets the `Access-Control-Max-Age` header for API endpoints.
+
+## Tracker Configuration
+
+### TRACKER_SCRIPT_NAME
+
+Custom filename(s) for the tracking script.
+
+```bash
+TRACKER_SCRIPT_NAME=analytics.js,stats.js
+```
+
+**Default:** `script.js`
+
+Allows accessing the tracker at custom URLs to bypass ad blockers:
+
+```html
+<!-- Default -->
+<script async src="https://analytics.example.com/script.js"></script>
+
+<!-- Custom -->
+<script async src="https://analytics.example.com/analytics.js"></script>
+```
+
+<Tip>
+  Use multiple names separated by commas. All will serve the same tracking script.
+</Tip>
+
+### TRACKER_SCRIPT_URL
+
+Proxy tracking script from external URL.
+
+```bash
+TRACKER_SCRIPT_URL=https://cdn.example.com/umami.js
+```
+
+**Default:** None (serves from local)
+
+Useful for serving the tracker from a CDN:
+
+```javascript next.config.ts
+if (trackerScriptURL) {
+  rewrites.push({
+    source: TRACKER_SCRIPT,
+    destination: trackerScriptURL,
+  });
+}
+```
+
+### COLLECT_API_ENDPOINT
+
+Custom endpoint for data collection.
+
+```bash
+COLLECT_API_ENDPOINT=/api/collect
+```
+
+**Default:** `/api/send`
+
+Changes the data collection endpoint URL to bypass ad blockers.
+
+## Localization
+
+### DEFAULT_LOCALE
+
+Default language for the interface.
+
+```bash
+DEFAULT_LOCALE=en-US
+```
+
+**Default:** `en-US`
+
+**Supported locales:**
+- `en-US` - English (United States)
+- `es-ES` - Spanish (Spain)
+- `fr-FR` - French (France)
+- `de-DE` - German (Germany)
+- `ja-JP` - Japanese (Japan)
+- `zh-CN` - Chinese (Simplified)
+- `pt-BR` - Portuguese (Brazil)
+- And many more...
+
+<Info>
+  Users can override the default locale in their profile settings.
+</Info>
+
+## Cloud Mode
+
+### CLOUD_MODE
+
+Enable cloud-specific features.
+
+```bash
+CLOUD_MODE=1
+```
+
+**Default:** Not set
+
+<Warning>
+  This is for Umami Cloud only. Do not enable for self-hosted instances.
+</Warning>
+
+### CLOUD_URL
+
+URL for cloud-mode features.
+
+```bash
+CLOUD_URL=https://cloud.umami.is
+```
+
+**Default:** None
+
+<Note>
+  Only used when CLOUD_MODE is enabled.
+</Note>
+
+## Development Variables
+
+### NODE_ENV
+
+Node.js environment.
+
+```bash
+NODE_ENV=production
+```
+
+**Values:**
+- `production` - Production mode (optimized, no debug)
+- `development` - Development mode (hot reload, debug)
+- `test` - Test mode
+
+<Warning>
+  Always use `production` for deployed instances. Development mode has performance overhead and security implications.
+</Warning>
+
+### NEXT_TELEMETRY_DISABLED
+
+Disable Next.js telemetry.
+
+```bash
+NEXT_TELEMETRY_DISABLED=1
+```
+
+**Default:** `1` (disabled in Dockerfile)
+
+Umami disables this by default for privacy.
+
+## Database Control
+
+### SKIP_DB_CHECK
+
+Skip database connection check on startup.
+
+```bash
+SKIP_DB_CHECK=1
+```
+
+**Default:** Not set
+
+<Warning>
+  Only use for troubleshooting. Application will fail if database is unavailable.
+</Warning>
+
+### SKIP_DB_MIGRATION
+
+Skip automatic database migration on startup.
+
+```bash
+SKIP_DB_MIGRATION=1
+```
+
+**Default:** Not set
+
+<Note>
+  Use this if you want to manually control when migrations run.
+</Note>
+
+## GeoIP Database
+
+### GEO_DATABASE_URL
+
+URL to download MaxMind GeoLite2 database.
+
+```bash
+GEO_DATABASE_URL=https://example.com/GeoLite2-City.mmdb
+```
+
+**Default:** None (uses included database)
+
+The build process downloads this automatically. Override to use a custom source.
+
+## Complete .env Example
+
+Here's a complete production `.env` file:
+
+```bash .env
+# Required
+DATABASE_URL=postgresql://umami:secure-password@localhost:5432/umami
+APP_SECRET=generated-with-openssl-rand-base64-32
+
+# Server
+PORT=3000
+HOSTNAME=0.0.0.0
+
+# Optional: ClickHouse for high volume
+# CLICKHOUSE_URL=http://localhost:8123/umami
+
+# Optional: Redis for multiple instances
+# REDIS_URL=redis://localhost:6379
+
+# Security
+FORCE_SSL=1
+
+# Localization
+DEFAULT_LOCALE=en-US
+
+# Tracker customization (bypass ad blockers)
+TRACKER_SCRIPT_NAME=stats.js,analytics.js
+COLLECT_API_ENDPOINT=/api/collect
+
+# Production mode
+NODE_ENV=production
+```
+
+## Docker Compose Example
+
+```yaml docker-compose.yml
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:latest
+    ports:
+      - "3000:3000"
+    environment:
+      # Required
+      DATABASE_URL: postgresql://umami:${DB_PASSWORD}@db:5432/umami
+      APP_SECRET: ${APP_SECRET}
+      
+      # Optional
+      FORCE_SSL: 1
+      DEFAULT_LOCALE: en-US
+      TRACKER_SCRIPT_NAME: analytics.js
+      COLLECT_API_ENDPOINT: /api/collect
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    init: true
+```
+
+With `.env` file:
+
+```bash .env
+DB_PASSWORD=your-secure-database-password
+APP_SECRET=your-generated-app-secret
+```
+
+## Kubernetes ConfigMap
+
+```yaml configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: umami-config
+  namespace: umami
+data:
+  PORT: "3000"
+  HOSTNAME: "0.0.0.0"
+  FORCE_SSL: "1"
+  DEFAULT_LOCALE: "en-US"
+  CORS_MAX_AGE: "86400"
+  TRACKER_SCRIPT_NAME: "analytics.js,stats.js"
+  COLLECT_API_ENDPOINT: "/api/collect"
+```
+
+```yaml secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: umami-secrets
+  namespace: umami
+type: Opaque
+stringData:
+  DATABASE_URL: postgresql://umami:password@postgres:5432/umami
+  APP_SECRET: your-app-secret
+  REDIS_URL: redis://redis:6379
+```
+
+## Environment Variable Priority
+
+Variables are loaded in this order (later overrides earlier):
+
+1. Default values in `next.config.ts`
+2. `.env` file in application root
+3. System environment variables
+4. Docker/Kubernetes environment variables
+
+## Validation
+
+Umami validates required environment variables on startup:
+
+```javascript scripts/check-env.js
+function checkMissing(requiredVars) {
+  const missing = requiredVars.filter(name => !process.env[name]);
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+}
+
+checkMissing(['DATABASE_URL']);
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Variables not being read">
+    Check `.env` file location:
+    
+    ```bash
+    # Must be in application root
+    /path/to/umami/.env
+    ```
+    
+    Verify file format:
+    
+    ```bash
+    # Correct
+    DATABASE_URL=postgresql://...
+    
+    # Wrong - no spaces
+    DATABASE_URL = postgresql://...
+    
+    # Wrong - no quotes needed
+    DATABASE_URL="postgresql://..."
+    ```
+  </Accordion>
+  
+  <Accordion title="DATABASE_URL not defined error">
+    Ensure DATABASE_URL is set:
+    
+    ```bash
+    # Check current environment
+    echo $DATABASE_URL
+    
+    # Or in Docker
+    docker compose exec umami env | grep DATABASE_URL
+    ```
+    
+    Set it if missing:
+    
+    ```bash
+    export DATABASE_URL=postgresql://...
+    ```
+  </Accordion>
+  
+  <Accordion title="BASE_PATH not working">
+    BASE_PATH requires rebuilding:
+    
+    ```bash
+    # Set BASE_PATH
+    export BASE_PATH=/analytics
+    
+    # Rebuild application
+    pnpm build
+    
+    # Or rebuild Docker image
+    docker build --build-arg BASE_PATH=/analytics -t umami .
+    ```
+    
+    Cannot be changed at runtime.
+  </Accordion>
+  
+  <Accordion title="Sessions not persisting across restarts">
+    Set APP_SECRET to prevent session invalidation:
+    
+    ```bash
+    # Generate secret
+    openssl rand -base64 32
+    
+    # Set in .env
+    APP_SECRET=generated-secret
+    ```
+    
+    Or use Redis for session storage:
+    
+    ```bash
+    REDIS_URL=redis://localhost:6379
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Strong Secrets" icon="key">
+    Use cryptographically secure random values for APP_SECRET.
+  </Card>
+  <Card title="Secure Storage" icon="lock">
+    Never commit .env files to version control.
+  </Card>
+  <Card title="Principle of Least Privilege" icon="shield">
+    Database users should have minimum required permissions.
+  </Card>
+  <Card title="Regular Rotation" icon="rotate">
+    Rotate secrets periodically, especially after team changes.
+  </Card>
+</CardGroup>
+
+### .gitignore Entry
+
+Always exclude environment files:
+
+```bash .gitignore
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Docker Deployment" icon="docker" href="/self-hosting/docker-deployment">
+    Deploy with Docker Compose
+  </Card>
+  <Card title="PostgreSQL" icon="database" href="/self-hosting/postgresql">
+    Configure your database
+  </Card>
+  <Card title="Upgrading" icon="arrow-up" href="/self-hosting/upgrading">
+    Update your installation
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/self-hosting/troubleshooting">
+    Solve configuration issues
+  </Card>
+</CardGroup>

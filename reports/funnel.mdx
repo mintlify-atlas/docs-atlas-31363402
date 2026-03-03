@@ -1,0 +1,265 @@
+---
+title: 'Funnel Report'
+description: 'Track conversion funnels and identify drop-off points in your user journey'
+icon: 'filter'
+---
+
+The Funnel Report helps you track multi-step conversion processes and identify where users drop off in their journey. This is essential for optimizing conversion rates and improving user experience.
+
+## What is a Funnel Report?
+
+A funnel represents a series of steps that users take to complete a desired action (like making a purchase or signing up). The Funnel Report shows you:
+
+- How many users complete each step
+- Where users drop off in the process
+- Conversion rates between steps
+- Overall funnel completion rate
+
+## Key Metrics
+
+<CardGroup cols={2}>
+  <Card title="Visitors" icon="users">
+    Number of unique visitors who reached each step
+  </Card>
+  <Card title="Drop-off Rate" icon="arrow-down">
+    Percentage of users who left between steps
+  </Card>
+  <Card title="Remaining" icon="percent">
+    Percentage of original visitors still in the funnel
+  </Card>
+  <Card title="Conversion Rate" icon="chart-line">
+    Overall percentage of users who complete the entire funnel
+  </Card>
+</CardGroup>
+
+## How Funnels Work
+
+<Steps>
+  <Step title="Define Funnel Steps">
+    Create a sequence of steps representing your conversion path. Each step can be a page view or a custom event.
+  </Step>
+  
+  <Step title="Set Time Window">
+    Define how long users have to complete the funnel. For example, 30 minutes for a checkout process.
+  </Step>
+  
+  <Step title="Track Progression">
+    Umami tracks visitors as they progress through each step in order within the time window.
+  </Step>
+  
+  <Step title="Calculate Drop-offs">
+    The report shows how many visitors drop off at each step and what percentage continue.
+  </Step>
+</Steps>
+
+## Setting Up a Funnel
+
+### Step Types
+
+Each funnel step can be one of two types:
+
+<Tabs>
+  <Tab title="Page Views">
+    Track when users view specific pages. This is useful for tracking navigation through your site.
+    
+    **Example:** Track a checkout funnel:
+    1. Product page (`/product/*`)
+    2. Cart page (`/cart`)
+    3. Checkout page (`/checkout`)
+    4. Confirmation page (`/confirmation`)
+    
+    ```json
+    {
+      "steps": [
+        { "type": "path", "value": "/product/*" },
+        { "type": "path", "value": "/cart" },
+        { "type": "path", "value": "/checkout" },
+        { "type": "path", "value": "/confirmation" }
+      ],
+      "window": 30
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Custom Events">
+    Track specific user actions using custom events. This is useful for tracking interactions that don't involve page navigation.
+    
+    **Example:** Track a signup funnel:
+    1. View signup form
+    2. Click "Sign Up" button
+    3. Complete form submission
+    4. Email verified
+    
+    ```json
+    {
+      "steps": [
+        { "type": "event", "value": "signup_view" },
+        { "type": "event", "value": "signup_click" },
+        { "type": "event", "value": "signup_submit" },
+        { "type": "event", "value": "email_verified" }
+      ],
+      "window": 60
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Wildcard Matching
+
+Use wildcards (`*`) to match multiple pages or events:
+
+- `/blog/*` - Matches any blog post
+- `*checkout` - Matches any value ending with "checkout"
+- `*product*` - Matches any value containing "product"
+
+```json
+{
+  "steps": [
+    { "type": "path", "value": "/products/*" },
+    { "type": "path", "value": "*cart" },
+    { "type": "path", "value": "*/checkout" }
+  ]
+}
+```
+
+## Understanding the Results
+
+### Funnel Visualization
+
+The Funnel Report displays:
+
+1. **Step Name**: The page or event being tracked
+2. **Visitors**: Number of unique visitors who reached this step
+3. **Previous**: Number of visitors from the previous step
+4. **Dropped**: Number of visitors who dropped off from the previous step
+5. **Drop-off %**: Percentage who dropped off between steps
+6. **Remaining %**: Percentage of original visitors still in the funnel
+
+<Info>
+  The first step shows all visitors who entered the funnel. Subsequent steps show only those who progressed from the previous step within the time window.
+</Info>
+
+## Common Funnel Patterns
+
+<Accordion title="E-commerce Purchase Funnel">
+  Track the complete purchase journey:
+  
+  1. Product page view
+  2. Add to cart
+  3. View cart
+  4. Begin checkout
+  5. Complete payment
+  6. Order confirmation
+  
+  **Time window**: 60 minutes
+  
+  **Key insights**: Identify which step has the highest drop-off rate to optimize that part of the experience.
+</Accordion>
+
+<Accordion title="SaaS Signup Funnel">
+  Track user registration and onboarding:
+  
+  1. Landing page visit
+  2. Click "Sign Up"
+  3. Complete registration form
+  4. Email verification
+  5. Complete onboarding
+  6. First product usage
+  
+  **Time window**: 120 minutes (or longer for email verification)
+  
+  **Key insights**: See where users abandon the signup process.
+</Accordion>
+
+<Accordion title="Content Engagement Funnel">
+  Track how users engage with your content:
+  
+  1. Blog post landing
+  2. Scroll to 50%
+  3. Scroll to 100%
+  4. Click related article
+  5. Subscribe to newsletter
+  
+  **Time window**: 30 minutes
+  
+  **Key insights**: Understand content engagement and identify opportunities to increase subscriptions.
+</Accordion>
+
+<Accordion title="Lead Generation Funnel">
+  Track lead capture process:
+  
+  1. Visit pricing page
+  2. Click "Get Started"
+  3. Fill contact form
+  4. Submit form
+  5. Schedule demo
+  
+  **Time window**: 45 minutes
+  
+  **Key insights**: Optimize your lead capture process by identifying friction points.
+</Accordion>
+
+## API Usage
+
+```bash
+curl -X POST https://your-umami-instance.com/api/reports/funnel \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "websiteId": "your-website-id",
+    "parameters": {
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": "2024-01-31T23:59:59Z",
+      "window": 30,
+      "steps": [
+        { "type": "path", "value": "/pricing" },
+        { "type": "path", "value": "/signup" },
+        { "type": "event", "value": "signup_complete" }
+      ]
+    }
+  }'
+```
+
+## Optimization Tips
+
+<CardGroup cols={2}>
+  <Card title="Focus on Biggest Drops" icon="arrow-down-wide-short">
+    Prioritize optimizing the step with the largest drop-off percentage
+  </Card>
+  <Card title="Test Step Order" icon="shuffle">
+    Sometimes reordering steps can improve conversion rates
+  </Card>
+  <Card title="Reduce Friction" icon="hand">
+    Simplify steps with high drop-off rates - fewer form fields, clearer CTAs
+  </Card>
+  <Card title="Adjust Time Window" icon="clock">
+    Set appropriate time windows based on expected user behavior
+  </Card>
+</CardGroup>
+
+<Warning>
+  Users must complete steps in order within the time window. If a user skips a step or takes longer than the window, they won't be counted in subsequent steps.
+</Warning>
+
+## Best Practices
+
+1. **Keep funnels focused**: 3-6 steps is usually optimal. Too many steps can be hard to analyze.
+2. **Set realistic time windows**: Consider how long users typically take to complete the process.
+3. **Monitor regularly**: Check your funnels weekly to catch issues early.
+4. **Segment by source**: Use filters to see how different traffic sources perform in your funnel.
+5. **A/B test improvements**: When you identify a problem step, test changes and measure the impact.
+
+<Tip>
+  Create multiple funnel variations to test different user paths and identify the most effective flow.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Track Goals" icon="bullseye" href="/reports/goal">
+    Track single conversion events with Goal Reports
+  </Card>
+  <Card title="Attribution" icon="link" href="/reports/attribution">
+    See which traffic sources drive funnel completions
+  </Card>
+</CardGroup>

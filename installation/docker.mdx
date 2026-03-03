@@ -1,0 +1,451 @@
+---
+title: Docker Installation
+description: Install Umami using Docker and Docker Compose
+---
+
+# Docker Installation
+
+Docker is the recommended way to install Umami. This guide covers both Docker Compose (easiest) and standalone Docker installation.
+
+## Prerequisites
+
+<Info>
+  Make sure you have Docker and Docker Compose installed on your system. Visit [docker.com](https://www.docker.com/get-started) for installation instructions.
+</Info>
+
+Required:
+- Docker Engine 20.10+
+- Docker Compose v2.0+ (included with Docker Desktop)
+- At least 512MB RAM
+- 1GB free disk space
+
+## Quick Start with Docker Compose
+
+The fastest way to get Umami running with a PostgreSQL database.
+
+<Steps>
+  <Step title="Get the Docker Compose File">
+    Clone the repository or download the `docker-compose.yml` file:
+
+    ```bash
+    git clone https://github.com/umami-software/umami.git
+    cd umami
+    ```
+
+    Or create your own `docker-compose.yml` file:
+
+    ```yaml docker-compose.yml
+    ---
+    services:
+      umami:
+        image: ghcr.io/umami-software/umami:latest
+        ports:
+          - "3000:3000"
+        environment:
+          DATABASE_URL: postgresql://umami:umami@db:5432/umami
+          APP_SECRET: replace-me-with-a-random-string
+        depends_on:
+          db:
+            condition: service_healthy
+        init: true
+        restart: always
+        healthcheck:
+          test: ["CMD-SHELL", "curl http://localhost:3000/api/heartbeat"]
+          interval: 5s
+          timeout: 5s
+          retries: 5
+      db:
+        image: postgres:15-alpine
+        environment:
+          POSTGRES_DB: umami
+          POSTGRES_USER: umami
+          POSTGRES_PASSWORD: umami
+        volumes:
+          - umami-db-data:/var/lib/postgresql/data
+        restart: always
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+          interval: 5s
+          timeout: 5s
+          retries: 5
+    volumes:
+      umami-db-data:
+    ```
+  </Step>
+
+  <Step title="Configure Environment Variables">
+    <Warning>
+      **Important**: Change the `APP_SECRET` to a random string before deploying to production!
+    </Warning>
+
+    You can generate a random secret:
+
+    ```bash
+    openssl rand -base64 32
+    ```
+
+    Or use an online generator. Update your `docker-compose.yml`:
+
+    ```yaml
+    environment:
+      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      APP_SECRET: your-random-secret-string-here
+    ```
+  </Step>
+
+  <Step title="Start the Containers">
+    Launch Umami and PostgreSQL:
+
+    ```bash
+    docker compose up -d
+    ```
+
+    The `-d` flag runs containers in detached mode (background).
+  </Step>
+
+  <Step title="Verify Installation">
+    Check that both containers are running:
+
+    ```bash
+    docker compose ps
+    ```
+
+    You should see both `umami` and `db` with status "Up" and "healthy".
+
+    View logs to confirm successful startup:
+
+    ```bash
+    docker compose logs umami
+    ```
+  </Step>
+
+  <Step title="Access Umami">
+    Open your browser and navigate to:
+
+    ```
+    http://localhost:3000
+    ```
+
+    Login with default credentials:
+    - Username: `admin`
+    - Password: `umami`
+
+    <Warning>
+      Change the default password immediately after logging in!
+    </Warning>
+  </Step>
+</Steps>
+
+## Using Pre-built Docker Image
+
+You can also run Umami using just Docker (without Docker Compose) if you have an external PostgreSQL database.
+
+### Pull the Image
+
+```bash
+docker pull ghcr.io/umami-software/umami:latest
+```
+
+Alternatively, you can use the Docker Hub image:
+
+```bash
+docker pull docker.umami.is/umami-software/umami:latest
+```
+
+### Run the Container
+
+<Tabs>
+  <Tab title="With External Database">
+    If you have an existing PostgreSQL database:
+
+    ```bash
+    docker run -d \
+      --name umami \
+      -p 3000:3000 \
+      -e DATABASE_URL=postgresql://username:password@hostname:5432/dbname \
+      -e APP_SECRET=your-random-secret \
+      --restart always \
+      ghcr.io/umami-software/umami:latest
+    ```
+
+    Replace the DATABASE_URL with your actual database connection string.
+  </Tab>
+
+  <Tab title="With Docker Network">
+    If your PostgreSQL is in another Docker container:
+
+    ```bash
+    # Create a network
+    docker network create umami-network
+
+    # Run PostgreSQL
+    docker run -d \
+      --name postgres \
+      --network umami-network \
+      -e POSTGRES_DB=umami \
+      -e POSTGRES_USER=umami \
+      -e POSTGRES_PASSWORD=umami \
+      -v umami-db-data:/var/lib/postgresql/data \
+      postgres:15-alpine
+
+    # Run Umami
+    docker run -d \
+      --name umami \
+      --network umami-network \
+      -p 3000:3000 \
+      -e DATABASE_URL=postgresql://umami:umami@postgres:5432/umami \
+      -e APP_SECRET=your-random-secret \
+      --restart always \
+      ghcr.io/umami-software/umami:latest
+    ```
+  </Tab>
+</Tabs>
+
+## Configuration Options
+
+### Environment Variables
+
+<CardGroup cols={2}>
+  <Card title="DATABASE_URL" icon="database">
+    **Required**. PostgreSQL connection string
+  </Card>
+  <Card title="APP_SECRET" icon="key">
+    **Required**. Random string for securing sessions and data
+  </Card>
+  <Card title="PORT" icon="network-wired">
+    Optional. Port to run on (default: 3000)
+  </Card>
+  <Card title="BASE_PATH" icon="folder">
+    Optional. Base path for reverse proxy setups
+  </Card>
+</CardGroup>
+
+See the full list in [Environment Variables](/configuration/environment-variables).
+
+### Volume Mounts
+
+The Docker Compose setup creates a persistent volume for PostgreSQL data:
+
+```yaml
+volumes:
+  - umami-db-data:/var/lib/postgresql/data
+```
+
+This ensures your analytics data persists across container restarts.
+
+## Building from Source
+
+To build your own Docker image from source:
+
+<Steps>
+  <Step title="Clone Repository">
+    ```bash
+    git clone https://github.com/umami-software/umami.git
+    cd umami
+    ```
+  </Step>
+
+  <Step title="Build Image">
+    ```bash
+    docker build -t umami:local .
+    ```
+
+    This uses the `Dockerfile` in the repository.
+  </Step>
+
+  <Step title="Run Your Image">
+    ```bash
+    docker run -d \
+      --name umami \
+      -p 3000:3000 \
+      -e DATABASE_URL=postgresql://user:pass@host:5432/db \
+      -e APP_SECRET=your-secret \
+      umami:local
+    ```
+  </Step>
+</Steps>
+
+### Build Arguments
+
+The Dockerfile supports build arguments:
+
+```bash
+docker build \
+  --build-arg NODE_IMAGE_VERSION=22-alpine \
+  --build-arg BASE_PATH=/analytics \
+  -t umami:custom .
+```
+
+Available arguments:
+- `NODE_IMAGE_VERSION`: Node.js base image version (default: 22-alpine)
+- `BASE_PATH`: URL base path for serving Umami
+- `PRISMA_VERSION`: Prisma version to use (default: 6.19.0)
+
+## Management Commands
+
+### View Logs
+
+<CodeGroup>
+  ```bash Docker Compose
+  # View all logs
+  docker compose logs
+
+  # Follow logs in real-time
+  docker compose logs -f umami
+
+  # Last 100 lines
+  docker compose logs --tail=100 umami
+  ```
+
+  ```bash Docker
+  # View logs
+  docker logs umami
+
+  # Follow logs
+  docker logs -f umami
+  ```
+</CodeGroup>
+
+### Restart Containers
+
+<CodeGroup>
+  ```bash Docker Compose
+  # Restart all services
+  docker compose restart
+
+  # Restart just Umami
+  docker compose restart umami
+  ```
+
+  ```bash Docker
+  docker restart umami
+  ```
+</CodeGroup>
+
+### Stop and Remove
+
+<CodeGroup>
+  ```bash Docker Compose
+  # Stop containers
+  docker compose stop
+
+  # Stop and remove containers (keeps data)
+  docker compose down
+
+  # Remove everything including volumes
+  docker compose down -v
+  ```
+
+  ```bash Docker
+  # Stop container
+  docker stop umami
+
+  # Remove container
+  docker rm umami
+  ```
+</CodeGroup>
+
+## Updating Umami
+
+<Steps>
+  <Step title="Pull Latest Image">
+    ```bash
+    docker compose pull
+    ```
+  </Step>
+
+  <Step title="Recreate Containers">
+    ```bash
+    docker compose up -d --force-recreate
+    ```
+  </Step>
+
+  <Step title="Verify Update">
+    Check the version in Umami settings or view logs:
+
+    ```bash
+    docker compose logs umami | grep version
+    ```
+  </Step>
+</Steps>
+
+<Info>
+  Database migrations run automatically on startup, so your schema will be updated when you upgrade to a new version.
+</Info>
+
+## Troubleshooting
+
+<Accordion title="Containers won't start">
+  Check logs for errors:
+  ```bash
+  docker compose logs
+  ```
+
+  Common issues:
+  - Port 3000 already in use (change port mapping)
+  - DATABASE_URL incorrect
+  - Insufficient memory or disk space
+</Accordion>
+
+<Accordion title="Database connection failed">
+  Verify database is healthy:
+  ```bash
+  docker compose ps db
+  ```
+
+  Check DATABASE_URL format:
+  ```
+  postgresql://username:password@hostname:5432/database
+  ```
+
+  Ensure database is reachable from Umami container.
+</Accordion>
+
+<Accordion title="Can't access localhost:3000">
+  - Check container is running: `docker compose ps`
+  - Verify port mapping in docker-compose.yml
+  - Check firewall settings
+  - Try `http://127.0.0.1:3000` instead
+</Accordion>
+
+<Accordion title="Data lost after restart">
+  Ensure volumes are properly configured:
+  ```bash
+  docker volume ls
+  ```
+
+  You should see `umami-db-data` volume. If not, your data wasn't persisted.
+</Accordion>
+
+## Production Deployment
+
+<Warning>
+  For production deployments, you MUST:
+  1. Change the `APP_SECRET` to a strong random value
+  2. Use strong database passwords
+  3. Set up a reverse proxy (nginx, Traefik, Caddy)
+  4. Enable HTTPS/SSL
+  5. Configure backups for the PostgreSQL volume
+  6. Change the default admin password
+</Warning>
+
+<Tip>
+  See [Configuration](/configuration/running) for production deployment best practices including reverse proxy setup and SSL configuration.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="gear" href="/configuration/environment-variables">
+    Configure advanced Umami features
+  </Card>
+  <Card title="Database Setup" icon="database" href="/configuration/database-setup">
+    Optimize your database configuration
+  </Card>
+  <Card title="Add Your Website" icon="plus" href="/quickstart#add-your-first-website">
+    Start tracking your first website
+  </Card>
+  <Card title="Running in Production" icon="server" href="/configuration/running">
+    Production deployment guide
+  </Card>
+</CardGroup>

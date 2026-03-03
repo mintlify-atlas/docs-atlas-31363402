@@ -1,0 +1,653 @@
+---
+title: Environment Variables
+description: Complete reference for Umami environment variables and configuration options
+---
+
+# Environment Variables
+
+Umami can be configured using environment variables to customize behavior, enable features, and integrate with external services.
+
+## Required Variables
+
+These variables are required for Umami to function:
+
+### DATABASE_URL
+
+<Card title="Database Connection" icon="database">
+  PostgreSQL database connection string.
+</Card>
+
+```bash
+DATABASE_URL=postgresql://username:password@hostname:port/database
+```
+
+**Format:**
+```
+postgresql://[user]:[password]@[host]:[port]/[database]
+```
+
+**Examples:**
+
+<CodeGroup>
+  ```bash Local
+  DATABASE_URL=postgresql://umami:mypassword@localhost:5432/umami
+  ```
+
+  ```bash Docker Compose
+  DATABASE_URL=postgresql://umami:umami@db:5432/umami
+  ```
+
+  ```bash Cloud (Supabase)
+  DATABASE_URL=postgresql://postgres:password@db.xxx.supabase.co:6543/postgres?pgbouncer=true
+  ```
+
+  ```bash Cloud (Neon)
+  DATABASE_URL=postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname
+  ```
+</CodeGroup>
+
+<Warning>
+  Never commit your DATABASE_URL to version control. Use `.env` files that are in `.gitignore`.
+</Warning>
+
+### APP_SECRET
+
+<Card title="Application Secret" icon="key">
+  Random string used for encrypting sessions, tokens, and sensitive data.
+</Card>
+
+```bash
+APP_SECRET=your-random-secret-string-minimum-32-characters
+```
+
+**Generate a secure secret:**
+
+<CodeGroup>
+  ```bash OpenSSL
+  openssl rand -base64 32
+  ```
+
+  ```bash Node.js
+  node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+  ```
+
+  ```bash Python
+  python -c "import secrets; print(secrets.token_urlsafe(32))"
+  ```
+</CodeGroup>
+
+<Warning>
+  **Critical**: Change APP_SECRET before deploying to production. Never use default or example values.
+</Warning>
+
+## Optional Configuration
+
+### Application Settings
+
+#### PORT
+
+Port number for the application server.
+
+```bash
+PORT=3000
+```
+
+**Default:** `3000`
+
+<Note>
+  Cloud platforms like Railway and Vercel automatically set the PORT variable. You usually don't need to change this.
+</Note>
+
+#### HOSTNAME
+
+Hostname for the server to bind to.
+
+```bash
+HOSTNAME=0.0.0.0
+```
+
+**Default:** `0.0.0.0` (all interfaces)
+
+**Options:**
+- `0.0.0.0` - Accept connections from any interface
+- `localhost` - Only local connections
+- Specific IP address
+
+#### BASE_PATH
+
+Serve Umami from a subdirectory.
+
+```bash
+BASE_PATH=/analytics
+```
+
+**Example:** Access Umami at `https://yourdomain.com/analytics`
+
+<Info>
+  When using BASE_PATH, you must rebuild the application for changes to take effect.
+</Info>
+
+### Tracking Configuration
+
+#### TRACKER_SCRIPT_NAME
+
+Customize the tracking script filename to avoid ad blockers.
+
+```bash
+TRACKER_SCRIPT_NAME=custom-script.js
+```
+
+**Multiple names:**
+```bash
+TRACKER_SCRIPT_NAME=analytics.js,stats.js,umami.js
+```
+
+**Benefits:**
+- Avoid ad blocker detection
+- Use branded script names
+- Support multiple script names simultaneously
+
+**Usage:**
+```html
+<!-- Default -->
+<script src="/script.js" data-website-id="..."></script>
+
+<!-- Custom -->
+<script src="/analytics.js" data-website-id="..."></script>
+```
+
+#### TRACKER_SCRIPT_URL
+
+Serve tracking script from external URL.
+
+```bash
+TRACKER_SCRIPT_URL=https://cdn.yourdomain.com/umami.js
+```
+
+<Tip>
+  Host the script on your own CDN for better performance and control.
+</Tip>
+
+#### COLLECT_API_ENDPOINT
+
+Customize the data collection endpoint.
+
+```bash
+COLLECT_API_ENDPOINT=/api/collect
+```
+
+**Default:** `/api/send`
+
+Use this to:
+- Avoid ad blocker patterns
+- Match your API structure
+- Use custom endpoint names
+
+### Security Settings
+
+#### FORCE_SSL
+
+Force HTTPS and add security headers.
+
+```bash
+FORCE_SSL=1
+```
+
+When enabled:
+- Adds `Strict-Transport-Security` header
+- Forces HTTPS redirects
+- Enhances security posture
+
+<Warning>
+  Only enable this if you have HTTPS properly configured. Enabling without HTTPS will break your site.
+</Warning>
+
+#### ALLOWED_FRAME_URLS
+
+Configure Content Security Policy for embedding Umami in iframes.
+
+```bash
+ALLOWED_FRAME_URLS=https://yourdomain.com https://app.yourdomain.com
+```
+
+**Use cases:**
+- Embed Umami dashboard in your app
+- Display analytics on your website
+- Allow specific domains to frame Umami
+
+#### CORS_MAX_AGE
+
+CORS preflight cache duration in seconds.
+
+```bash
+CORS_MAX_AGE=86400
+```
+
+**Default:** `86400` (24 hours)
+
+### Cloud Mode
+
+#### CLOUD_MODE
+
+Enable cloud/SaaS mode features.
+
+```bash
+CLOUD_MODE=1
+```
+
+Enables:
+- Multi-tenant features
+- Team workspaces
+- Usage limits
+- Billing integration
+
+<Info>
+  Cloud mode is for SaaS deployments. Most self-hosted users don't need this.
+</Info>
+
+#### CLOUD_URL
+
+Cloud service URL for remote tracking.
+
+```bash
+CLOUD_URL=https://cloud.umami.is
+```
+
+Required additional variables when using cloud mode:
+```bash
+CLICKHOUSE_URL=http://clickhouse:8123
+REDIS_URL=redis://redis:6379
+```
+
+### Database Options
+
+#### DATABASE_TYPE
+
+Database type (usually auto-detected).
+
+```bash
+DATABASE_TYPE=postgresql
+```
+
+**Options:**
+- `postgresql` (default and recommended)
+- `mysql` (deprecated, not recommended)
+
+<Note>
+  Umami v2+ focuses on PostgreSQL. MySQL support is limited and may be removed in future versions.
+</Note>
+
+#### SKIP_DB_CHECK
+
+Skip database connection check on startup.
+
+```bash
+SKIP_DB_CHECK=1
+```
+
+<Warning>
+  Only use this if you know what you're doing. Skipping DB check can lead to runtime errors.
+</Warning>
+
+### High-Volume Options
+
+For sites with millions of pageviews:
+
+#### CLICKHOUSE_URL
+
+ClickHouse database for high-volume analytics.
+
+```bash
+CLICKHOUSE_URL=http://clickhouse:8123
+```
+
+**Benefits:**
+- Handle billions of events
+- Faster queries on large datasets
+- Columnar storage for analytics
+
+<Info>
+  ClickHouse is optional and only needed for very high-traffic sites (millions of events per day).
+</Info>
+
+#### REDIS_URL
+
+Redis for caching and session storage.
+
+```bash
+REDIS_URL=redis://redis:6379
+```
+
+**Alternative formats:**
+```bash
+# With password
+REDIS_URL=redis://:password@redis:6379
+
+# Redis Sentinel
+REDIS_URL=redis-sentinel://sentinel:26379/mymaster
+
+# TLS
+REDIS_URL=rediss://redis:6380
+```
+
+**Benefits:**
+- Faster session management
+- Improved performance
+- Distributed caching
+
+### Localization
+
+#### DEFAULT_LOCALE
+
+Default language for the UI.
+
+```bash
+DEFAULT_LOCALE=en-US
+```
+
+**Available locales:**
+- `en-US` - English (default)
+- `es-ES` - Spanish
+- `fr-FR` - French
+- `de-DE` - German
+- `zh-CN` - Chinese (Simplified)
+- `ja-JP` - Japanese
+- `ko-KR` - Korean
+- `pt-BR` - Portuguese (Brazil)
+- `ru-RU` - Russian
+- And many more...
+
+### Build-Time Variables
+
+These affect the build process:
+
+#### NEXT_TELEMETRY_DISABLED
+
+Disable Next.js telemetry.
+
+```bash
+NEXT_TELEMETRY_DISABLED=1
+```
+
+<Tip>
+  Disable telemetry for privacy and slightly faster builds.
+</Tip>
+
+#### NODE_ENV
+
+Node.js environment mode.
+
+```bash
+NODE_ENV=production
+```
+
+**Options:**
+- `production` - Optimized builds, no debug info
+- `development` - Debug mode, hot reload
+- `test` - Testing environment
+
+<Warning>
+  Always use `NODE_ENV=production` for production deployments.
+</Warning>
+
+#### NODE_OPTIONS
+
+Node.js runtime options.
+
+```bash
+NODE_OPTIONS="--max-old-space-size=4096"
+```
+
+**Common options:**
+```bash
+# Increase memory limit
+NODE_OPTIONS="--max-old-space-size=4096"
+
+# Enable source maps
+NODE_OPTIONS="--enable-source-maps"
+```
+
+## Setting Environment Variables
+
+### Local Development
+
+Create a `.env` file in the project root:
+
+```bash .env
+DATABASE_URL=postgresql://umami:password@localhost:5432/umami
+APP_SECRET=your-random-secret-here
+NEXT_TELEMETRY_DISABLED=1
+```
+
+<Note>
+  The `.env` file is in `.gitignore` by default. Never commit it to version control.
+</Note>
+
+### Docker Compose
+
+Add to `docker-compose.yml`:
+
+```yaml docker-compose.yml
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:latest
+    environment:
+      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      APP_SECRET: replace-me-with-random-string
+      TRACKER_SCRIPT_NAME: analytics.js
+      FORCE_SSL: 1
+```
+
+Or use an `.env` file:
+
+```yaml docker-compose.yml
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:latest
+    env_file:
+      - .env
+```
+
+### Docker Run
+
+Pass variables with `-e` flag:
+
+```bash
+docker run -d \
+  -e DATABASE_URL=postgresql://user:pass@host:5432/db \
+  -e APP_SECRET=my-secret \
+  -e TRACKER_SCRIPT_NAME=analytics.js \
+  -p 3000:3000 \
+  ghcr.io/umami-software/umami:latest
+```
+
+### Railway
+
+1. Go to your Umami service
+2. Click **Variables** tab
+3. Click **+ New Variable**
+4. Add key and value
+5. Click **Add**
+
+Railway automatically redeploys when variables change.
+
+### Vercel
+
+1. Go to **Settings** → **Environment Variables**
+2. Enter variable name and value
+3. Select environments (Production, Preview, Development)
+4. Click **Save**
+5. Redeploy for changes to take effect
+
+### System Environment
+
+For systemd or process managers:
+
+```bash
+# Export in shell
+export DATABASE_URL=postgresql://...
+export APP_SECRET=...
+pnpm start
+```
+
+```ini systemd service file
+[Service]
+Environment="DATABASE_URL=postgresql://..."
+Environment="APP_SECRET=..."
+ExecStart=/usr/bin/pnpm start
+```
+
+## Configuration Examples
+
+### Minimal Production Setup
+
+```bash .env
+DATABASE_URL=postgresql://umami:password@localhost:5432/umami
+APP_SECRET=8f3d9a7b6c2e1f4a9d8c7b6a5e4d3c2b1a0f9e8d7c6b5a4e3d2c1b0a9f8e7d6c
+NEXT_TELEMETRY_DISABLED=1
+```
+
+### Advanced Production
+
+```bash .env
+# Database
+DATABASE_URL=postgresql://umami:password@localhost:5432/umami
+
+# Security
+APP_SECRET=8f3d9a7b6c2e1f4a9d8c7b6a5e4d3c2b1a0f9e8d7c6b5a4e3d2c1b0a9f8e7d6c
+FORCE_SSL=1
+
+# Tracking
+TRACKER_SCRIPT_NAME=analytics.js,stats.js
+
+# UI
+DEFAULT_LOCALE=en-US
+BASE_PATH=/analytics
+
+# Performance
+REDIS_URL=redis://localhost:6379
+
+# Next.js
+NEXT_TELEMETRY_DISABLED=1
+NODE_ENV=production
+```
+
+### High-Volume Setup
+
+```bash .env
+# Databases
+DATABASE_URL=postgresql://umami:password@localhost:5432/umami
+CLICKHOUSE_URL=http://localhost:8123
+REDIS_URL=redis://localhost:6379
+
+# Security
+APP_SECRET=8f3d9a7b6c2e1f4a9d8c7b6a5e4d3c2b1a0f9e8d7c6b5a4e3d2c1b0a9f8e7d6c
+FORCE_SSL=1
+
+# Cloud mode
+CLOUD_MODE=1
+CLOUD_URL=https://analytics.yourdomain.com
+
+# Tracking
+TRACKER_SCRIPT_NAME=umami.js
+COLLECT_API_ENDPOINT=/api/collect
+
+# Performance
+NODE_OPTIONS="--max-old-space-size=4096"
+```
+
+## Troubleshooting
+
+<Accordion title="Environment variables not loading">
+  Check:
+  - `.env` file exists in project root
+  - No syntax errors in `.env` file
+  - Variables don't have quotes unless needed
+  - Restart the application after changes
+  
+  Format:
+  ```bash
+  # Correct
+  DATABASE_URL=postgresql://...
+  
+  # Incorrect (usually)
+  DATABASE_URL="postgresql://..."
+  ```
+</Accordion>
+
+<Accordion title="DATABASE_URL not found">
+  Make sure:
+  - Variable is set before building/starting
+  - No typos in variable name
+  - Connection string format is correct
+  - Using `=` not `:` or space
+  
+  Test:
+  ```bash
+  echo $DATABASE_URL
+  ```
+</Accordion>
+
+<Accordion title="Changes not taking effect">
+  - Rebuild after changing build-time variables (BASE_PATH, TRACKER_SCRIPT_NAME)
+  - Restart after changing runtime variables
+  - Clear Next.js cache: `rm -rf .next`
+  - In Docker: recreate containers
+</Accordion>
+
+<Accordion title="Invalid APP_SECRET">
+  Requirements:
+  - Minimum 32 characters recommended
+  - Use alphanumeric and special characters
+  - Don't use spaces
+  - Base64 encoding recommended
+  
+  Generate:
+  ```bash
+  openssl rand -base64 32
+  ```
+</Accordion>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use Strong Secrets" icon="lock">
+    Generate cryptographically secure random strings for APP_SECRET
+  </Card>
+  <Card title="Never Commit Secrets" icon="git-branch">
+    Keep `.env` in `.gitignore` and use secret management tools
+  </Card>
+  <Card title="Document Your Config" icon="file-text">
+    Create `.env.example` with dummy values for team reference
+  </Card>
+  <Card title="Use Different Secrets" icon="shield">
+    Don't reuse APP_SECRET across environments or applications
+  </Card>
+</CardGroup>
+
+<Warning>
+  **Security Checklist:**
+  - [ ] APP_SECRET is random and unique
+  - [ ] DATABASE_URL uses strong password
+  - [ ] Secrets are not committed to Git
+  - [ ] Production uses different secrets than development
+  - [ ] FORCE_SSL enabled for HTTPS deployments
+  - [ ] Default admin password changed
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Database Setup" icon="database" href="/configuration/database-setup">
+    Configure and optimize your database
+  </Card>
+  <Card title="Running in Production" icon="server" href="/configuration/running">
+    Production deployment best practices
+  </Card>
+  <Card title="Docker Installation" icon="docker" href="/installation/docker">
+    Deploy with Docker using environment variables
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get started with Umami
+  </Card>
+</CardGroup>

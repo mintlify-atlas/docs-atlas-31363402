@@ -1,0 +1,587 @@
+---
+title: Revenue Tracking
+description: Track e-commerce revenue and monetary value from your website visitors
+---
+
+Revenue tracking enables you to monitor monetary value generated from your website. Track purchases, subscription value, and other revenue-generating events to measure your website's financial impact.
+
+## Overview
+
+Revenue tracking captures financial transactions and associates them with:
+
+<CardGroup cols={2}>
+  <Card title="Transaction Data" icon="dollar-sign">
+    Monetary information:
+    - Revenue amount
+    - Currency type
+    - Transaction ID
+    - Event name
+  </Card>
+  
+  <Card title="Attribution Data" icon="link">
+    Traffic source context:
+    - Referrer source
+    - UTM parameters
+    - User session
+    - Geographic location
+  </Card>
+</CardGroup>
+
+<Info>
+  Revenue tracking requires implementing revenue events in your tracking code. All revenue data is associated with your existing analytics.
+</Info>
+
+## Setting Up Revenue Tracking
+
+### Prerequisites
+
+Before tracking revenue:
+
+<Steps>
+  <Step title="Install Tracking Code">
+    Ensure the Umami tracking script is installed on your website.
+  </Step>
+  
+  <Step title="Implement Events">
+    Add custom event tracking to your site.
+  </Step>
+  
+  <Step title="Add Revenue Events">
+    Include revenue data with specific events.
+  </Step>
+</Steps>
+
+### Basic Revenue Event
+
+Track revenue by sending a custom event with revenue data:
+
+```javascript
+umami.track('purchase', {
+  revenue: 99.99,
+  currency: 'USD'
+});
+```
+
+<Note>
+  The event name can be any custom name you choose (e.g., 'purchase', 'subscription', 'checkout').
+</Note>
+
+### Complete Revenue Event
+
+Include additional context:
+
+```javascript
+umami.track('purchase', {
+  revenue: 149.99,
+  currency: 'USD',
+  // Optional: Additional product information
+  product_id: 'PROD-123',
+  product_name: 'Premium Plan',
+  quantity: 1,
+  category: 'subscription'
+});
+```
+
+## Revenue Event Properties
+
+### Required Properties
+
+<CardGroup cols={2}>
+  <Card title="revenue">
+    **Type:** Number
+    
+    **Description:** The monetary amount
+    
+    **Example:** `99.99`
+    
+    **Notes:** Use decimal format, positive numbers
+  </Card>
+  
+  <Card title="currency">
+    **Type:** String
+    
+    **Description:** 3-letter currency code
+    
+    **Example:** `"USD"`, `"EUR"`, `"GBP"`
+    
+    **Notes:** ISO 4217 currency codes
+  </Card>
+</CardGroup>
+
+### Optional Properties
+
+Add custom properties for detailed analysis:
+
+- **product_id**: Product identifier
+- **product_name**: Product name
+- **category**: Product category
+- **quantity**: Number of items
+- **transaction_id**: Unique transaction identifier
+- **payment_method**: Payment type used
+- Any other custom properties you need
+
+<Tip>
+  Include relevant properties to enable detailed revenue analysis and segmentation.
+</Tip>
+
+## Implementation Examples
+
+### E-commerce Purchase
+
+Track completed purchases:
+
+```javascript
+// After successful checkout
+function trackPurchase(orderData) {
+  umami.track('purchase', {
+    revenue: orderData.total,
+    currency: orderData.currency,
+    transaction_id: orderData.orderId,
+    product_id: orderData.productId,
+    quantity: orderData.quantity,
+    payment_method: orderData.paymentMethod
+  });
+}
+
+// Example usage
+trackPurchase({
+  total: 299.99,
+  currency: 'USD',
+  orderId: 'ORD-2024-001',
+  productId: 'WIDGET-PRO',
+  quantity: 2,
+  paymentMethod: 'credit_card'
+});
+```
+
+### Subscription Revenue
+
+Track subscription signups:
+
+```javascript
+function trackSubscription(plan, amount, currency) {
+  umami.track('subscription', {
+    revenue: amount,
+    currency: currency,
+    plan: plan,
+    billing_cycle: 'monthly'
+  });
+}
+
+// Example: Monthly subscription
+trackSubscription('premium', 29.99, 'USD');
+```
+
+### Digital Downloads
+
+Track paid content purchases:
+
+```javascript
+function trackDownload(item) {
+  umami.track('download_purchase', {
+    revenue: item.price,
+    currency: 'USD',
+    content_type: item.type,
+    content_id: item.id,
+    content_title: item.title
+  });
+}
+
+// Example: E-book purchase
+trackDownload({
+  price: 19.99,
+  type: 'ebook',
+  id: 'BOOK-123',
+  title: 'Analytics Guide'
+});
+```
+
+### Lead Value
+
+Track estimated value of leads:
+
+```javascript
+function trackLead(leadType, estimatedValue) {
+  umami.track('lead_generated', {
+    revenue: estimatedValue,
+    currency: 'USD',
+    lead_type: leadType,
+    lead_source: 'contact_form'
+  });
+}
+
+// Example: High-value lead
+trackLead('enterprise', 5000);
+```
+
+### In-App Purchases
+
+Track mobile app purchases:
+
+```javascript
+function trackInAppPurchase(item) {
+  umami.track('in_app_purchase', {
+    revenue: item.price,
+    currency: item.currency,
+    item_id: item.id,
+    item_name: item.name,
+    item_type: item.type
+  });
+}
+
+// Example: Premium feature unlock
+trackInAppPurchase({
+  price: 4.99,
+  currency: 'USD',
+  id: 'FEATURE-PREMIUM',
+  name: 'Premium Features',
+  type: 'upgrade'
+});
+```
+
+## Revenue Reports
+
+Analyze your revenue data:
+
+<Steps>
+  <Step title="Navigate to Revenue">
+    Go to your website and select the **Revenue** tab.
+  </Step>
+  
+  <Step title="View Revenue Metrics">
+    See total revenue, transaction count, and average order value.
+  </Step>
+  
+  <Step title="Analyze by Dimension">
+    Break down revenue by source, page, event, or custom properties.
+  </Step>
+  
+  <Step title="Filter Data">
+    Apply filters to analyze specific revenue segments.
+  </Step>
+</Steps>
+
+### Revenue Metrics
+
+<CardGroup cols={3}>
+  <Card title="Total Revenue" icon="dollar-sign">
+    Sum of all revenue events in the selected period.
+  </Card>
+  
+  <Card title="Transactions" icon="shopping-cart">
+    Number of revenue events tracked.
+  </Card>
+  
+  <Card title="Average Order Value" icon="trending-up">
+    Mean revenue per transaction (Total Revenue / Transactions).
+  </Card>
+</CardGroup>
+
+### Revenue Over Time
+
+Visualize revenue trends:
+- Daily, weekly, or monthly revenue
+- Compare time periods
+- Identify seasonal patterns
+- Track growth trends
+
+<Info>
+  The revenue chart automatically adjusts granularity based on your selected date range.
+</Info>
+
+## Revenue Analysis
+
+### By Traffic Source
+
+Understand which sources drive revenue:
+
+<CardGroup cols={2}>
+  <Card title="By Referrer">
+    Revenue from each referrer:
+    - Social media platforms
+    - Partner websites
+    - Search engines
+    - Direct traffic
+  </Card>
+  
+  <Card title="By Campaign">
+    Revenue by marketing campaign:
+    - UTM campaign tracking
+    - Source and medium
+    - Campaign ROI
+    - Attribution analysis
+  </Card>
+</CardGroup>
+
+### By Page
+
+See which pages generate revenue:
+- Landing pages that convert
+- Product pages that drive sales
+- Content that leads to purchases
+- Entry points for customers
+
+### By Geography
+
+Analyze revenue by location:
+- Country-level revenue
+- Regional performance
+- International market value
+- Geographic expansion opportunities
+
+### By Event Type
+
+Compare different revenue events:
+- Purchase vs subscription revenue
+- Product category performance
+- Revenue by event name
+- Custom event analysis
+
+## Currency Handling
+
+Umami tracks revenue in multiple currencies:
+
+### Multi-Currency Support
+
+```javascript
+// USD transaction
+umami.track('purchase', {
+  revenue: 99.99,
+  currency: 'USD'
+});
+
+// EUR transaction
+umami.track('purchase', {
+  revenue: 89.99,
+  currency: 'EUR'
+});
+
+// GBP transaction
+umami.track('purchase', {
+  revenue: 79.99,
+  currency: 'GBP'
+});
+```
+
+<Note>
+  Revenue is stored in the original currency. Reports display revenue grouped by currency.
+</Note>
+
+### Common Currency Codes
+
+| Code | Currency |
+|------|----------|
+| USD | US Dollar |
+| EUR | Euro |
+| GBP | British Pound |
+| CAD | Canadian Dollar |
+| AUD | Australian Dollar |
+| JPY | Japanese Yen |
+| CNY | Chinese Yuan |
+| INR | Indian Rupee |
+
+<Tip>
+  Use ISO 4217 standard currency codes for consistency.
+</Tip>
+
+## Revenue Attribution
+
+Understand what drives revenue:
+
+### First-Touch Attribution
+
+Revenue credited to initial source:
+- Where did the customer first arrive?
+- Which campaign brought them in?
+- Original referrer tracking
+
+### Last-Touch Attribution
+
+Revenue credited to final source:
+- What was the last touchpoint?
+- Which page preceded purchase?
+- Final referrer before conversion
+
+<Info>
+  Umami associates revenue with the session where it occurred, providing last-touch attribution by default.
+</Info>
+
+## E-commerce Integration
+
+### WooCommerce Example
+
+Add to your order confirmation page:
+
+```php
+<?php
+if (is_order_received_page()) {
+  $order_id = $_GET['order_id'];
+  $order = wc_get_order($order_id);
+  ?>
+  <script>
+    umami.track('purchase', {
+      revenue: <?php echo $order->get_total(); ?>,
+      currency: '<?php echo $order->get_currency(); ?>',
+      transaction_id: '<?php echo $order->get_id(); ?>',
+      items: <?php echo $order->get_item_count(); ?>
+    });
+  </script>
+  <?php
+}
+?>
+```
+
+### Shopify Example
+
+Add to your thank you page:
+
+```liquid
+{% if first_time_accessed %}
+<script>
+  umami.track('purchase', {
+    revenue: {{ checkout.total_price | money_without_currency }},
+    currency: '{{ checkout.currency }}',
+    transaction_id: '{{ checkout.order_id }}',
+    items: {{ checkout.line_items.size }}
+  });
+</script>
+{% endif %}
+```
+
+### Stripe Integration
+
+Track Stripe payments:
+
+```javascript
+stripe.confirmPayment({
+  // ... payment details
+}).then(function(result) {
+  if (result.error) {
+    // Handle error
+  } else {
+    // Payment successful
+    umami.track('purchase', {
+      revenue: result.paymentIntent.amount / 100, // Convert cents
+      currency: result.paymentIntent.currency.toUpperCase(),
+      transaction_id: result.paymentIntent.id,
+      payment_method: 'stripe'
+    });
+  }
+});
+```
+
+## Best Practices
+
+### Tracking Implementation
+
+- Track revenue only once per transaction
+- Include transaction IDs to prevent duplicates
+- Use consistent event names across your site
+- Track revenue at the confirmation step, not the attempt
+- Include relevant context in event properties
+
+### Data Quality
+
+<Warning>
+  Do not track the same transaction multiple times. Use unique transaction IDs and track only on final confirmation pages.
+</Warning>
+
+- Validate revenue amounts before tracking
+- Use correct currency codes
+- Handle refunds separately (negative revenue or separate event)
+- Test in development before production
+- Monitor for duplicate transactions
+
+### Security Considerations
+
+- Don't expose sensitive payment information
+- Don't include credit card numbers or CVV
+- Don't include personal identifying information
+- Track only completed, authorized transactions
+- Use server-side validation when possible
+
+## Troubleshooting
+
+<Accordion title="Revenue not appearing in reports">
+  **Possible causes:**
+  - Revenue events not properly implemented
+  - Wrong event property names
+  - Currency code missing or invalid
+  - Events firing before tracking code loads
+  
+  **Solutions:**
+  - Check browser console for errors
+  - Verify event properties match requirements
+  - Test with known currency codes
+  - Ensure tracking code loads before revenue events
+  - Check network tab for event requests
+</Accordion>
+
+<Accordion title="Duplicate revenue tracking">
+  **Possible causes:**
+  - Tracking on page reload
+  - Multiple confirmation steps
+  - User refreshing thank you page
+  
+  **Solutions:**
+  - Track only on first page load
+  - Use transaction IDs to detect duplicates
+  - Implement client-side flags
+  - Track on server-side webhook instead
+</Accordion>
+
+<Accordion title="Incorrect revenue amounts">
+  **Possible causes:**
+  - Currency conversion errors
+  - Decimal point issues
+  - Including tax/shipping incorrectly
+  
+  **Solutions:**
+  - Verify amount calculation
+  - Use consistent decimal format
+  - Decide on gross vs net revenue
+  - Test with known amounts
+</Accordion>
+
+## Revenue Reporting Tips
+
+- Compare revenue across different time periods
+- Segment revenue by customer type or value
+- Track revenue per visitor (RPV)
+- Monitor conversion rate and average order value together
+- Use revenue data to calculate marketing ROI
+- Filter by traffic source to optimize ad spend
+
+## Privacy Considerations
+
+Revenue tracking respects user privacy:
+
+- No personal information required
+- Transaction amounts are aggregated
+- User identities remain anonymous
+- GDPR compliant tracking
+- No third-party data sharing
+
+<Info>
+  Umami's privacy-first approach means revenue data is collected without compromising user privacy.
+</Info>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Reports" href="/features/reports">
+    Create revenue reports and analysis
+  </Card>
+  
+  <Card title="Event Tracking" href="/tracking/events">
+    Learn more about custom events
+  </Card>
+  
+  <Card title="Goals" href="/reports/goal">
+    Set up conversion goals
+  </Card>
+  
+  <Card title="Funnels" href="/reports/funnel">
+    Track revenue conversion funnels
+  </Card>
+</CardGroup>

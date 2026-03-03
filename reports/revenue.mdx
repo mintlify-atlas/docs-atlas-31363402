@@ -1,0 +1,450 @@
+---
+title: 'Revenue Report'
+description: 'Analyze revenue metrics, transactions, and geographic distribution'
+icon: 'dollar-sign'
+---
+
+The Revenue Report provides comprehensive analytics for tracking e-commerce revenue, transactions, and financial performance. This report is essential for understanding your business's financial health and optimizing for revenue growth.
+
+## What is a Revenue Report?
+
+The Revenue Report tracks monetary transactions on your website, showing:
+- Total revenue over time
+- Number of transactions
+- Average order value
+- Revenue by geographic location
+- Revenue trends and patterns
+
+<Note>
+  Revenue tracking requires sending revenue data to Umami through custom events with monetary values.
+</Note>
+
+## Key Metrics
+
+<CardGroup cols={2}>
+  <Card title="Total Revenue" icon="dollar-sign">
+    Sum of all transaction values in the selected period
+  </Card>
+  <Card title="Transaction Count" icon="receipt">
+    Number of individual transactions completed
+  </Card>
+  <Card title="Average Order Value" icon="calculator">
+    Average revenue per transaction (Total Revenue / Transactions)
+  </Card>
+  <Card title="Unique Customers" icon="users">
+    Number of unique sessions that generated revenue
+  </Card>
+</CardGroup>
+
+## Revenue Report Components
+
+The Revenue Report provides three main data views:
+
+<Tabs>
+  <Tab title="Revenue Chart">
+    ### Time-Series Revenue Analysis
+    
+    The revenue chart shows revenue trends over time, broken down by revenue event.
+    
+    **What it includes:**
+    - Revenue plotted over time (day, week, or month)
+    - Breakdown by event name (e.g., 'purchase', 'subscription', 'upgrade')
+    - Visual trends and patterns
+    
+    **Use cases:**
+    - Identify seasonal trends
+    - Measure impact of marketing campaigns
+    - Compare revenue from different product lines
+    - Spot anomalies or issues
+    
+    ```json
+    {
+      "x": "purchase",
+      "t": "2024-01-15",
+      "y": 12450.50
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Geographic Revenue">
+    ### Revenue by Country
+    
+    See which countries generate the most revenue.
+    
+    **What it includes:**
+    - Revenue totals by country
+    - Ranked list of countries
+    - Percentage of total revenue per country
+    
+    **Use cases:**
+    - Identify key markets
+    - Plan international expansion
+    - Optimize pricing by region
+    - Target marketing by geography
+    
+    ```json
+    {
+      "name": "United States",
+      "value": 45230.75
+    }
+    ```
+    
+    <Tip>
+      Use geographic revenue data to inform decisions about localization, payment methods, and regional marketing budgets.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Revenue Summary">
+    ### Overall Performance Metrics
+    
+    Aggregate statistics for the selected time period.
+    
+    **What it includes:**
+    - Total revenue sum
+    - Total transaction count
+    - Average order value
+    - Number of unique customers
+    
+    **Use cases:**
+    - Quick performance overview
+    - Compare periods (e.g., month-over-month)
+    - Calculate customer lifetime value
+    - Set revenue targets
+    
+    ```json
+    {
+      "sum": 125430.50,
+      "count": 1523,
+      "average": 82.36,
+      "unique_count": 1401
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Setting Up Revenue Tracking
+
+<Steps>
+  <Step title="Install Umami Tracking">
+    Ensure Umami tracking script is installed on your website.
+  </Step>
+  
+  <Step title="Send Revenue Events">
+    When a transaction occurs, send a revenue event to Umami with the transaction details.
+  </Step>
+  
+  <Step title="Include Required Data">
+    Each revenue event must include the revenue amount and currency code.
+  </Step>
+  
+  <Step title="Test Implementation">
+    Complete a test transaction and verify it appears in your Revenue Report.
+  </Step>
+</Steps>
+
+## Tracking Revenue Events
+
+### Basic Revenue Tracking
+
+```javascript
+// Track a purchase
+umami.track('purchase', {
+  revenue: 99.99,
+  currency: 'USD'
+});
+```
+
+### E-commerce Implementation
+
+```javascript
+// After successful checkout
+function handleCheckoutSuccess(orderData) {
+  // Track the revenue
+  umami.track('purchase', {
+    revenue: orderData.total,
+    currency: orderData.currency,
+    // Optional: additional metadata
+    orderId: orderData.id,
+    productCount: orderData.items.length
+  });
+}
+```
+
+### Multiple Revenue Events
+
+Track different types of revenue separately:
+
+```javascript
+// One-time purchase
+umami.track('purchase', {
+  revenue: 49.99,
+  currency: 'USD'
+});
+
+// Subscription
+umami.track('subscription', {
+  revenue: 29.99,
+  currency: 'USD'
+});
+
+// Upgrade
+umami.track('upgrade', {
+  revenue: 19.99,
+  currency: 'USD'
+});
+```
+
+<Info>
+  Using different event names for different revenue types allows you to see revenue breakdown by source in the chart.
+</Info>
+
+## API Usage
+
+```bash
+curl -X POST https://your-umami-instance.com/api/reports/revenue \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "websiteId": "your-website-id",
+    "parameters": {
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": "2024-01-31T23:59:59Z",
+      "unit": "day",
+      "timezone": "America/New_York",
+      "currency": "USD"
+    },
+    "filters": {}
+  }'
+```
+
+### Parameters
+
+- **unit**: Time grouping (`day`, `week`, `month`)
+- **timezone**: Timezone for date calculations
+- **currency**: Currency code (ISO 4217 format: USD, EUR, GBP, etc.)
+
+### Response Format
+
+```json
+{
+  "chart": [
+    {
+      "x": "purchase",
+      "t": "2024-01-15",
+      "y": 12450.50
+    }
+  ],
+  "country": [
+    {
+      "name": "United States",
+      "value": 45230.75
+    }
+  ],
+  "total": {
+    "sum": 125430.50,
+    "count": 1523,
+    "average": 82.36,
+    "unique_count": 1401
+  }
+}
+```
+
+## Use Cases and Insights
+
+<Tabs>
+  <Tab title="Revenue Optimization">
+    ### Maximize Revenue per Visitor
+    
+    Analyze revenue data to identify optimization opportunities.
+    
+    **Key questions:**
+    - What's the average order value?
+    - Which products/categories drive the most revenue?
+    - Are there seasonal trends?
+    - Which traffic sources generate the most revenue?
+    
+    **Actionable insights:**
+    - Focus on high-value customer segments
+    - Optimize pricing strategies
+    - Plan promotions during low-revenue periods
+    - Double down on high-performing products
+    
+    <Tip>
+      Combine Revenue Reports with Attribution Reports to see which marketing channels drive the highest revenue.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Geographic Strategy">
+    ### Expand to High-Value Markets
+    
+    Use geographic revenue data to inform business strategy.
+    
+    **Analysis:**
+    - Which countries generate the most revenue?
+    - Are there untapped markets with high potential?
+    - Should pricing vary by region?
+    - Where should you focus customer support resources?
+    
+    **Strategic decisions:**
+    - **Localization**: Translate site for high-revenue countries
+    - **Payment methods**: Add local payment options for key markets
+    - **Pricing**: Adjust pricing based on regional purchasing power
+    - **Marketing**: Allocate ad spend to high-revenue regions
+  </Tab>
+  
+  <Tab title="Product Performance">
+    ### Track Revenue by Product Line
+    
+    Use different event names to track revenue from different products or services.
+    
+    **Implementation:**
+    ```javascript
+    // Track product-specific revenue
+    umami.track('product_a_purchase', { revenue: 49.99, currency: 'USD' });
+    umami.track('product_b_purchase', { revenue: 79.99, currency: 'USD' });
+    umami.track('service_purchase', { revenue: 199.99, currency: 'USD' });
+    ```
+    
+    **Insights:**
+    - Which products are bestsellers?
+    - What's the revenue mix?
+    - Are there cross-sell opportunities?
+    - Which products have the highest value?
+    
+    <Warning>
+      Don't create too many event types. Group similar products into categories for cleaner reporting.
+    </Warning>
+  </Tab>
+  
+  <Tab title="Campaign ROI">
+    ### Measure Marketing Return on Investment
+    
+    Track revenue from specific campaigns using filters.
+    
+    **Workflow:**
+    1. Add UTM parameters to campaign links
+    2. Filter revenue report by UTM parameters
+    3. Calculate revenue generated by each campaign
+    4. Compare to campaign costs to calculate ROI
+    
+    **Example:**
+    ```bash
+    # Get revenue from specific campaign
+    curl -X POST .../api/reports/revenue \
+      -d '{
+        "filters": {
+          "utm_campaign": "summer_sale_2024"
+        }
+      }'
+    ```
+    
+    **ROI Calculation:**
+    ```
+    ROI = (Revenue - Cost) / Cost × 100
+    
+    Example:
+    Revenue: $10,000
+    Ad Spend: $2,000
+    ROI = ($10,000 - $2,000) / $2,000 × 100 = 400%
+    ```
+  </Tab>
+</Tabs>
+
+## Revenue Metrics to Track
+
+<CardGroup cols={2}>
+  <Card title="Revenue Growth Rate" icon="chart-line">
+    Month-over-month or year-over-year revenue growth percentage
+  </Card>
+  <Card title="Average Order Value" icon="calculator">
+    Track trends in AOV to measure pricing and upselling effectiveness
+  </Card>
+  <Card title="Revenue per Visitor" icon="user">
+    Divide total revenue by total visitors to measure site effectiveness
+  </Card>
+  <Card title="Repeat Customer Rate" icon="arrows-rotate">
+    Compare unique customers to total transactions
+  </Card>
+</CardGroup>
+
+## Multi-Currency Support
+
+Umami stores revenue in the currency you specify with each event.
+
+### Best Practices for Multi-Currency
+
+<Steps>
+  <Step title="Use Customer's Currency">
+    Send revenue in the currency the customer paid in for accurate geographic analysis.
+  </Step>
+  
+  <Step title="Consistent Currency for Reporting">
+    Query the Revenue Report with one currency at a time for accurate totals.
+  </Step>
+  
+  <Step title="Convert for Comparison">
+    If you need to compare revenue across currencies, convert to a base currency in your analytics layer.
+  </Step>
+</Steps>
+
+```javascript
+// Store in customer's currency
+if (customer.country === 'UK') {
+  umami.track('purchase', { revenue: 79.99, currency: 'GBP' });
+} else if (customer.country === 'EU') {
+  umami.track('purchase', { revenue: 89.99, currency: 'EUR' });
+} else {
+  umami.track('purchase', { revenue: 99.99, currency: 'USD' });
+}
+```
+
+<Info>
+  The Revenue Report filters by a single currency at a time. To see all revenue, you'll need to query each currency separately and convert to a base currency.
+</Info>
+
+## Best Practices
+
+1. **Track all revenue sources**: Include purchases, subscriptions, upgrades, and other monetization
+2. **Use consistent event names**: Standardize naming conventions across your team
+3. **Include transaction IDs**: Add order IDs to event data for reconciliation
+4. **Monitor data quality**: Regularly verify revenue tracking is working correctly
+5. **Set up alerts**: Monitor for sudden drops or spikes in revenue
+
+<Tip>
+  Compare your Umami revenue data with your payment processor regularly to ensure accuracy.
+</Tip>
+
+## Troubleshooting
+
+<Accordion title="Revenue totals don't match payment processor">
+  **Common causes:**
+  - Tracking code not firing on all success pages
+  - Failed transactions being tracked
+  - Refunds not being accounted for
+  - Ad blockers preventing tracking
+  
+  **Solutions:**
+  - Implement server-side revenue tracking
+  - Only track on confirmed success pages
+  - Implement refund tracking
+  - Compare blocked vs tracked percentages
+</Accordion>
+
+<Accordion title="Missing revenue data for some transactions">
+  **Check:**
+  - Tracking code loads before checkout success page
+  - JavaScript errors aren't preventing tracking
+  - Currency parameter is included
+  - Revenue values are numbers, not strings
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Attribution Analysis" icon="link" href="/reports/attribution">
+    See which traffic sources drive revenue
+  </Card>
+  <Card title="Funnel Analysis" icon="filter" href="/reports/funnel">
+    Optimize your checkout funnel to increase revenue
+  </Card>
+</CardGroup>

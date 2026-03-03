@@ -1,0 +1,502 @@
+---
+title: Segments
+description: Create and analyze user segments to understand different audience groups
+---
+
+Segments allow you to group users based on shared characteristics and behaviors. By creating segments, you can analyze how different audience groups interact with your website and tailor your analytics insights.
+
+## What are Segments?
+
+A segment is a subset of your website visitors defined by specific criteria:
+
+<CardGroup cols={2}>
+  <Card title="Behavioral Segments" icon="activity">
+    Based on user actions:
+    - Visitors from specific pages
+    - Users who triggered events
+    - Visitors from campaigns
+    - Repeat vs new visitors
+  </Card>
+  
+  <Card title="Demographic Segments" icon="users">
+    Based on user attributes:
+    - Geographic location
+    - Device type
+    - Browser or OS
+    - Language preference
+  </Card>
+</CardGroup>
+
+### Segment Use Cases
+
+- Compare mobile vs desktop user behavior
+- Analyze traffic from specific marketing campaigns
+- Track users from different geographic regions
+- Segment by customer journey stage
+- Isolate power users vs casual visitors
+
+## Creating Segments
+
+Build segments using filter criteria:
+
+<Steps>
+  <Step title="Navigate to Segments">
+    Select your website and go to the **Segments** section.
+  </Step>
+  
+  <Step title="Add Segment">
+    Click the **Add Segment** button.
+  </Step>
+  
+  <Step title="Name Your Segment">
+    Give your segment a clear, descriptive name (e.g., "Mobile Users from US").
+  </Step>
+  
+  <Step title="Define Filter Criteria">
+    Add one or more filters to define your segment.
+    
+    <Note>
+      Multiple filters are combined with AND logic - users must match all criteria.
+    </Note>
+  </Step>
+  
+  <Step title="Save Segment">
+    Save to make the segment available throughout your analytics.
+  </Step>
+</Steps>
+
+## Filter Criteria
+
+Segments are built using filters. Available filter types:
+
+### Page and Content Filters
+
+<Accordion title="URL Path">
+  Filter by visited pages:
+  - **Equals**: Exact URL match
+  - **Contains**: URL includes text
+  - **Starts with**: URL begins with pattern
+  - **Ends with**: URL ends with pattern
+  
+  Example: `path contains /blog/` for all blog visitors
+</Accordion>
+
+<Accordion title="Page Title">
+  Filter by page title:
+  - Match specific page titles
+  - Use contains for flexible matching
+  
+  Example: `title contains "Product"` for product page visitors
+</Accordion>
+
+### Traffic Source Filters
+
+<Accordion title="Referrer">
+  Filter by traffic source:
+  - Specific referrer domains
+  - Social media platforms
+  - Search engines
+  - Empty (direct traffic)
+  
+  Example: `referrer equals twitter.com` for Twitter traffic
+</Accordion>
+
+<Accordion title="UTM Parameters">
+  Filter by campaign parameters:
+  - **utm_source**: Traffic source
+  - **utm_medium**: Marketing medium
+  - **utm_campaign**: Campaign name
+  - **utm_content**: Ad variation
+  - **utm_term**: Keywords
+  
+  Example: `utm_source equals google` for Google campaigns
+</Accordion>
+
+### Technology Filters
+
+<Accordion title="Browser">
+  Filter by web browser:
+  - Chrome, Firefox, Safari, Edge
+  - Browser versions
+  - Mobile browsers
+  
+  Example: `browser equals Chrome` for Chrome users
+</Accordion>
+
+<Accordion title="Operating System">
+  Filter by OS:
+  - Windows, macOS, Linux
+  - iOS, Android
+  - OS versions
+  
+  Example: `os equals iOS` for iPhone/iPad users
+</Accordion>
+
+<Accordion title="Device Type">
+  Filter by device category:
+  - Desktop
+  - Mobile
+  - Tablet
+  
+  Example: `device equals mobile` for mobile users
+</Accordion>
+
+<Accordion title="Screen Size">
+  Filter by screen resolution:
+  - Specific resolutions
+  - Screen size categories
+  
+  Example: `screen equals 1920x1080` for Full HD displays
+</Accordion>
+
+### Geographic Filters
+
+<Accordion title="Country">
+  Filter by country:
+  - Country codes (US, UK, CA, etc.)
+  - Multiple countries
+  
+  Example: `country equals US` for United States visitors
+</Accordion>
+
+<Accordion title="Region">
+  Filter by state/province:
+  - Specific regions within countries
+  - Regional targeting
+  
+  Example: `region equals California` for California visitors
+</Accordion>
+
+<Accordion title="City">
+  Filter by city:
+  - Specific cities
+  - Urban vs suburban analysis
+  
+  Example: `city equals New York` for NYC visitors
+</Accordion>
+
+### Behavioral Filters
+
+<Accordion title="Event Name">
+  Filter by custom events:
+  - Specific event names
+  - Event categories
+  
+  Example: `event equals purchase` for users who made purchases
+</Accordion>
+
+<Accordion title="Event Properties">
+  Filter by event data:
+  - Custom properties attached to events
+  - Property values
+  
+  Example: `event_property plan equals premium` for premium subscribers
+</Accordion>
+
+## Filter Operators
+
+Choose how to match filter values:
+
+| Operator | Description | Example |
+|----------|-------------|----------|
+| **Equals** | Exact match | `country equals US` |
+| **Not equals** | Exclude exact match | `browser not equals Chrome` |
+| **Contains** | Partial match | `path contains /product/` |
+| **Does not contain** | Exclude partial match | `path does not contain /admin/` |
+| **Starts with** | Begins with value | `path starts with /blog/` |
+| **Ends with** | Ends with value | `path ends with .pdf` |
+
+<Tip>
+  Use "contains" operators for flexible matching when exact values may vary.
+</Tip>
+
+## Combining Filters
+
+### Multiple Filters (AND Logic)
+
+All filters must match:
+
+```text
+Segment: "US Mobile Users"
+  Filter 1: country equals US
+  Filter 2: device equals mobile
+  
+Result: Users from US AND using mobile devices
+```
+
+### Creating Multiple Segments (OR Logic)
+
+To achieve OR logic, create separate segments:
+
+```text
+Segment 1: "Mobile Users"
+  Filter: device equals mobile
+  
+Segment 2: "Tablet Users"
+  Filter: device equals tablet
+  
+Compare both segments to analyze mobile OR tablet users
+```
+
+## Using Segments
+
+Apply segments throughout your analytics:
+
+### In Dashboards
+
+<Steps>
+  <Step title="Open Dashboard">
+    Navigate to your website dashboard.
+  </Step>
+  
+  <Step title="Select Segment">
+    Choose a segment from the segment dropdown.
+  </Step>
+  
+  <Step title="View Filtered Data">
+    All dashboard panels update to show only the segment's data.
+  </Step>
+  
+  <Step title="Compare Segments">
+    Switch between segments to compare different audience groups.
+  </Step>
+</Steps>
+
+### In Reports
+
+Apply segments to reports:
+- Filter funnel reports by segment
+- Analyze retention by segment
+- Compare goal completion rates
+- Segment revenue analysis
+
+<Info>
+  Segments can be applied to any report type for focused analysis.
+</Info>
+
+### In Real-time View
+
+See segment activity in real-time:
+- Monitor specific audience groups live
+- Track campaign traffic as it arrives
+- Watch geographic regions separately
+
+## Managing Segments
+
+### Editing Segments
+
+<Steps>
+  <Step title="Find Segment">
+    Go to the Segments page and locate your segment.
+  </Step>
+  
+  <Step title="Click Edit">
+    Click the edit icon next to the segment name.
+  </Step>
+  
+  <Step title="Modify Filters">
+    Update the segment name or filter criteria.
+  </Step>
+  
+  <Step title="Save Changes">
+    Save to update the segment definition.
+  </Step>
+</Steps>
+
+### Deleting Segments
+
+<Warning>
+  Deleting a segment removes the segment definition but does not affect your underlying analytics data.
+</Warning>
+
+<Steps>
+  <Step title="Open Segments">
+    Navigate to your segments list.
+  </Step>
+  
+  <Step title="Delete Segment">
+    Click the delete button next to the segment.
+  </Step>
+  
+  <Step title="Confirm Deletion">
+    Confirm to permanently remove the segment.
+  </Step>
+</Steps>
+
+## Segment Examples
+
+### Marketing Segments
+
+<CardGroup cols={2}>
+  <Card title="Paid Search Traffic">
+    **Filters:**
+    - utm_medium equals cpc
+    - utm_source equals google
+  </Card>
+  
+  <Card title="Email Campaign Visitors">
+    **Filters:**
+    - utm_medium equals email
+    - utm_campaign contains newsletter
+  </Card>
+  
+  <Card title="Social Media Traffic">
+    **Filters:**
+    - referrer contains facebook.com
+    OR create separate segments for each platform
+  </Card>
+  
+  <Card title="Organic Search">
+    **Filters:**
+    - referrer contains google.com
+    - utm_medium not equals cpc
+  </Card>
+</CardGroup>
+
+### Behavioral Segments
+
+<CardGroup cols={2}>
+  <Card title="Product Page Visitors">
+    **Filters:**
+    - path starts with /products/
+  </Card>
+  
+  <Card title="Content Downloaders">
+    **Filters:**
+    - event equals download
+  </Card>
+  
+  <Card title="Video Watchers">
+    **Filters:**
+    - event equals video_play
+  </Card>
+  
+  <Card title="Form Submitters">
+    **Filters:**
+    - event equals form_submit
+  </Card>
+</CardGroup>
+
+### Technical Segments
+
+<CardGroup cols={2}>
+  <Card title="Mobile Safari Users">
+    **Filters:**
+    - device equals mobile
+    - browser equals Safari
+  </Card>
+  
+  <Card title="Windows Desktop Users">
+    **Filters:**
+    - os equals Windows
+    - device equals desktop
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+### Segment Naming
+
+- Use clear, descriptive names
+- Include key filter criteria in the name
+- Use consistent naming conventions
+- Avoid overly generic names
+
+<Tip>
+  Good names: "US Mobile Users", "Blog Visitors from Twitter"
+  
+  Poor names: "Segment 1", "Test", "Users"
+</Tip>
+
+### Segment Strategy
+
+- Create segments for your key audience groups
+- Start with broad segments, then create sub-segments
+- Don't create too many similar segments
+- Review and archive unused segments regularly
+- Document segment purposes and use cases
+- Share important segments with team members
+
+### Analysis Tips
+
+- Compare segment performance regularly
+- Look for significant differences between segments
+- Use segments to validate hypotheses
+- Combine segments with date ranges for trend analysis
+- Apply segments to different report types
+
+## Segments vs Filters
+
+<Info>
+  **Segments** are saved filter combinations that can be reused across your analytics.
+  
+  **Filters** are temporary criteria applied ad-hoc to dashboards and reports.
+</Info>
+
+| Feature | Segments | Filters |
+|---------|----------|----------|
+| **Saved** | Yes | No |
+| **Reusable** | Yes | No |
+| **Shareable** | Yes | No |
+| **Named** | Yes | No |
+| **Quick Analysis** | No | Yes |
+
+**When to use Segments:**
+- Analyzing recurring audience groups
+- Sharing analysis with team members
+- Consistent comparison over time
+- Important business segments
+
+**When to use Filters:**
+- One-time analysis
+- Quick exploration
+- Testing filter combinations
+- Ad-hoc questions
+
+## Troubleshooting
+
+<Accordion title="Segment shows no data">
+  **Possible causes:**
+  - Filter criteria too restrictive
+  - No matching visitors in date range
+  - Incorrect filter syntax
+  
+  **Solutions:**
+  - Broaden filter criteria
+  - Extend date range
+  - Check filter values against dashboard data
+  - Remove filters one by one to identify issues
+</Accordion>
+
+<Accordion title="Segment includes unexpected data">
+  **Possible causes:**
+  - Filter operator incorrect (e.g., contains vs equals)
+  - Case sensitivity issues
+  - URL pattern matching too broad
+  
+  **Solutions:**
+  - Review each filter carefully
+  - Use more specific operators
+  - Test with sample data first
+  - Add additional filters to narrow results
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Filters" href="/features/filters">
+    Learn more about filtering analytics data
+  </Card>
+  
+  <Card title="Reports" href="/features/reports">
+    Apply segments to custom reports
+  </Card>
+  
+  <Card title="Dashboards" href="/features/dashboards">
+    Use segments in your dashboard analysis
+  </Card>
+  
+  <Card title="Event Tracking" href="/tracking/events">
+    Track custom events for behavioral segments
+  </Card>
+</CardGroup>

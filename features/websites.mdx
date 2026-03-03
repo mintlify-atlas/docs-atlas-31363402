@@ -1,0 +1,170 @@
+---
+title: Websites
+description: Create and manage multiple websites to track analytics across all your properties
+---
+
+Websites are the core of Umami's analytics platform. Each website you add gets its own tracking code and dedicated dashboard where you can monitor visitor activity, engagement metrics, and user behavior.
+
+## Creating a Website
+
+Add a new website to start tracking analytics:
+
+<Steps>
+  <Step title="Navigate to Websites">
+    From the main navigation, click on **Websites** to view all your tracked websites.
+  </Step>
+  
+  <Step title="Add Website">
+    Click the **Add Website** button in the top right corner.
+  </Step>
+  
+  <Step title="Enter Details">
+    Provide the following information:
+    - **Name**: A descriptive name for your website (e.g., "Company Blog")
+    - **Domain**: Your website's domain (e.g., example.com)
+    
+    <Note>
+      The domain should match the format: `example.com` without `http://` or `https://`
+    </Note>
+  </Step>
+  
+  <Step title="Get Tracking Code">
+    After creation, go to the website settings to copy your unique tracking code.
+  </Step>
+</Steps>
+
+## Website Dashboard
+
+Each website has a comprehensive dashboard showing:
+
+<CardGroup cols={2}>
+  <Card title="Real-time Metrics" icon="chart-line">
+    Monitor live visitor activity with key metrics:
+    - Current visitors online
+    - Page views
+    - Unique visitors
+    - Bounce rate
+    - Average visit duration
+  </Card>
+  
+  <Card title="Traffic Sources" icon="globe">
+    Understand where your visitors come from:
+    - Referrer domains
+    - UTM campaign parameters
+    - Geographic locations
+    - Devices and browsers
+  </Card>
+  
+  <Card title="Content Performance" icon="file-text">
+    See which pages perform best:
+    - Most visited pages
+    - Entry and exit pages
+    - Page titles and URLs
+    - Custom events
+  </Card>
+  
+  <Card title="Historical Trends" icon="trending-up">
+    Analyze data over time:
+    - Customizable date ranges
+    - Time-based charts
+    - Comparison with previous periods
+    - Export data for analysis
+  </Card>
+</CardGroup>
+
+## Website Settings
+
+Manage your website configuration and tracking:
+
+### Basic Settings
+
+Update your website information:
+- **Name**: Change the display name
+- **Domain**: Update the tracked domain
+
+### Tracking Code
+
+Get your tracking script to install on your website:
+
+```html
+<script defer src="https://analytics.example.com/script.js" data-website-id="your-website-id"></script>
+```
+
+<Tip>
+  Place the tracking code in the `<head>` section of your website for optimal tracking.
+</Tip>
+
+### Share URL
+
+Generate a public link to share your analytics dashboard with others. See [Share URLs](/features/share-urls) for more details.
+
+### Data Management
+
+<Accordion title="Reset Statistics">
+  Clear all analytics data for this website while keeping the website configuration. This action cannot be undone.
+</Accordion>
+
+<Accordion title="Delete Website">
+  Permanently remove the website and all associated data. This action cannot be undone.
+</Accordion>
+
+## Team Websites
+
+Websites can be owned by individual users or by teams:
+
+- **Personal websites**: Created under your account
+- **Team websites**: Shared with team members based on their roles
+
+<Info>
+  To create a team website, select a team when adding a new website. All team members will have access based on their role permissions.
+</Info>
+
+## Website Transfer
+
+Transfer website ownership between users or to a team:
+
+<Steps>
+  <Step title="Open Settings">
+    Navigate to the website settings page.
+  </Step>
+  
+  <Step title="Transfer Ownership">
+    Select the transfer option and choose the new owner (user or team).
+  </Step>
+  
+  <Step title="Confirm Transfer">
+    Confirm the transfer to complete the process.
+  </Step>
+</Steps>
+
+<Warning>
+  Once transferred, you may lose access to the website unless you're added back as a team member.
+</Warning>
+
+## Best Practices
+
+- Use clear, descriptive names for easy identification
+- Keep domains accurate for proper tracking
+- Regularly review your website list and archive unused sites
+- Use teams for shared websites to enable collaboration
+- Generate share URLs for stakeholders who don't need full access
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Set Up Tracking" href="/tracking/script">
+    Install the tracking code on your website
+  </Card>
+  
+  <Card title="View Real-time Data" href="/features/realtime">
+    Monitor live visitor activity
+  </Card>
+  
+  <Card title="Create Reports" href="/features/reports">
+    Build custom analytics reports
+  </Card>
+  
+  <Card title="Share Analytics" href="/features/share-urls">
+    Generate public dashboard links
+  </Card>
+</CardGroup>

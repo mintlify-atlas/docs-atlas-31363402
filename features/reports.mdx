@@ -1,0 +1,441 @@
+---
+title: Reports
+description: Create custom analytics reports for deep insights into user behavior and website performance
+---
+
+Reports provide advanced analytics capabilities beyond the standard dashboard. Create custom reports to analyze user journeys, measure conversions, understand retention, and track revenue.
+
+## Report Types
+
+Umami offers several specialized report types, each designed for specific analytics needs:
+
+<CardGroup cols={2}>
+  <Card title="Insights" icon="lightbulb" href="#insights-reports">
+    Analyze metrics by custom dimensions and breakdowns
+  </Card>
+  
+  <Card title="Funnel" icon="filter" href="#funnel-reports">
+    Track user progression through multi-step processes
+  </Card>
+  
+  <Card title="Retention" icon="users" href="#retention-reports">
+    Measure how often users return to your site
+  </Card>
+  
+  <Card title="Journey" icon="map" href="#journey-reports">
+    Visualize user paths through your website
+  </Card>
+</CardGroup>
+
+<CardGroup cols={2}>
+  <Card title="Goal" icon="target" href="#goal-reports">
+    Track conversion goals and completion rates
+  </Card>
+  
+  <Card title="Revenue" icon="dollar-sign" href="#revenue-reports">
+    Monitor revenue and e-commerce performance
+  </Card>
+  
+  <Card title="UTM" icon="tag" href="#utm-reports">
+    Analyze marketing campaign effectiveness
+  </Card>
+</CardGroup>
+
+## Creating Reports
+
+General steps for creating any report:
+
+<Steps>
+  <Step title="Navigate to Reports">
+    Select your website and click on the appropriate report section (Goals, Funnels, etc.).
+  </Step>
+  
+  <Step title="Click Add Report">
+    Click the **Add** button to create a new report.
+  </Step>
+  
+  <Step title="Configure Report">
+    Set up your report parameters (varies by report type).
+  </Step>
+  
+  <Step title="Save and View">
+    Save the report to start collecting data.
+  </Step>
+</Steps>
+
+<Info>
+  Reports are saved to your website and can be accessed anytime from the reports navigation.
+</Info>
+
+## Insights Reports
+
+Analyze your data by custom dimensions and metrics:
+
+### Breakdown Reports
+
+Break down your analytics by any field:
+
+- **URL paths**: See which pages get the most traffic
+- **Referrers**: Understand your traffic sources
+- **Browsers**: Know what browsers your users prefer
+- **Operating Systems**: See OS distribution
+- **Devices**: Desktop vs mobile vs tablet
+- **Countries**: Geographic distribution
+- **Events**: Custom event analysis
+- **Event Properties**: Analyze event data fields
+
+<Accordion title="Creating a Breakdown Report">
+  <Steps>
+    <Step title="Select Field">
+      Choose the dimension to analyze (e.g., URL, Browser, Country).
+    </Step>
+    
+    <Step title="Apply Filters">
+      Optionally filter data to specific criteria.
+    </Step>
+    
+    <Step title="Choose Date Range">
+      Select the time period to analyze.
+    </Step>
+    
+    <Step title="View Results">
+      See a ranked list with counts and percentages.
+    </Step>
+  </Steps>
+</Accordion>
+
+## Funnel Reports
+
+Track user progression through multi-step processes:
+
+### What is a Funnel?
+
+A funnel represents a sequence of steps users take toward a goal:
+
+```text
+Step 1: Visit landing page     →  1,000 visitors (100%)
+Step 2: View product page       →    600 visitors (60%)
+Step 3: Add to cart            →    200 visitors (20%)
+Step 4: Complete checkout      →    100 visitors (10%)
+```
+
+### Creating a Funnel
+
+<Steps>
+  <Step title="Name Your Funnel">
+    Give your funnel a descriptive name (e.g., "Purchase Funnel").
+  </Step>
+  
+  <Step title="Set Time Window">
+    Define how long users have to complete the funnel (in minutes).
+    
+    <Tip>
+      Typical values: 30 minutes for e-commerce, 60 minutes for complex flows.
+    </Tip>
+  </Step>
+  
+  <Step title="Add Steps">
+    Define each step in your funnel:
+    - **Type**: Choose action type (page view, event, etc.)
+    - **Value**: Specify the URL or event name
+    - **Order**: Arrange steps in sequence
+    
+    <Note>
+      Minimum 2 steps required, maximum 8 steps supported.
+    </Note>
+  </Step>
+  
+  <Step title="Save Funnel">
+    Save and view conversion rates between steps.
+  </Step>
+</Steps>
+
+### Funnel Analysis
+
+Understand drop-off points:
+- **Conversion Rate**: Percentage completing each step
+- **Drop-off Rate**: Percentage leaving at each step
+- **Total Conversions**: Number reaching the end
+- **Step Duration**: Time between steps
+
+<Warning>
+  Funnels only track forward progression. Users who skip steps or go backward are not counted.
+</Warning>
+
+## Retention Reports
+
+Measure how often users return to your website:
+
+### Understanding Retention
+
+Retention shows the percentage of users who return after their first visit:
+
+| Cohort | Day 1 | Day 2 | Day 3 | Day 7 | Day 14 |
+|--------|-------|-------|-------|-------|--------|
+| Jan 1  | 100%  | 45%   | 30%   | 20%   | 15%    |
+| Jan 2  | 100%  | 50%   | 35%   | 22%   | 16%    |
+| Jan 3  | 100%  | 48%   | 32%   | 21%   | -      |
+
+### Retention Metrics
+
+- **Cohort Date**: First visit date
+- **Initial Users**: Users in cohort
+- **Day N**: Percentage returning on day N
+- **Retention Curve**: Visualization of retention over time
+
+<Accordion title="Interpreting Retention Data">
+  **Good Retention:**
+  - Gradual decline
+  - Flattening curve
+  - Higher long-term retention
+  
+  **Poor Retention:**
+  - Sharp drop-off
+  - Low Day 7 retention
+  - Continuous decline
+  
+  <Tip>
+    Different industries have different retention benchmarks. Compare to your historical data.
+  </Tip>
+</Accordion>
+
+## Journey Reports
+
+Visualize the paths users take through your website:
+
+### Journey Visualization
+
+See the flow of visitors between pages:
+
+```text
+Home Page (1000)
+  ├─→ Products (400)
+  │   ├─→ Product A (150)
+  │   └─→ Product B (250)
+  ├─→ About (300)
+  └─→ Blog (300)
+      └─→ Blog Post (200)
+```
+
+### Journey Insights
+
+- **Popular Paths**: Most common navigation routes
+- **Entry Points**: Where journeys begin
+- **Exit Points**: Where users leave
+- **Path Length**: Average pages per journey
+
+<Info>
+  Journey reports help identify navigation issues and optimize user flow.
+</Info>
+
+## Goal Reports
+
+Track specific conversion goals:
+
+### Setting Up Goals
+
+<Steps>
+  <Step title="Define Goal">
+    Name your goal (e.g., "Newsletter Signup", "Download PDF").
+  </Step>
+  
+  <Step title="Choose Action Type">
+    Select what triggers the goal:
+    - **Page View**: Visiting a specific page
+    - **Event**: Triggering a custom event
+    - **URL Pattern**: Matching URL patterns
+  </Step>
+  
+  <Step title="Set Value">
+    Specify the page URL or event name.
+  </Step>
+  
+  <Step title="Save Goal">
+    Start tracking goal completions.
+  </Step>
+</Steps>
+
+### Goal Metrics
+
+<CardGroup cols={2}>
+  <Card title="Completions" icon="check-circle">
+    Total number of goal completions
+  </Card>
+  
+  <Card title="Conversion Rate" icon="percent">
+    Percentage of visitors who complete the goal
+  </Card>
+  
+  <Card title="Unique Completions" icon="user-check">
+    Number of unique users completing the goal
+  </Card>
+  
+  <Card title="Trend" icon="trending-up">
+    Goal performance over time
+  </Card>
+</CardGroup>
+
+### Common Goal Examples
+
+- Newsletter signups
+- Account registrations
+- File downloads
+- Video completions
+- Form submissions
+- Add to cart actions
+- Purchase completions
+
+## Revenue Reports
+
+Track monetary value and e-commerce performance:
+
+### Revenue Tracking Setup
+
+<Note>
+  Revenue tracking requires implementing revenue events in your tracking code. See [Revenue Tracking](/features/revenue-tracking) for setup instructions.
+</Note>
+
+### Revenue Metrics
+
+- **Total Revenue**: Sum of all revenue events
+- **Transactions**: Number of revenue events
+- **Average Order Value**: Revenue per transaction
+- **Revenue by Source**: Attribution by traffic source
+- **Revenue by Page**: Which pages drive revenue
+- **Top Products**: Most valuable items
+
+### Revenue Report Features
+
+<CardGroup cols={2}>
+  <Card title="Currency Support">
+    Track multiple currencies with automatic handling
+  </Card>
+  
+  <Card title="Time-based Analysis">
+    See revenue trends over time
+  </Card>
+  
+  <Card title="Event Properties">
+    Analyze custom revenue attributes
+  </Card>
+  
+  <Card title="Filtering">
+    Segment revenue by any dimension
+  </Card>
+</CardGroup>
+
+## UTM Reports
+
+Analyze marketing campaign performance:
+
+### UTM Parameters
+
+Track five standard UTM parameters:
+
+- **utm_source**: Traffic source (e.g., google, newsletter, facebook)
+- **utm_medium**: Marketing medium (e.g., cpc, email, social)
+- **utm_campaign**: Campaign name (e.g., summer_sale, product_launch)
+- **utm_content**: Ad variation (e.g., banner_a, text_link)
+- **utm_term**: Paid keywords (for search campaigns)
+
+### Campaign Analysis
+
+<Accordion title="By Source">
+  Compare performance across traffic sources:
+  - Which sources drive the most traffic?
+  - Conversion rates by source
+  - Revenue by source (if tracking revenue)
+</Accordion>
+
+<Accordion title="By Medium">
+  Understand which mediums work best:
+  - Email vs Social vs Paid
+  - Medium-specific metrics
+  - Cost-effectiveness analysis
+</Accordion>
+
+<Accordion title="By Campaign">
+  Track individual campaign performance:
+  - Campaign visitors and conversions
+  - Campaign ROI
+  - Time-based campaign trends
+</Accordion>
+
+<Tip>
+  Use UTM parameters consistently across all marketing efforts for accurate tracking.
+</Tip>
+
+## Managing Reports
+
+### Report List
+
+All saved reports appear in their respective sections:
+- Sort by name or date created
+- Quick access to recent reports
+- Edit or delete existing reports
+
+### Editing Reports
+
+<Steps>
+  <Step title="Find Report">
+    Locate the report in your report list.
+  </Step>
+  
+  <Step title="Click Edit">
+    Click the edit icon next to the report name.
+  </Step>
+  
+  <Step title="Update Settings">
+    Modify report parameters as needed.
+  </Step>
+  
+  <Step title="Save Changes">
+    Save to update the report.
+  </Step>
+</Steps>
+
+### Deleting Reports
+
+<Warning>
+  Deleting a report cannot be undone. The report configuration is removed, but underlying analytics data is preserved.
+</Warning>
+
+## Best Practices
+
+- Name reports clearly and consistently
+- Create reports for your key business metrics
+- Review reports regularly to identify trends
+- Use filters to segment report data
+- Combine different report types for complete analysis
+- Document your report configurations
+- Share important reports with team members
+
+## Report Limitations
+
+<Info>
+  **Funnel Reports**: Maximum 8 steps per funnel
+  
+  **Retention Reports**: Requires sufficient historical data (minimum 30 days recommended)
+  
+  **Journey Reports**: Shows top paths only for performance reasons
+</Info>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Revenue Tracking" href="/features/revenue-tracking">
+    Set up e-commerce revenue tracking
+  </Card>
+  
+  <Card title="Segments" href="/features/segments">
+    Create user segments for targeted analysis
+  </Card>
+  
+  <Card title="Filters" href="/features/filters">
+    Apply advanced filters to reports
+  </Card>
+  
+  <Card title="Event Tracking" href="/tracking/events">
+    Implement custom events for goals and funnels
+  </Card>
+</CardGroup>

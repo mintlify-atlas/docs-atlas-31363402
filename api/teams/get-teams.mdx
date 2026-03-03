@@ -1,0 +1,132 @@
+---
+title: 'Get Teams'
+description: 'Retrieve teams the authenticated user belongs to'
+---
+
+## Get Teams
+
+Retrieve a list of all teams that the authenticated user is a member of.
+
+### Endpoint
+
+```
+GET /api/teams
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="page" type="number">
+  Page number for pagination (default: 1)
+</ParamField>
+
+<ParamField query="pageSize" type="number">
+  Number of results per page
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of team objects
+  
+  <Expandable title="team object">
+    <ResponseField name="id" type="string">
+      Team UUID
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      Team name (max 50 characters)
+    </ResponseField>
+    
+    <ResponseField name="accessCode" type="string">
+      Unique access code for joining the team
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of creation
+    </ResponseField>
+    
+    <ResponseField name="updatedAt" type="string">
+      ISO 8601 timestamp of last update
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="count" type="number">
+  Total number of teams
+</ResponseField>
+
+<ResponseField name="page" type="number">
+  Current page number
+</ResponseField>
+
+<ResponseField name="pageSize" type="number">
+  Results per page
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl https://your-umami-instance.com/api/teams \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://your-umami-instance.com/api/teams', {
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN',
+  },
+});
+
+const teams = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://your-umami-instance.com/api/teams',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+teams = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "660e8400-e29b-41d4-a716-446655440001",
+      "name": "Engineering",
+      "accessCode": "team_abc123def456789",
+      "createdAt": "2024-01-10T08:00:00.000Z",
+      "updatedAt": "2024-02-15T10:30:00.000Z"
+    },
+    {
+      "id": "770e8400-e29b-41d4-a716-446655440002",
+      "name": "Marketing",
+      "accessCode": "team_xyz789ghi012345",
+      "createdAt": "2024-02-01T12:00:00.000Z",
+      "updatedAt": "2024-02-01T12:00:00.000Z"
+    }
+  ],
+  "count": 2,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+<Note>
+  Only teams where you are a member will be returned. The response includes teams where you have any role (member, manager, or owner).
+</Note>
