@@ -1,0 +1,257 @@
+{
+  "projectType": "saas",
+  "projectName": "Umami",
+  "projectDescription": "A modern, privacy-focused web analytics platform and open-source alternative to Google Analytics.",
+  "theme": "mint",
+  "primaryColor": "#5B4FF6",
+  "lightColor": "#8B7FF8",
+  "darkColor": "#4A3FD5",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Get Started",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["introduction", "quickstart", "features"]
+          },
+          {
+            "group": "Installation",
+            "pages": [
+              "installation/docker",
+              "installation/source",
+              "installation/railway",
+              "installation/vercel"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/environment-variables",
+              "configuration/database-setup",
+              "configuration/running"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Tracking",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["tracking/overview", "tracking/script-installation"]
+          },
+          {
+            "group": "Event Tracking",
+            "pages": [
+              "tracking/events",
+              "tracking/custom-events",
+              "tracking/event-data"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "tracking/tracker-config",
+              "tracking/tracker-functions",
+              "tracking/identify"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Features",
+        "groups": [
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/websites",
+              "features/teams",
+              "features/realtime",
+              "features/dashboards"
+            ]
+          },
+          {
+            "group": "Analytics",
+            "pages": [
+              "features/reports",
+              "features/segments",
+              "features/filters"
+            ]
+          },
+          {
+            "group": "Additional Features",
+            "pages": [
+              "features/revenue-tracking",
+              "features/share-urls",
+              "features/links",
+              "features/pixels"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reports",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["reports/overview"]
+          },
+          {
+            "group": "Report Types",
+            "pages": [
+              "reports/breakdown",
+              "reports/funnel",
+              "reports/retention",
+              "reports/journey",
+              "reports/goal",
+              "reports/revenue",
+              "reports/attribution",
+              "reports/utm"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["api/overview", "api/authentication"]
+          },
+          {
+            "group": "Websites",
+            "pages": [
+              "api/websites/get-websites",
+              "api/websites/create-website",
+              "api/websites/get-website",
+              "api/websites/update-website",
+              "api/websites/delete-website",
+              "api/websites/reset-website"
+            ]
+          },
+          {
+            "group": "Teams",
+            "pages": [
+              "api/teams/get-teams",
+              "api/teams/create-team",
+              "api/teams/get-team",
+              "api/teams/update-team",
+              "api/teams/delete-team",
+              "api/teams/get-team-members",
+              "api/teams/add-team-member",
+              "api/teams/update-team-member",
+              "api/teams/remove-team-member"
+            ]
+          },
+          {
+            "group": "Reports",
+            "pages": [
+              "api/reports/get-reports",
+              "api/reports/create-report",
+              "api/reports/get-report",
+              "api/reports/update-report",
+              "api/reports/delete-report"
+            ]
+          },
+          {
+            "group": "Events",
+            "pages": [
+              "api/events/send-event",
+              "api/events/get-events",
+              "api/events/event-data"
+            ]
+          },
+          {
+            "group": "Realtime",
+            "pages": ["api/realtime/get-realtime"]
+          },
+          {
+            "group": "Users",
+            "pages": [
+              "api/users/get-current-user",
+              "api/users/update-password"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Self-Hosting",
+        "groups": [
+          {
+            "group": "Deployment",
+            "pages": [
+              "self-hosting/getting-started",
+              "self-hosting/docker-deployment",
+              "self-hosting/kubernetes"
+            ]
+          },
+          {
+            "group": "Database",
+            "pages": [
+              "self-hosting/postgresql",
+              "self-hosting/clickhouse",
+              "self-hosting/migrations"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "self-hosting/environment-variables",
+              "self-hosting/upgrading",
+              "self-hosting/troubleshooting"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Privacy-focused web analytics",
+    "Event tracking with custom properties",
+    "Multiple report types (funnel, retention, journey, revenue, attribution, UTM)",
+    "Real-time visitor tracking",
+    "Team collaboration with role-based access",
+    "Self-hosted or cloud deployment",
+    "PostgreSQL and ClickHouse support",
+    "Share URLs and embedded reports",
+    "Revenue tracking and e-commerce analytics",
+    "Link shortening and pixel tracking"
+  ],
+  "publicApiSurface": [
+    "window.umami.track()",
+    "window.umami.identify()",
+    "GET /api/websites",
+    "POST /api/websites",
+    "GET /api/websites/{websiteId}",
+    "PUT /api/websites/{websiteId}",
+    "DELETE /api/websites/{websiteId}",
+    "POST /api/websites/{websiteId}/reset",
+    "GET /api/teams",
+    "POST /api/teams",
+    "GET /api/teams/{teamId}",
+    "PUT /api/teams/{teamId}",
+    "DELETE /api/teams/{teamId}",
+    "GET /api/teams/{teamId}/users",
+    "POST /api/teams/{teamId}/users",
+    "PUT /api/teams/{teamId}/users/{userId}",
+    "DELETE /api/teams/{teamId}/users/{userId}",
+    "GET /api/reports",
+    "POST /api/reports",
+    "GET /api/reports/{reportId}",
+    "PUT /api/reports/{reportId}",
+    "DELETE /api/reports/{reportId}",
+    "POST /api/reports/breakdown",
+    "POST /api/reports/funnel",
+    "POST /api/reports/retention",
+    "POST /api/reports/journey",
+    "POST /api/reports/goal",
+    "POST /api/reports/revenue",
+    "POST /api/reports/attribution",
+    "POST /api/reports/utm",
+    "POST /api/send",
+    "GET /api/realtime/{websiteId}",
+    "GET /api/me",
+    "POST /api/me/password"
+  ]
+}
