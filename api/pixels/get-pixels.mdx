@@ -1,0 +1,152 @@
+---
+title: 'Get Pixels'
+description: 'Retrieve a list of tracking pixels for the authenticated user'
+---
+
+## Get Pixels
+
+Retrieve all tracking pixels that the authenticated user has created or has access to through teams.
+
+### Endpoint
+
+```
+GET /api/pixels
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="page" type="number">
+  Page number for pagination (default: 1)
+</ParamField>
+
+<ParamField query="pageSize" type="number">
+  Number of results per page
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search term to filter pixels by name
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of pixel objects
+  
+  <Expandable title="pixel object">
+    <ResponseField name="id" type="string">
+      Pixel UUID
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      Pixel name (max 100 characters)
+    </ResponseField>
+    
+    <ResponseField name="slug" type="string">
+      Unique pixel slug (max 100 characters)
+    </ResponseField>
+    
+    <ResponseField name="userId" type="string">
+      Owner user UUID (for personal pixels)
+    </ResponseField>
+    
+    <ResponseField name="teamId" type="string">
+      Team UUID (for team pixels)
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of creation
+    </ResponseField>
+    
+    <ResponseField name="updatedAt" type="string">
+      ISO 8601 timestamp of last update
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="count" type="number">
+  Total number of pixels
+</ResponseField>
+
+<ResponseField name="page" type="number">
+  Current page number
+</ResponseField>
+
+<ResponseField name="pageSize" type="number">
+  Results per page
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl "https://your-umami-instance.com/api/pixels?page=1&pageSize=20" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://your-umami-instance.com/api/pixels?page=1&pageSize=20',
+  {
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+    },
+  }
+);
+
+const pixels = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://your-umami-instance.com/api/pixels',
+    params={'page': 1, 'pageSize': 20},
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+pixels = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Email Campaign Tracker",
+      "slug": "email-campaign",
+      "userId": "660e8400-e29b-41d4-a716-446655440001",
+      "teamId": null,
+      "createdAt": "2024-01-15T10:30:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z"
+    },
+    {
+      "id": "770e8400-e29b-41d4-a716-446655440002",
+      "name": "Newsletter Tracker",
+      "slug": "newsletter",
+      "userId": null,
+      "teamId": "880e8400-e29b-41d4-a716-446655440003",
+      "createdAt": "2024-02-20T14:45:00.000Z",
+      "updatedAt": "2024-02-20T14:45:00.000Z"
+    }
+  ],
+  "count": 2,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+<Note>
+  Tracking pixels are 1x1 transparent images used to track email opens, page views, and other events where JavaScript tracking isn't available.
+</Note>

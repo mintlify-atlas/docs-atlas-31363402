@@ -1,0 +1,149 @@
+---
+title: 'Get Segments'
+description: 'Retrieve segments for a website'
+---
+
+## Get Segments
+
+Retrieve a list of segments (saved audience groups) or cohorts (time-based user groups) for a specific website.
+
+### Endpoint
+
+```
+GET /api/websites/{websiteId}/segments
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="websiteId" type="string" required>
+  Website UUID
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="type" type="string">
+  Segment type: `segment` or `cohort`
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search term to filter segments by name
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of segment objects
+  
+  <Expandable title="segment object">
+    <ResponseField name="id" type="string">
+      Segment UUID
+    </ResponseField>
+    
+    <ResponseField name="websiteId" type="string">
+      Website UUID this segment belongs to
+    </ResponseField>
+    
+    <ResponseField name="type" type="string">
+      Segment type: `segment` or `cohort`
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      Segment name (max 200 characters)
+    </ResponseField>
+    
+    <ResponseField name="parameters" type="object">
+      Segment configuration parameters (structure varies by segment type)
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of creation
+    </ResponseField>
+    
+    <ResponseField name="updatedAt" type="string">
+      ISO 8601 timestamp of last update
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl "https://your-umami-instance.com/api/websites/550e8400-e29b-41d4-a716-446655440000/segments?type=segment" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const websiteId = '550e8400-e29b-41d4-a716-446655440000';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/websites/${websiteId}/segments?type=segment`,
+  {
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+    },
+  }
+);
+
+const segments = await response.json();
+```
+
+```python Python
+import requests
+
+website_id = '550e8400-e29b-41d4-a716-446655440000'
+
+response = requests.get(
+    f'https://your-umami-instance.com/api/websites/{website_id}/segments',
+    params={'type': 'segment'},
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+segments = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+[
+  {
+    "id": "770e8400-e29b-41d4-a716-446655440001",
+    "websiteId": "550e8400-e29b-41d4-a716-446655440000",
+    "type": "segment",
+    "name": "Mobile Users",
+    "parameters": {
+      "filters": {
+        "device": "mobile"
+      }
+    },
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "updatedAt": "2024-01-15T10:30:00.000Z"
+  },
+  {
+    "id": "880e8400-e29b-41d4-a716-446655440002",
+    "websiteId": "550e8400-e29b-41d4-a716-446655440000",
+    "type": "segment",
+    "name": "US Visitors",
+    "parameters": {
+      "filters": {
+        "country": "US"
+      }
+    },
+    "createdAt": "2024-02-20T14:45:00.000Z",
+    "updatedAt": "2024-02-20T14:45:00.000Z"
+  }
+]
+```
+
+<Note>
+  Segments allow you to save filter combinations for quick access. Cohorts are time-based groups that track user behavior over time.
+</Note>

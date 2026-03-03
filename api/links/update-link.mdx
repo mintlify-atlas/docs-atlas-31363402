@@ -1,0 +1,168 @@
+---
+title: 'Update Link'
+description: 'Update an existing short link'
+---
+
+## Update Link
+
+Update the properties of an existing short link.
+
+### Endpoint
+
+```
+PUT /api/links/{linkId}
+```
+
+<Note>
+  This endpoint uses the POST HTTP method in the actual implementation, but follows PUT semantics for updating resources.
+</Note>
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="linkId" type="string" required>
+  Link UUID
+</ParamField>
+
+### Request Body
+
+<ParamField body="name" type="string">
+  Link name (max 100 characters)
+</ParamField>
+
+<ParamField body="url" type="string">
+  Destination URL (max 500 characters)
+</ParamField>
+
+<ParamField body="slug" type="string">
+  URL slug (min 8 characters, max 100 characters). Must be unique.
+</ParamField>
+
+<Note>
+  All fields are optional. Only provide the fields you want to update.
+</Note>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Link UUID
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Updated link name
+</ResponseField>
+
+<ResponseField name="url" type="string">
+  Updated destination URL
+</ResponseField>
+
+<ResponseField name="slug" type="string">
+  Updated URL slug
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  Owner user UUID
+</ResponseField>
+
+<ResponseField name="teamId" type="string">
+  Team UUID
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 timestamp of last update
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X POST "https://your-umami-instance.com/api/links/550e8400-e29b-41d4-a716-446655440000" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Product Launch",
+    "url": "https://example.com/new-product-launch"
+  }'
+```
+
+```javascript JavaScript
+const linkId = '550e8400-e29b-41d4-a716-446655440000';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/links/${linkId}`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: 'Updated Product Launch',
+      url: 'https://example.com/new-product-launch',
+    }),
+  }
+);
+
+const link = await response.json();
+```
+
+```python Python
+import requests
+
+link_id = '550e8400-e29b-41d4-a716-446655440000'
+
+response = requests.post(
+    f'https://your-umami-instance.com/api/links/{link_id}',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'},
+    json={
+        'name': 'Updated Product Launch',
+        'url': 'https://example.com/new-product-launch'
+    }
+)
+
+link = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Updated Product Launch",
+  "url": "https://example.com/new-product-launch",
+  "slug": "launch2024",
+  "userId": "660e8400-e29b-41d4-a716-446655440001",
+  "teamId": null,
+  "updatedAt": "2024-03-15T09:20:00.000Z"
+}
+```
+
+### Error Responses
+
+<ResponseField name="400" type="error">
+  Bad Request - The slug is already taken by another link
+</ResponseField>
+
+<ResponseField name="401" type="error">
+  Unauthorized - You don't have permission to update this link
+</ResponseField>
+
+<ResponseField name="404" type="error">
+  Not Found - Link does not exist
+</ResponseField>
+
+<Warning>
+  If you change the slug, the old short URL will no longer work. Make sure to update any references to the old URL.
+</Warning>
+
+<Note>
+  You must have update permissions for the link to modify it.
+</Note>

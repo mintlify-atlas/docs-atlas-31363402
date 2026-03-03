@@ -1,0 +1,98 @@
+---
+title: 'Delete Pixel'
+description: 'Delete a tracking pixel'
+---
+
+## Delete Pixel
+
+Permanently delete a tracking pixel and its associated analytics data.
+
+### Endpoint
+
+```
+DELETE /api/pixels/{pixelId}
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="pixelId" type="string" required>
+  Pixel UUID
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Returns `true` if deletion was successful
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X DELETE "https://your-umami-instance.com/api/pixels/550e8400-e29b-41d4-a716-446655440000" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const pixelId = '550e8400-e29b-41d4-a716-446655440000';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/pixels/${pixelId}`,
+  {
+    method: 'DELETE',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+    },
+  }
+);
+
+const result = await response.json();
+```
+
+```python Python
+import requests
+
+pixel_id = '550e8400-e29b-41d4-a716-446655440000'
+
+response = requests.delete(
+    f'https://your-umami-instance.com/api/pixels/{pixel_id}',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "success": true
+}
+```
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  Unauthorized - You don't have permission to delete this pixel
+</ResponseField>
+
+<ResponseField name="404" type="error">
+  Not Found - Pixel does not exist
+</ResponseField>
+
+<Warning>
+  This action is permanent and cannot be undone. The pixel will stop tracking immediately, and all associated analytics data will be deleted.
+</Warning>
+
+<Note>
+  You must have delete permissions for the pixel to remove it.
+</Note>

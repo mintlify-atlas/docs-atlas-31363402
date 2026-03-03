@@ -1,0 +1,180 @@
+---
+title: 'Create Segment'
+description: 'Create a new segment for a website'
+---
+
+## Create Segment
+
+Create a new segment or cohort to save filter combinations and track specific audience groups.
+
+### Endpoint
+
+```
+POST /api/websites/{websiteId}/segments
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="websiteId" type="string" required>
+  Website UUID
+</ParamField>
+
+### Request Body
+
+<ParamField body="type" type="string" required>
+  Segment type: `segment` or `cohort`
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Segment name (max 200 characters)
+</ParamField>
+
+<ParamField body="parameters" type="object" required>
+  Segment configuration parameters. Structure varies based on segment type and use case.
+  
+  <Expandable title="Example parameters">
+    For audience segments, you can include filter criteria:
+    ```json
+    {
+      "filters": {
+        "device": "mobile",
+        "country": "US"
+      }
+    }
+    ```
+    
+    For cohorts, you can include time-based grouping:
+    ```json
+    {
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+    ```
+  </Expandable>
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Segment UUID
+</ResponseField>
+
+<ResponseField name="websiteId" type="string">
+  Website UUID
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Segment type
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Segment name
+</ResponseField>
+
+<ResponseField name="parameters" type="object">
+  Segment configuration parameters
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 timestamp of creation
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X POST "https://your-umami-instance.com/api/websites/550e8400-e29b-41d4-a716-446655440000/segments" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "segment",
+    "name": "Mobile Users from US",
+    "parameters": {
+      "filters": {
+        "device": "mobile",
+        "country": "US"
+      }
+    }
+  }'
+```
+
+```javascript JavaScript
+const websiteId = '550e8400-e29b-41d4-a716-446655440000';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/websites/${websiteId}/segments`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      type: 'segment',
+      name: 'Mobile Users from US',
+      parameters: {
+        filters: {
+          device: 'mobile',
+          country: 'US'
+        }
+      }
+    }),
+  }
+);
+
+const segment = await response.json();
+```
+
+```python Python
+import requests
+
+website_id = '550e8400-e29b-41d4-a716-446655440000'
+
+response = requests.post(
+    f'https://your-umami-instance.com/api/websites/{website_id}/segments',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'},
+    json={
+        'type': 'segment',
+        'name': 'Mobile Users from US',
+        'parameters': {
+            'filters': {
+                'device': 'mobile',
+                'country': 'US'
+            }
+        }
+    }
+)
+
+segment = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "id": "770e8400-e29b-41d4-a716-446655440001",
+  "websiteId": "550e8400-e29b-41d4-a716-446655440000",
+  "type": "segment",
+  "name": "Mobile Users from US",
+  "parameters": {
+    "filters": {
+      "device": "mobile",
+      "country": "US"
+    }
+  },
+  "createdAt": "2024-03-15T09:20:00.000Z"
+}
+```
+
+<Note>
+  You must have update permissions for the website to create segments. The parameters object structure is flexible and can contain any valid JSON.
+</Note>

@@ -13,7 +13,7 @@ Authenticate with your username and password to obtain an access token.
 
 ### Endpoint
 
-```
+```http
 POST /api/auth/login
 ```
 
@@ -133,10 +133,12 @@ token = data['token']
 
 ## Verify Token
 
-Verify that your authentication token is valid and retrieve current user information.
+Verify if a token is still valid.
 
 ### Endpoint
 
+```http
+POST /api/auth/verify
 ```
 POST /api/auth/verify
 ```
@@ -189,7 +191,7 @@ Invalidate the current authentication token.
 
 ### Endpoint
 
-```
+```http
 POST /api/auth/logout
 ```
 

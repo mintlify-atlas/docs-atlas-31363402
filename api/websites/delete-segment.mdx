@@ -1,0 +1,104 @@
+---
+title: 'Delete Segment'
+description: 'Delete a segment from a website'
+---
+
+## Delete Segment
+
+Permanently delete a segment or cohort from a website.
+
+### Endpoint
+
+```
+DELETE /api/websites/{websiteId}/segments/{segmentId}
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="websiteId" type="string" required>
+  Website UUID
+</ParamField>
+
+<ParamField path="segmentId" type="string" required>
+  Segment UUID
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Returns `true` if deletion was successful
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl -X DELETE "https://your-umami-instance.com/api/websites/550e8400-e29b-41d4-a716-446655440000/segments/770e8400-e29b-41d4-a716-446655440001" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const websiteId = '550e8400-e29b-41d4-a716-446655440000';
+const segmentId = '770e8400-e29b-41d4-a716-446655440001';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/websites/${websiteId}/segments/${segmentId}`,
+  {
+    method: 'DELETE',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+    },
+  }
+);
+
+const result = await response.json();
+```
+
+```python Python
+import requests
+
+website_id = '550e8400-e29b-41d4-a716-446655440000'
+segment_id = '770e8400-e29b-41d4-a716-446655440001'
+
+response = requests.delete(
+    f'https://your-umami-instance.com/api/websites/{website_id}/segments/{segment_id}',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "success": true
+}
+```
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  Unauthorized - You don't have permission to delete this segment
+</ResponseField>
+
+<ResponseField name="404" type="error">
+  Not Found - Segment does not exist
+</ResponseField>
+
+<Warning>
+  This action is permanent and cannot be undone. Make sure you want to delete the segment before proceeding.
+</Warning>
+
+<Note>
+  You must have delete permissions for the website to remove its segments.
+</Note>

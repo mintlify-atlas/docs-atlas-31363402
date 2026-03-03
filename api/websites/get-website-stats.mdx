@@ -1,0 +1,293 @@
+---
+title: 'Get Website Stats'
+description: 'Retrieve analytics statistics for a website'
+---
+
+## Get Website Stats
+
+Retrieve comprehensive analytics statistics for a specific website, including page views, visitors, bounce rate, and visit duration. The endpoint also returns comparison data from the previous period.
+
+### Endpoint
+
+```
+GET /api/websites/{websiteId}/stats
+```
+
+### Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="websiteId" type="string" required>
+  Website UUID
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="startAt" type="number">
+  Start timestamp in milliseconds (Unix epoch)
+</ParamField>
+
+<ParamField query="endAt" type="number">
+  End timestamp in milliseconds (Unix epoch)
+</ParamField>
+
+<ParamField query="startDate" type="string">
+  Start date in ISO 8601 format
+</ParamField>
+
+<ParamField query="endDate" type="string">
+  End date in ISO 8601 format
+</ParamField>
+
+<ParamField query="timezone" type="string">
+  Valid IANA timezone (e.g., America/New_York)
+</ParamField>
+
+<ParamField query="unit" type="string">
+  Time unit for aggregation (hour, day, week, month, year)
+</ParamField>
+
+<ParamField query="compare" type="string">
+  Comparison period (prev, year)
+</ParamField>
+
+<ParamField query="path" type="string">
+  Filter by page path
+</ParamField>
+
+<ParamField query="referrer" type="string">
+  Filter by referrer URL
+</ParamField>
+
+<ParamField query="title" type="string">
+  Filter by page title
+</ParamField>
+
+<ParamField query="query" type="string">
+  Filter by query parameters
+</ParamField>
+
+<ParamField query="os" type="string">
+  Filter by operating system
+</ParamField>
+
+<ParamField query="browser" type="string">
+  Filter by browser
+</ParamField>
+
+<ParamField query="device" type="string">
+  Filter by device type
+</ParamField>
+
+<ParamField query="country" type="string">
+  Filter by country code (ISO 3166-1 alpha-2)
+</ParamField>
+
+<ParamField query="region" type="string">
+  Filter by region
+</ParamField>
+
+<ParamField query="city" type="string">
+  Filter by city
+</ParamField>
+
+<ParamField query="tag" type="string">
+  Filter by tag
+</ParamField>
+
+<ParamField query="hostname" type="string">
+  Filter by hostname
+</ParamField>
+
+<ParamField query="language" type="string">
+  Filter by language
+</ParamField>
+
+<ParamField query="event" type="string">
+  Filter by event name
+</ParamField>
+
+<ParamField query="segment" type="string">
+  Filter by segment UUID
+</ParamField>
+
+<ParamField query="cohort" type="string">
+  Filter by cohort UUID
+</ParamField>
+
+<ParamField query="eventType" type="number">
+  Filter by event type (positive integer)
+</ParamField>
+
+### Response
+
+<ResponseField name="pageviews" type="object">
+  Page views data
+  
+  <Expandable title="pageviews object">
+    <ResponseField name="value" type="number">
+      Total number of page views
+    </ResponseField>
+    
+    <ResponseField name="change" type="number">
+      Percentage change from comparison period
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="visitors" type="object">
+  Unique visitors data
+  
+  <Expandable title="visitors object">
+    <ResponseField name="value" type="number">
+      Total number of unique visitors
+    </ResponseField>
+    
+    <ResponseField name="change" type="number">
+      Percentage change from comparison period
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="visits" type="object">
+  Visits data
+  
+  <Expandable title="visits object">
+    <ResponseField name="value" type="number">
+      Total number of visits
+    </ResponseField>
+    
+    <ResponseField name="change" type="number">
+      Percentage change from comparison period
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="bounces" type="object">
+  Bounce rate data
+  
+  <Expandable title="bounces object">
+    <ResponseField name="value" type="number">
+      Bounce rate percentage
+    </ResponseField>
+    
+    <ResponseField name="change" type="number">
+      Percentage change from comparison period
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="totaltime" type="object">
+  Total time on site data
+  
+  <Expandable title="totaltime object">
+    <ResponseField name="value" type="number">
+      Average visit duration in milliseconds
+    </ResponseField>
+    
+    <ResponseField name="change" type="number">
+      Percentage change from comparison period
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="comparison" type="object">
+  Stats from the previous comparison period (same structure as main stats)
+</ResponseField>
+
+### Example Request
+
+<CodeGroup>
+
+```bash curl
+curl "https://your-umami-instance.com/api/websites/550e8400-e29b-41d4-a716-446655440000/stats?startDate=2024-01-01&endDate=2024-01-31&timezone=America/New_York" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const websiteId = '550e8400-e29b-41d4-a716-446655440000';
+
+const response = await fetch(
+  `https://your-umami-instance.com/api/websites/${websiteId}/stats?startDate=2024-01-01&endDate=2024-01-31&timezone=America/New_York`,
+  {
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+    },
+  }
+);
+
+const stats = await response.json();
+```
+
+```python Python
+import requests
+from datetime import datetime
+
+website_id = '550e8400-e29b-41d4-a716-446655440000'
+
+response = requests.get(
+    f'https://your-umami-instance.com/api/websites/{website_id}/stats',
+    params={
+        'startDate': '2024-01-01',
+        'endDate': '2024-01-31',
+        'timezone': 'America/New_York'
+    },
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+stats = response.json()
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "pageviews": {
+    "value": 15420,
+    "change": 12.5
+  },
+  "visitors": {
+    "value": 3240,
+    "change": 8.3
+  },
+  "visits": {
+    "value": 4850,
+    "change": 10.1
+  },
+  "bounces": {
+    "value": 42.5,
+    "change": -2.3
+  },
+  "totaltime": {
+    "value": 125000,
+    "change": 5.7
+  },
+  "comparison": {
+    "pageviews": {
+      "value": 13710
+    },
+    "visitors": {
+      "value": 2990
+    },
+    "visits": {
+      "value": 4405
+    },
+    "bounces": {
+      "value": 43.5
+    },
+    "totaltime": {
+      "value": 118250
+    }
+  }
+}
+```
+
+<Note>
+  The comparison period is automatically calculated based on the date range. For example, if you query a 7-day period, the comparison will be the previous 7 days.
+</Note>

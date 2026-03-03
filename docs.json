@@ -139,7 +139,13 @@
               "api/websites/get-website",
               "api/websites/update-website",
               "api/websites/delete-website",
-              "api/websites/reset-website"
+              "api/websites/reset-website",
+              "api/websites/get-website-stats",
+              "api/websites/get-segments",
+              "api/websites/create-segment",
+              "api/websites/get-segment",
+              "api/websites/update-segment",
+              "api/websites/delete-segment"
             ]
           },
           {
@@ -183,6 +189,26 @@
             "pages": [
               "api/users/get-current-user",
               "api/users/update-password"
+            ]
+          },
+          {
+            "group": "Links",
+            "pages": [
+              "api/links/get-links",
+              "api/links/create-link",
+              "api/links/get-link",
+              "api/links/update-link",
+              "api/links/delete-link"
+            ]
+          },
+          {
+            "group": "Pixels",
+            "pages": [
+              "api/pixels/get-pixels",
+              "api/pixels/create-pixel",
+              "api/pixels/get-pixel",
+              "api/pixels/update-pixel",
+              "api/pixels/delete-pixel"
             ]
           }
         ]
